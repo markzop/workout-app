@@ -1011,6 +1011,190 @@
       return esc(JSON.stringify(String(s)));
     }
 
+
+    // ========== MOJIBAKE REPAIR ==========
+    // Hebrew text that was saved as UTF-8 bytes read back as Windows-1252 / Latin-1
+    // (e.g. "×¤×¨×¡" instead of "פרס"). Repair is strict and idempotent: a string is
+    // only changed if its cp1252 bytes are valid UTF-8 containing Hebrew.
+    const DATA_RAW_BACKUP_KEY = "workoutData_v1_prefix_backup";
+    const CP1252_TO_BYTE = (() => {
+      const m = new Map();
+      const hi = [0x20AC, 0x81, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x8D, 0x017D, 0x8F,
+                  0x90, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014, 0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x9D, 0x017E, 0x0178];
+      hi.forEach((cp, i) => m.set(cp, 0x80 + i));
+      for (let b = 0x80; b <= 0xFF; b++) if (!m.has(b)) m.set(b, b); // Latin-1: C1 controls + A0..FF map to themselves
+      return m;
+    })();
+    const UTF8_LEAD_AS_LATIN1 = /[\u00C2-\u00F4]/;
+    const HEBREW_CHAR = /[\u0590-\u05FF]/;
+    let utf8Strict = null;
+
+    function textToCp1252Bytes(str) {
+      const out = [];
+      for (const ch of str) {
+        const c = ch.codePointAt(0);
+        if (c < 0x80) out.push(c);
+        else if (CP1252_TO_BYTE.has(c)) out.push(CP1252_TO_BYTE.get(c));
+        else return null; // a real non-Latin character: not mojibake
+      }
+      return out;
+    }
+
+    function strictUtf8(bytes) {
+      try {
+        utf8Strict = utf8Strict || new TextDecoder("utf-8", { fatal: true });
+        const s = utf8Strict.decode(new Uint8Array(bytes));
+        return s.includes("\uFFFD") ? null : s;
+      } catch (e) { return null; }
+    }
+
+    // Plausibility of Hebrew words, used only to choose between candidates when
+    // copy/paste dropped invisible chars (א -> "×\u0090", ם -> "×\u009D", נ -> "×\u00A0").
+    function hebrewScore(s) {
+      let score = 0;
+      (s.match(/[\u05D0-\u05EA]+/g) || []).forEach(w => {
+        for (let i = 0; i < w.length - 1; i++) if ("ךםןףץ".includes(w[i])) score -= 10; // final form mid-word
+        if (w.length > 1 && "כמנפצ".includes(w[w.length - 1])) score -= 3;            // non-final form at word end
+        if (w.length === 1 && w !== "ו") score -= 4; // stray one-letter "words" mean a split word
+        if (w.length > 1 && w[w.length - 1] === "ם") score += 2; // final mem is a very common word ending
+      });
+      return score;
+    }
+
+    function repairLostBytes(bytes, known) {
+      // A lone 0xD7 lead byte means its continuation byte was lost or changed.
+      const isCont = b => b >= 0x80 && b <= 0xBF;
+      const gaps = [];
+      for (let i = 0; i < bytes.length; i++) {
+        if (bytes[i] === 0xD7 && !isCont(bytes[i + 1])) gaps.push(i);
+        // "”" (E2 80 9D) loses its invisible last byte the same way
+        else if (bytes[i] === 0xE2 && bytes[i + 1] === 0x80 && !isCont(bytes[i + 2])) gaps.push(i + 1);
+      }
+      if (!gaps.length || gaps.length > 7) return null;
+      // Only when the string is clearly Hebrew mojibake (intact "×" + continuation pairs), never for a lone "×" like "3×10".
+      let pairs = 0;
+      for (let i = 0; i < bytes.length - 1; i++) if (bytes[i] === 0xD7 && bytes[i + 1] >= 0x80 && bytes[i + 1] <= 0xBF) pairs++;
+      if (pairs < Math.max(2, gaps.length)) return null;
+      const options = gaps.map(i => {
+        if (bytes[i] !== 0xD7) return [{ insert: 0x9D }];
+        const o = [{ insert: 0x90 }, { insert: 0x9D }];        // א / ם (C1 control was stripped)
+        if (bytes[i + 1] === 0x20) o.push({ replace: 0xA0 }); // נ (no-break space became a space)
+        return o;
+      });
+      let best = null, bestScore = -Infinity;
+      const pick = new Array(gaps.length).fill(0);
+      const total = options.reduce((n, o) => n * o.length, 1);
+      for (let k = 0; k < total; k++) {
+        let r = k;
+        for (let g = 0; g < gaps.length; g++) { pick[g] = r % options[g].length; r = Math.floor(r / options[g].length); }
+        const b = [];
+        let skip = -1, g = 0;
+        for (let i = 0; i < bytes.length; i++) {
+          if (i === skip) continue;
+          b.push(bytes[i]);
+          if (g < gaps.length && gaps[g] === i) {
+            const opt = options[g][pick[g]];
+            if (opt.insert != null) b.push(opt.insert);
+            else { b.push(opt.replace); skip = i + 1; }
+            g++;
+          }
+        }
+        const s = strictUtf8(b);
+        if (!s || !HEBREW_CHAR.test(s)) continue;
+        if (known && known.has(s)) return s;
+        const sc = hebrewScore(s);
+        if (sc > bestScore) { best = s; bestScore = sc; }
+      }
+      return best;
+    }
+
+    function repairMojibakeString(str, known) {
+      if (typeof str !== "string" || !UTF8_LEAD_AS_LATIN1.test(str)) return str;
+      let cur = str;
+      for (let level = 0; level < 3; level++) { // also handles text that was double-encoded
+        const bytes = textToCp1252Bytes(cur);
+        if (!bytes) break;
+        const dec = strictUtf8(bytes) || repairLostBytes(bytes, known);
+        if (!dec || dec === cur) break;
+        if (HEBREW_CHAR.test(dec)) return dec;
+        cur = dec;
+      }
+      return str;
+    }
+
+    function entryKey(e) {
+      return e && typeof e === "object" ? (e.date || "") + "|" + JSON.stringify(e.sets || null) + "|" + (e.type || "") : JSON.stringify(e);
+    }
+
+    // Merge two lists of log entries, dropping exact duplicates (same date + sets + type).
+    function mergeEntryLists(a, b) {
+      const seen = new Set();
+      return (a || []).concat(b || []).filter(e => {
+        const k = entryKey(e);
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      }).sort((x, y) => (Date.parse(x && x.date) || 0) - (Date.parse(y && y.date) || 0));
+    }
+
+    function repairDeep(v, known, st) {
+      if (typeof v === "string") {
+        const r = repairMojibakeString(v, known);
+        if (r !== v) st.changed++;
+        return r;
+      }
+      if (Array.isArray(v)) return v.map(x => repairDeep(x, known, st));
+      if (v && typeof v === "object") {
+        const o = {};
+        Object.keys(v).forEach(k => {
+          const nk = repairMojibakeString(k, known);
+          if (nk !== k) st.changed++;
+          const val = repairDeep(v[k], known, st);
+          if (Object.prototype.hasOwnProperty.call(o, nk)) {
+            st.merged++;
+            o[nk] = (Array.isArray(o[nk]) && Array.isArray(val)) ? mergeEntryLists(o[nk], val) : o[nk];
+          } else {
+            o[nk] = val;
+          }
+        });
+        return o;
+      }
+      return v;
+    }
+
+    // Returns { data, changed, merged }. Works on any parsed data/backup object.
+    function repairMojibakeData(obj) {
+      if (!obj || typeof obj !== "object") return { data: obj, changed: 0, merged: 0 };
+      const known = new Set();
+      const addNames = p => {
+        if (!p || !Array.isArray(p.workouts)) return;
+        p.workouts.concat(Array.isArray(p.accessories) ? p.accessories : []).forEach(g =>
+          ((g && g.exercises) || []).forEach(e => { const n = typeof e === "string" ? e : e && e.name; if (n && HEBREW_CHAR.test(n)) known.add(n); }));
+      };
+      addNames(buildDefaultProgram());
+      addNames(obj.program);
+      Object.keys(obj.logs || {}).forEach(k => { if (HEBREW_CHAR.test(k)) known.add(k); });
+      const st = { changed: 0, merged: 0 };
+      const data = repairDeep(obj, known, st);
+      return { data, changed: st.changed, merged: st.merged };
+    }
+
+    // One-time (idempotent) repair of stored data, keeping a raw copy of the original first.
+    function repairStoredData() {
+      let raw;
+      try { raw = localStorage.getItem("workoutData_v1"); } catch (e) { return; }
+      if (!raw || !UTF8_LEAD_AS_LATIN1.test(raw)) return;
+      try {
+        const res = repairMojibakeData(JSON.parse(raw));
+        if (!res.changed) return;
+        if (localStorage.getItem(DATA_RAW_BACKUP_KEY) == null) localStorage.setItem(DATA_RAW_BACKUP_KEY, raw);
+        localStorage.setItem("workoutData_v1", JSON.stringify(res.data));
+        console.info(`workout data: repaired ${res.changed} garbled Hebrew strings (${res.merged} merged)`);
+      } catch (e) {
+        console.warn("workout data repair skipped", e); // e.g. storage full: data is left exactly as it was
+      }
+    }
+
     // ========== STATE ==========
     let currentWorkout = null;
     let currentExercise = null;
@@ -1026,7 +1210,8 @@
     // ========== STORAGE ==========
     function getData() {
       const raw = localStorage.getItem("workoutData_v1");
-      const data = raw ? JSON.parse(raw) : { logs: {}, sessions: [] };
+      let data = raw ? JSON.parse(raw) : { logs: {}, sessions: [] };
+      if (raw && UTF8_LEAD_AS_LATIN1.test(raw)) data = repairMojibakeData(data).data;
       if (!data.logs || typeof data.logs !== "object" || Array.isArray(data.logs)) data.logs = {};
       if (!Array.isArray(data.sessions)) data.sessions = [];
       return data;
@@ -1830,7 +2015,7 @@
     }
 
     function downloadBackup(json, name) {
-      const blob = new Blob([json], { type: "application/json" });
+      const blob = new Blob(["\uFEFF" + json], { type: "application/json;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -1849,7 +2034,7 @@
       // iOS: share sheet lets the user pick "Save to Files" / iCloud Drive.
       if (isIOSDevice() && navigator.share && navigator.canShare && typeof File === "function") {
         let file = null;
-        try { file = new File([json], name, { type: "application/json" }); } catch (e) {}
+        try { file = new File(["\uFEFF" + json], name, { type: "application/json" }); } catch (e) {}
         let canShareFile = false;
         try { canShareFile = !!file && navigator.canShare({ files: [file] }); } catch (e) {}
         if (canShareFile) {
@@ -1870,7 +2055,7 @@
     function restoreBackupFromText(text, msgs) {
       msgs = msgs || {};
       try {
-        const parsed = JSON.parse(String(text == null ? "" : text).trim());
+        const parsed = repairMojibakeData(JSON.parse(String(text == null ? "" : text).trim())).data;
         if (!parsed || typeof parsed !== "object" || !parsed.logs || typeof parsed.logs !== "object" || Array.isArray(parsed.logs)) {
           showToast(msgs.invalid || "קובץ לא תקין");
           return "invalid";
@@ -1894,6 +2079,7 @@
         showHistory();
         return "ok";
       } catch (e) {
+        console.warn("restore failed", e);
         showToast(msgs.parseError || "שגיאה בקריאת הקובץ");
         return "invalid";
       }
@@ -1978,6 +2164,7 @@
         html += `<div class="section-title">לפי תרגיל</div><div class="card history-list">`;
         Object.keys(data.logs).sort().forEach(ex => {
           const logs = data.logs[ex];
+          if (!Array.isArray(logs) || !logs.length) return;
           const last = logs[logs.length - 1];
           const st = getExerciseStats(logs);
           const pr = st.prHeavy != null ? `PR ${st.prHeavy} ק״ג` : (st.prReps != null ? `PR ${st.prReps} חזרות` : "");
@@ -2689,6 +2876,7 @@
     }
 
     // ========== INIT ==========
+    repairStoredData();
     requestPersistentStorage();
     applySavedBackground();
     initHome();
