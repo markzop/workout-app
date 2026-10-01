@@ -588,53 +588,72 @@
       margin-bottom: 6px;
     }
 
-    .timer-card {
-      text-align: center;
-      margin-bottom: 12px;
-    }
 
-    .timer-display {
-      font-size: 3.2rem;
-      font-weight: 800;
-      color: #e11d48;
-      letter-spacing: 2px;
-      font-variant-numeric: tabular-nums;
-      line-height: 1.1;
-      margin: 8px 0 14px;
-    }
-
-    .timer-btns {
+    .backup-banner {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(225, 29, 72, 0.14);
+      border: 1px solid rgba(225, 29, 72, 0.55);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin: 0 0 12px;
+      font-size: 0.95rem;
     }
+    .backup-banner .bb-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .backup-banner .btn-sm { padding: 8px 12px; }
 
-    .timer-btns .btn-sm {
-      min-width: 72px;
+    .suggest-box {
+      background: rgba(225, 29, 72, 0.10);
+      border: 1px solid rgba(225, 29, 72, 0.45);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 16px;
     }
+    .suggest-main { font-size: 1.02rem; }
+    .suggest-main b { color: #fff; font-size: 1.1rem; }
+    .suggest-rule { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; line-height: 1.35; }
 
-    .timer-presets {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      margin-bottom: 10px;
-    }
-
-    .timer-presets button {
-      background: var(--card2);
+    .pe-note { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px; }
+    .pe-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .pe-head h3 { font-size: 1.05rem; }
+    .pe-letter { font-weight: 800; margin-left: 6px; }
+    .pe-row { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .pe-row:last-of-type { border-bottom: none; }
+    .pe-info { flex: 1; min-width: 0; cursor: pointer; }
+    .pe-info:active { opacity: 0.7; }
+    .pe-btns { display: flex; gap: 6px; flex-shrink: 0; }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 0.8rem;
+      background: var(--card2);
+      color: var(--text);
+      font-size: 0.95rem;
       cursor: pointer;
     }
+    .icon-btn:active { border-color: var(--primary); }
+    .icon-btn:disabled { opacity: 0.3; }
+    .icon-btn.danger { color: #fca5a5; }
 
-    .timer-presets button.active {
-      border-color: var(--primary);
-      color: #fff;
+    .form-label { display: block; font-size: 0.85rem; color: var(--text-muted); margin: 12px 0 6px; }
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card2);
+      color: var(--text);
+      font-size: 1rem;
     }
+    .form-row { display: flex; align-items: center; gap: 10px; }
+    .form-row span { color: var(--text-muted); }
+    .day-map-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; }
+    .day-map-row span { flex-shrink: 0; width: 80px; }
+    .day-map-row .form-input { padding: 10px; }
+    .paste-modal-box { max-height: calc(100vh - 32px); overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -651,24 +670,21 @@
         <span id="accessory-badge" class="badge"></span>
       </div>
 
+      <div id="backup-banner" class="backup-banner hidden">
+        <span>💾 עבר שבוע מהגיבוי האחרון</span>
+        <div class="bb-actions">
+          <button class="btn btn-sm btn-primary" onclick="exportBackup()">גבה עכשיו</button>
+          <button class="btn btn-sm btn-outline" onclick="snoozeBackupBanner()" aria-label="סגור">✕</button>
+        </div>
+      </div>
+
       <div class="section-title">בחר אימון</div>
-      <div class="workout-select">
-        <div class="workout-btn" onclick="startWorkout('A')">
-          <h2>אימון A – רגליים</h2>
-          <p>לחיצת רגליים • לאנץ' בולגרי • כפיפת ברך • פשיטת ברך • הרחקה</p>
-        </div>
-        <div class="workout-btn" onclick="startWorkout('B')">
-          <h2>אימון B – חזה + יד אחורית</h2>
-          <p>באנץ' עליון • פרפר • מקבילים • פשיטות מרפק • הרחקה לצדדים</p>
-        </div>
-        <div class="workout-btn" onclick="startWorkout('C')">
-          <h2>אימון C – גב + יד קדמית</h2>
-          <p>משיכה רחבה • חתירה • דדליפט • הרחקה אופקית • כפיפות • פטישים</p>
-        </div>
+      <div class="workout-select" id="workout-select">
       </div>
 
       <div style="margin-top: 24px;">
         <button class="btn btn-outline" onclick="showHistory()">📜 היסטוריית אימונים</button>
+        <button class="btn btn-outline" style="margin-top:8px;" onclick="showProgramEditor()">✏️ עריכת תוכנית</button>
       </div>
     </div>
 
@@ -700,6 +716,7 @@
       </header>
 
       <div class="prev-info" id="prev-info">אין נתונים קודמים לתרגיל זה</div>
+      <div class="suggest-box hidden" id="suggestion-box"></div>
 
       <div class="card" id="normal-sets">
         <div class="set-row">
@@ -747,23 +764,6 @@
         <p id="dynamic-hint" style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;text-align:center;"></p>
       </div>
 
-      <div class="card timer-card">
-        <div class="section-title" style="margin-top:0;text-align:center;">טיימר מנוחה</div>
-        <div class="timer-presets">
-          <button onclick="setTimerPreset(60)" id="tp-60">60</button>
-          <button onclick="setTimerPreset(90)" id="tp-90" class="active">90</button>
-          <button onclick="setTimerPreset(120)" id="tp-120">120</button>
-          <button onclick="setTimerPreset(180)" id="tp-180">180</button>
-        </div>
-        <div class="timer-display" id="timer-display">01:30</div>
-        <div class="timer-btns">
-          <button class="btn btn-sm btn-primary" onclick="startTimer()">התחל</button>
-          <button class="btn btn-sm btn-outline" onclick="addTimerTime(15)">+15</button>
-          <button class="btn btn-sm btn-outline" onclick="pauseTimer()">עצור</button>
-          <button class="btn btn-sm btn-outline" onclick="skipTimer()">דלג</button>
-        </div>
-      </div>
-
       <div class="nav-bottom">
         <button class="btn btn-primary" onclick="saveSets()">💾 שמור</button>
       </div>
@@ -784,7 +784,7 @@
           <button onclick="changeMonth(1)">‹</button>
         </div>
         <div class="cal-grid" id="cal-grid"></div>
-        <div class="cal-legend">
+        <div class="cal-legend" id="cal-legend">
           <span><i style="background:var(--color-a)"></i> A</span>
           <span><i style="background:var(--color-b)"></i> B</span>
           <span><i style="background:var(--color-c)"></i> C</span>
@@ -816,9 +816,50 @@
       <div class="section-title">כל הביצועים</div>
       <div class="card history-list" id="detail-list"></div>
     </div>
+
+    <!-- PROGRAM EDITOR -->
+    <div id="screen-program" class="hidden">
+      <button class="back-btn" onclick="goHome()">→ חזרה</button>
+      <header>
+        <h1>עריכת תוכנית</h1>
+      </header>
+      <div id="program-content"></div>
+    </div>
   </div>
 
   <div class="toast" id="toast">נשמר בהצלחה ✓</div>
+
+  <div class="paste-modal hidden" id="ex-modal" onclick="if (event.target === this) closeExerciseEditor()">
+    <div class="paste-modal-box">
+      <h3 id="ex-modal-title">עריכת תרגיל</h3>
+      <label class="form-label" for="ex-name">שם התרגיל</label>
+      <input type="text" id="ex-name" class="form-input" autocomplete="off" />
+      <label class="form-label" for="ex-type">סוג רישום</label>
+      <select id="ex-type" class="form-input" onchange="updateExerciseEditorFields()">
+        <option value="normal">2 קלים + כבד + דרופים</option>
+        <option value="simple">סטים רגילים (אפשר להוסיף)</option>
+        <option value="max">מקסימום חזרות / משקל גוף</option>
+      </select>
+      <div id="ex-prog-fields">
+        <label class="form-label">טווח חזרות ליעד (לפיו מחושב היעד היומי)</label>
+        <div class="form-row">
+          <input type="number" id="ex-repmin" inputmode="numeric" min="1" />
+          <span>עד</span>
+          <input type="number" id="ex-repmax" inputmode="numeric" min="1" />
+        </div>
+        <label class="form-label" for="ex-inc">תוספת משקל כשמתקדמים</label>
+        <select id="ex-inc" class="form-input">
+          <option value="1">1 ק״ג (תרגיל קטן / בידוד)</option>
+          <option value="2.5">2.5 ק״ג</option>
+          <option value="5">5 ק״ג</option>
+        </select>
+      </div>
+      <div class="backup-row" style="margin-top:16px;">
+        <button class="btn btn-primary" onclick="saveExerciseEditor()">שמור</button>
+        <button class="btn btn-outline" onclick="closeExerciseEditor()">ביטול</button>
+      </div>
+    </div>
+  </div>
 
   <div class="paste-modal hidden" id="paste-modal" onclick="if (event.target === this) closePasteBackup()">
     <div class="paste-modal-box">
@@ -834,29 +875,141 @@
   </div>
 
   <script>
-    // ========== DATA ==========
-    const WORKOUTS = {
-      A: {
-        name: "אימון A – רגליים",
-        exercises: ["לחיצת רגליים", "לאנץ' בולגרי", "כפיפת ברך במכונה", "פשיטת ברך במכונה", "הרחקה"]
-      },
-      B: {
-        name: "אימון B – חזה + יד אחורית",
-        exercises: ["באנץ' עליון", "פרפר", "מקבילים", "פשיטת מרפק בפולי", "פשיטת מרפק מאחורי הראש עם משקולת", "הרחקה לצדדים"]
-      },
-      C: {
-        name: "אימון C – גב + יד קדמית",
-        exercises: ["משיכה בפולי רחב", "חתירה בטי-בר רחב", "דדליפט", "הרחקה אופקית במכונה", "כפיפה בפריצ'ר", "פטישים"]
+    // ========== PROGRAM ==========
+    // The workout program lives in workoutData_v1.program. When it is absent
+    // (all data saved before v3) the original hardcoded program below is used,
+    // so nothing changes until the user edits it.
+    const LEGACY_MAX_REPS = ["מקבילים", "הרמות רגליים במתח", "לאנץ' בולגרי"];
+    const LEGACY_SIMPLE = ["דדליפט"];
+    const SMALL_INCREMENT = ["הרחקה לצדדים", "פשיטת מרפק מאחורי הראש עם משקולת", "כפיפה בפריצ'ר", "פטישים"];
+    const DEFAULT_ACCESSORY_BY_DAY = ["calves", "abs", "calves", "abs", "calves", "abs", null]; // Sun..Sat
+    const TYPE_LABELS = { normal: "2 קלים + כבד + דרופים", simple: "סטים רגילים", max: "מקס חזרות" };
+
+    function defaultExercise(name) {
+      const type = LEGACY_MAX_REPS.includes(name) ? "max" : (LEGACY_SIMPLE.includes(name) ? "simple" : "normal");
+      return { name, type, repMin: 6, repMax: 10, increment: SMALL_INCREMENT.includes(name) ? 1 : 2.5, origName: name };
+    }
+
+    function buildDefaultProgram() {
+      const g = (id, name, desc, list) => ({ id, name, desc, exercises: list.map(defaultExercise) });
+      return {
+        version: 1,
+        workouts: [
+          g("A", "אימון A – רגליים", "לחיצת רגליים • לאנץ' בולגרי • כפיפת ברך • פשיטת ברך • הרחקה",
+            ["לחיצת רגליים", "לאנץ' בולגרי", "כפיפת ברך במכונה", "פשיטת ברך במכונה", "הרחקה"]),
+          g("B", "אימון B – חזה + יד אחורית", "באנץ' עליון • פרפר • מקבילים • פשיטות מרפק • הרחקה לצדדים",
+            ["באנץ' עליון", "פרפר", "מקבילים", "פשיטת מרפק בפולי", "פשיטת מרפק מאחורי הראש עם משקולת", "הרחקה לצדדים"]),
+          g("C", "אימון C – גב + יד קדמית", "משיכה רחבה • חתירה • דדליפט • הרחקה אופקית • כפיפות • פטישים",
+            ["משיכה בפולי רחב", "חתירה בטי-בר רחב", "דדליפט", "הרחקה אופקית במכונה", "כפיפה בפריצ'ר", "פטישים"])
+        ],
+        accessories: [
+          g("abs", "בטן", null, ["כפיפת בטן במכשיר", "הרמות רגליים במתח"]),
+          g("calves", "תאומים", null, ["הרמת עקבים בעמידה", "הרמת עקבים בישיבה"])
+        ],
+        accessoryByDay: DEFAULT_ACCESSORY_BY_DAY.slice()
+      };
+    }
+
+    function normalizeExercise(e) {
+      if (typeof e === "string") e = { name: e };
+      if (!e || typeof e !== "object") return null;
+      const name = String(e.name == null ? "" : e.name).trim();
+      if (!name) return null;
+      const base = defaultExercise(name);
+      const type = ["normal", "max", "simple"].includes(e.type) ? e.type : base.type;
+      let repMin = parseInt(e.repMin, 10);
+      let repMax = parseInt(e.repMax, 10);
+      if (!(repMin > 0 && repMin <= 100)) repMin = base.repMin;
+      if (!(repMax >= repMin && repMax <= 100)) repMax = Math.max(repMin, base.repMax);
+      let increment = parseFloat(e.increment);
+      if (!(increment > 0 && increment <= 50)) increment = base.increment;
+      const out = { name, type, repMin, repMax, increment };
+      if (typeof e.origName === "string" && e.origName) out.origName = e.origName;
+      return out;
+    }
+
+    function normalizeGroup(g) {
+      if (!g || typeof g !== "object") return null;
+      const id = String(g.id == null ? "" : g.id).trim();
+      if (!id) return null;
+      const exercises = (Array.isArray(g.exercises) ? g.exercises : []).map(normalizeExercise).filter(Boolean);
+      return { id, name: String(g.name || id), desc: typeof g.desc === "string" ? g.desc : null, exercises };
+    }
+
+    function uniqueById(list) {
+      const seen = new Set();
+      return list.filter(x => x && !seen.has(x.id) && seen.add(x.id));
+    }
+
+    function normalizeProgram(p) {
+      if (!p || typeof p !== "object" || !Array.isArray(p.workouts)) return null;
+      const workouts = uniqueById(p.workouts.map(normalizeGroup));
+      if (!workouts.length) return null;
+      const accessories = uniqueById((Array.isArray(p.accessories) ? p.accessories : []).map(normalizeGroup));
+      const accIds = new Set(accessories.map(a => a.id));
+      const src = Array.isArray(p.accessoryByDay) ? p.accessoryByDay : DEFAULT_ACCESSORY_BY_DAY;
+      const accessoryByDay = [0, 1, 2, 3, 4, 5, 6].map(i => (i === 6 || !accIds.has(src[i])) ? null : src[i]);
+      return { version: 1, workouts, accessories, accessoryByDay };
+    }
+
+    function getProgram(data) {
+      data = data || getData();
+      return normalizeProgram(data.program) || buildDefaultProgram();
+    }
+
+    function findWorkout(id, prog) {
+      return (prog || getProgram()).workouts.find(w => w.id === id) || null;
+    }
+
+    function findAccessory(id, prog) {
+      if (!id) return null;
+      return (prog || getProgram()).accessories.find(a => a.id === id) || null;
+    }
+
+    function findExerciseDef(name, prog) {
+      prog = prog || getProgram();
+      for (const g of prog.workouts.concat(prog.accessories)) {
+        const e = g.exercises.find(x => x.name === name);
+        if (e) return e;
       }
-    };
+      return normalizeExercise({ name });
+    }
 
-    const ACCESSORIES = {
-      calves: { name: "תאומים", exercises: ["הרמת עקבים בעמידה", "הרמת עקבים בישיבה"] },
-      abs: { name: "בטן", exercises: ["כפיפת בטן במכשיר", "הרמות רגליים במתח"] }
-    };
+    // Single capital letters are workout ids (A/B/C by default, D.. for added workouts).
+    function isWorkoutId(id, prog) {
+      if (!id || typeof id !== "string") return false;
+      return /^[A-Z]$/.test(id) || !!findWorkout(id, prog);
+    }
 
-    const MAX_REPS_EXERCISES = ["מקבילים", "הרמות רגליים במתח", "לאנץ' בולגרי"];
-    const SIMPLE_3_SETS = ["דדליפט"];
+    function guessWorkoutIdFromNames(names, prog) {
+      const list = [...names];
+      for (const w of prog.workouts) {
+        if (list.some(n => w.exercises.some(e => e.name === n))) return w.id;
+      }
+      return null;
+    }
+
+    const EXTRA_COLORS = ["#f59e0b", "#a855f7", "#06b6d4", "#ec4899", "#84cc16", "#f97316"];
+    function workoutColor(id) {
+      if (id === "A") return "#e11d48";
+      if (id === "B") return "#3b82f6";
+      if (id === "C") return "#22c55e";
+      return EXTRA_COLORS[(String(id).charCodeAt(0) || 0) % EXTRA_COLORS.length];
+    }
+
+    function hexToRgba(hex, a) {
+      const n = parseInt(hex.slice(1), 16);
+      return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+    }
+
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    // JS string literal that is safe inside a double-quoted HTML attribute
+    function jsArg(s) {
+      return esc(JSON.stringify(String(s)));
+    }
 
     // ========== STATE ==========
     let currentWorkout = null;
@@ -866,17 +1019,17 @@
     let dynamicSetCount = 3;
     let progressChart = null;
     let calYear, calMonth; // 0-based month
-    let manualAccessory = null; // 'abs' | 'calves' | null
-    let timerSeconds = 90;
-    let timerDefault = 90;
-    let timerInterval = null;
-    let timerRunning = false;
+    let manualAccessory = null; // accessory id or null
     let sessionCompleted = new Set(); // exercises logged in current session
+    let currentSuggestion = null;
 
     // ========== STORAGE ==========
     function getData() {
       const raw = localStorage.getItem("workoutData_v1");
-      return raw ? JSON.parse(raw) : { logs: {}, sessions: [] };
+      const data = raw ? JSON.parse(raw) : { logs: {}, sessions: [] };
+      if (!data.logs || typeof data.logs !== "object" || Array.isArray(data.logs)) data.logs = {};
+      if (!Array.isArray(data.sessions)) data.sessions = [];
+      return data;
     }
 
     function saveData(data) {
@@ -932,9 +1085,9 @@
       }
       const check = done ? `<span class="check-done">✓</span>` : `<span class="arrow">‹</span>`;
       return `
-        <div class="exercise-item${done ? " done" : ""}" onclick="openLog('${name.replace(/'/g, "\\'")}')">
+        <div class="exercise-item${done ? " done" : ""}" onclick="openLog(${jsArg(name)})">
           <div>
-            <div class="exercise-name">${name}</div>
+            <div class="exercise-name">${esc(name)}</div>
             <div class="exercise-meta">${meta}</div>
           </div>
           ${check}
@@ -981,8 +1134,10 @@
       // Saturday = rest day, no automatic abs/calves
       if (isSaturday(date)) return null;
       const day = date.getDay(); // 0=Sun ... 5=Fri
-      // Sun(0), Tue(2), Thu(4) = calves | Mon(1), Wed(3), Fri(5) = abs
-      return (day % 2 === 0) ? "calves" : "abs";
+      // Default: Sun/Tue/Thu = calves, Mon/Wed/Fri = abs (editable in the program)
+      const prog = getProgram();
+      const id = prog.accessoryByDay[day];
+      return findAccessory(id, prog) ? id : null;
     }
 
     function getDayName(date = new Date()) {
@@ -1002,66 +1157,6 @@
       t.textContent = msg;
       t.classList.add("show");
       setTimeout(() => t.classList.remove("show"), 1800);
-    }
-
-    function formatTimer(sec) {
-      const m = Math.floor(Math.max(0, sec) / 60);
-      const s = Math.max(0, sec) % 60;
-      return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
-    }
-
-    function updateTimerDisplay() {
-      document.getElementById("timer-display").textContent = formatTimer(timerSeconds);
-    }
-
-    function setTimerPreset(sec) {
-      timerDefault = sec;
-      if (!timerRunning) {
-        timerSeconds = sec;
-        updateTimerDisplay();
-      }
-      document.querySelectorAll(".timer-presets button").forEach(b => b.classList.remove("active"));
-      const btn = document.getElementById("tp-" + sec);
-      if (btn) btn.classList.add("active");
-    }
-
-    function startTimer() {
-      if (timerRunning) return;
-      if (timerSeconds <= 0) timerSeconds = timerDefault;
-      timerRunning = true;
-      updateTimerDisplay();
-      timerInterval = setInterval(() => {
-        timerSeconds--;
-        updateTimerDisplay();
-        if (timerSeconds <= 0) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-          timerRunning = false;
-          timerSeconds = 0;
-          updateTimerDisplay();
-          try { navigator.vibrate && navigator.vibrate([200, 100, 200, 100, 400]); } catch(e) {}
-          showToast("המנוחה נגמרה ⏱");
-        }
-      }, 1000);
-    }
-
-    function addTimerTime(sec) {
-      timerSeconds += sec;
-      updateTimerDisplay();
-    }
-
-    function pauseTimer() {
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-      }
-      timerRunning = false;
-    }
-
-    function skipTimer() {
-      pauseTimer();
-      timerSeconds = timerDefault;
-      updateTimerDisplay();
     }
 
     function formatDate(iso) {
@@ -1114,18 +1209,27 @@
     }
 
     function initHome() {
+      const prog = getProgram();
       const todayText = document.getElementById("today-text");
       const badge = document.getElementById("accessory-badge");
+      badge.classList.remove("hidden");
       if (isSaturday()) {
         todayText.textContent = "היום שבת – יום מנוחה";
         badge.textContent = "מנוחה";
         badge.style.background = "#525252";
       } else {
-        const acc = getAccessoryForToday();
+        const acc = findAccessory(getAccessoryForToday(), prog);
         todayText.textContent = `היום יום ${getDayName()}`;
-        badge.textContent = ACCESSORIES[acc].name;
+        badge.textContent = acc ? acc.name : "";
         badge.style.background = "";
+        if (!acc) badge.classList.add("hidden");
       }
+      document.getElementById("workout-select").innerHTML = prog.workouts.map(w => `
+        <div class="workout-btn" onclick="startWorkout(${jsArg(w.id)})">
+          <h2>${esc(w.name)}</h2>
+          <p>${esc(w.desc != null ? w.desc : (w.exercises.map(e => e.name).join(" • ") || "אין תרגילים עדיין"))}</p>
+        </div>`).join("");
+      renderBackupBanner();
     }
 
     function goHome() {
@@ -1144,42 +1248,43 @@
 
     // ========== WORKOUT ==========
     function startWorkout(key) {
+      const prog = getProgram();
+      const w = findWorkout(key, prog);
+      if (!w) { goHome(); return; }
       currentWorkout = key;
-      const w = WORKOUTS[key];
       const accKey = getAccessoryForToday();
       const isRestDay = isSaturday();
+      const plannedAcc = findAccessory(accKey, prog);
 
       document.getElementById("workout-title").textContent = w.name;
       document.getElementById("workout-subtitle").textContent = isRestDay
         ? "שבת – יום מנוחה (אימון ידני)"
-        : `+ ${ACCESSORIES[accKey].name}`;
+        : (plannedAcc ? `+ ${plannedAcc.name}` : "");
 
       const list = document.getElementById("exercise-list");
-      list.innerHTML = "";
-      w.exercises.forEach(name => {
-        list.innerHTML += exerciseRowHtml(name);
-      });
+      list.innerHTML = w.exercises.map(e => exerciseRowHtml(e.name)).join("") ||
+        `<div class="empty-state" style="padding:16px;">אין תרגילים באימון הזה. אפשר להוסיף ב"עריכת תוכנית".</div>`;
 
-      const chosenAcc = manualAccessory || accKey;
+      const manualAcc = findAccessory(manualAccessory, prog);
+      const chosen = manualAcc || plannedAcc;
       const accTitle = document.getElementById("accessory-title");
       const accList = document.getElementById("accessory-list");
+      const noAccessories = !prog.accessories.length;
+      accTitle.classList.toggle("hidden", noAccessories);
+      accList.classList.toggle("hidden", noAccessories);
 
-      if (!chosenAcc) {
-        accTitle.textContent = "בטן / תאומים (אופציונלי)";
+      if (!chosen) {
+        accTitle.textContent = prog.accessories.map(a => a.name).join(" / ") + " (אופציונלי)";
         accList.innerHTML = `
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-sm btn-outline" style="flex:1;" onclick="pickAccessory('abs')">הוסף בטן</button>
-            <button class="btn btn-sm btn-outline" style="flex:1;" onclick="pickAccessory('calves')">הוסף תאומים</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            ${prog.accessories.map(a => `<button class="btn btn-sm btn-outline" style="flex:1;" onclick="pickAccessory(${jsArg(a.id)})">הוסף ${esc(a.name)}</button>`).join("")}
           </div>
-          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;text-align:center;">שבת – יום מנוחה. אפשר להוסיף ידנית אם רוצים.</p>`;
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;text-align:center;">${isRestDay ? "שבת – יום מנוחה. אפשר להוסיף ידנית אם רוצים." : "אין תוספת מתוכננת להיום. אפשר להוסיף ידנית אם רוצים."}</p>`;
       } else {
-        const acc = ACCESSORIES[chosenAcc];
-        accTitle.textContent = acc.name + (isRestDay ? " (נוסף ידנית)" : "");
-        accList.innerHTML = "";
-        acc.exercises.forEach(name => {
-          accList.innerHTML += exerciseRowHtml(name);
-        });
-        if (isRestDay) {
+        const isManual = !!manualAcc && manualAccessory !== accKey;
+        accTitle.textContent = chosen.name + (isManual ? " (נוסף ידנית)" : "");
+        accList.innerHTML = chosen.exercises.map(e => exerciseRowHtml(e.name)).join("");
+        if (isManual) {
           accList.innerHTML += `
             <div style="text-align:center;margin-top:8px;">
               <button class="btn btn-sm btn-outline" onclick="pickAccessory(null)">הסר תוספת</button>
@@ -1191,7 +1296,6 @@
     }
 
     function backToWorkout() {
-      skipTimer();
       if (currentWorkout) startWorkout(currentWorkout);
       else goHome();
     }
@@ -1251,9 +1355,7 @@
       currentExercise = exerciseName;
       showDrop3 = false;
 
-      if (MAX_REPS_EXERCISES.includes(exerciseName)) logMode = "max";
-      else if (SIMPLE_3_SETS.includes(exerciseName)) logMode = "simple";
-      else logMode = "normal";
+      logMode = findExerciseDef(exerciseName).type;
 
       document.getElementById("log-exercise-name").textContent = exerciseName;
       document.getElementById("drop3-container").classList.add("hidden");
@@ -1329,6 +1431,7 @@
         if (logMode === "max" || logMode === "simple") renderDynamicSets(3);
       }
 
+      renderSuggestion(exerciseName);
       showScreen("screen-log");
     }
 
@@ -1392,6 +1495,7 @@
 
     function renderCalendar() {
       const data = getData();
+      const prog = getProgram(data);
       const sessionMap = {};
       const hidden = new Set(data.hiddenDays || []);
       data.sessions.forEach(s => {
@@ -1411,12 +1515,9 @@
         });
       });
       Object.keys(dayExercises).forEach(key => {
-        if (sessionMap[key] && ["A","B","C"].includes(sessionMap[key].workout)) return;
+        if (sessionMap[key] && isWorkoutId(sessionMap[key].workout, prog)) return;
         const names = dayExercises[key];
-        let guessed = null;
-        if ([...names].some(n => (WORKOUTS.A.exercises || []).includes(n))) guessed = "A";
-        else if ([...names].some(n => (WORKOUTS.B.exercises || []).includes(n))) guessed = "B";
-        else if ([...names].some(n => (WORKOUTS.C.exercises || []).includes(n))) guessed = "C";
+        const guessed = guessWorkoutIdFromNames(names, prog);
         if (guessed) {
           sessionMap[key] = {
             date: key + "T12:00:00",
@@ -1426,6 +1527,11 @@
           };
         }
       });
+
+      const legendIds = prog.workouts.map(w => w.id);
+      document.getElementById("cal-legend").innerHTML =
+        legendIds.map(id => `<span><i style="background:${workoutColor(id)}"></i> ${esc(id)}</span>`).join("") +
+        `<span><i style="background:#525252"></i> מנוחה</span>`;
 
       const monthNames = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
       document.getElementById("cal-month-label").textContent = monthNames[calMonth] + " " + calYear;
@@ -1458,14 +1564,21 @@
         let cls = "cal-day";
         let letter = "";
         let onclick = "";
+        let style = "";
+        let letterStyle = "";
 
         if (key === todayKey) cls += " today";
 
-        const realWorkout = session && ["A", "B", "C"].includes(session.workout);
+        const realWorkout = session && isWorkoutId(session.workout, prog);
 
         if (realWorkout) {
           cls += " has-workout workout-" + session.workout;
           letter = session.workout;
+          if (!["A", "B", "C"].includes(session.workout)) {
+            const c = workoutColor(session.workout);
+            style = `style="background:${hexToRgba(c, 0.25)}"`;
+            letterStyle = `style="color:${c}"`;
+          }
           onclick = `onclick="showDayDetail('${key}')"`;
         } else if (restDay) {
           // Saturday with no real workout = rest day
@@ -1475,9 +1588,9 @@
         }
 
         grid.innerHTML += `
-          <div class="${cls}" ${onclick}>
+          <div class="${cls}" ${style} ${onclick}>
             <span class="day-num">${day}</span>
-            ${letter ? `<span class="workout-letter">${letter}</span>` : ""}
+            ${letter ? `<span class="workout-letter" ${letterStyle}>${esc(letter)}</span>` : ""}
           </div>`;
       }
 
@@ -1545,7 +1658,7 @@
         data.hiddenDays = (data.hiddenDays || []).filter(k => k !== last.dateKey);
         if (last.sessions && last.sessions.length) {
           data.sessions = (data.sessions || []).concat(last.sessions);
-        } else if (last.workout && ["A","B","C"].includes(last.workout)) {
+        } else if (isWorkoutId(last.workout)) {
           data.sessions = data.sessions || [];
           data.sessions.push({
             date: last.dateKey + "T12:00:00",
@@ -1564,7 +1677,8 @@
     function guessWorkoutForDay(dateKey, data) {
       if ((data.hiddenDays || []).includes(dateKey)) return null;
       const session = (data.sessions || []).find(s => toDateKey(new Date(s.date)) === dateKey);
-      if (session && ["A", "B", "C"].includes(session.workout)) return session;
+      const prog = getProgram(data);
+      if (session && isWorkoutId(session.workout, prog)) return session;
       const names = new Set();
       Object.keys(data.logs || {}).forEach(exName => {
         (data.logs[exName] || []).forEach(entry => {
@@ -1572,10 +1686,7 @@
         });
       });
       if (!names.size) return null;
-      let guessed = null;
-      if ([...names].some(n => (WORKOUTS.A.exercises || []).includes(n))) guessed = "A";
-      else if ([...names].some(n => (WORKOUTS.B.exercises || []).includes(n))) guessed = "B";
-      else if ([...names].some(n => (WORKOUTS.C.exercises || []).includes(n))) guessed = "C";
+      const guessed = guessWorkoutIdFromNames(names, prog);
       if (!guessed) return null;
       return { date: dateKey + "T12:00:00", workout: guessed, accessory: null, fromLogs: true };
     }
@@ -1587,10 +1698,11 @@
       const detail = document.getElementById("day-detail");
       detail.classList.remove("hidden");
 
-      if (session && ["A", "B", "C"].includes(session.workout)) {
-        const wName = WORKOUTS[session.workout]?.name || session.workout;
+      const prog = getProgram(data);
+      if (session && isWorkoutId(session.workout, prog)) {
+        const wName = esc(findWorkout(session.workout, prog)?.name || ("אימון " + session.workout));
         const accName = session.accessory
-          ? (ACCESSORIES[session.accessory]?.name || "")
+          ? esc(findAccessory(session.accessory, prog)?.name || "")
           : (session.fromLogs ? "מסומן לפי תרגילים" : "ללא תוספת");
         detail.innerHTML = `
           <div class="day-detail-card">
@@ -1704,17 +1816,53 @@
       showHistory();
     }
 
-    function exportBackup() {
+    function isIOSDevice() {
+      const ua = navigator.userAgent || "";
+      return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    }
+
+    function buildBackupPayload() {
       const data = getData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const out = Object.assign({}, data);
+      out.program = getProgram(data); // always include the program (default if never edited)
+      out.backupMeta = { app: "workout-pwa", format: 3, exportedAt: new Date().toISOString() };
+      return out;
+    }
+
+    function downloadBackup(json, name) {
+      const blob = new Blob([json], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      const stamp = new Date().toISOString().slice(0, 10);
       a.href = url;
-      a.download = `workout-backup-${stamp}.json`;
+      a.download = name;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      markBackupDone();
       showToast("הגיבוי הורד ✓");
+    }
+
+    function exportBackup() {
+      const json = JSON.stringify(buildBackupPayload(), null, 2);
+      const name = `workout-backup-${toDateKey(new Date())}.json`;
+      // iOS: share sheet lets the user pick "Save to Files" / iCloud Drive.
+      if (isIOSDevice() && navigator.share && navigator.canShare && typeof File === "function") {
+        let file = null;
+        try { file = new File([json], name, { type: "application/json" }); } catch (e) {}
+        let canShareFile = false;
+        try { canShareFile = !!file && navigator.canShare({ files: [file] }); } catch (e) {}
+        if (canShareFile) {
+          navigator.share({ files: [file], title: name })
+            .then(() => { markBackupDone(); showToast("הגיבוי נשמר ✓"); })
+            .catch(err => {
+              if (err && err.name === "AbortError") return; // user closed the share sheet
+              downloadBackup(json, name);
+            });
+          return;
+        }
+      }
+      downloadBackup(json, name);
     }
 
     // Shared restore logic for file import and paste import.
@@ -1723,15 +1871,25 @@
       msgs = msgs || {};
       try {
         const parsed = JSON.parse(String(text == null ? "" : text).trim());
-        if (!parsed || typeof parsed !== "object" || !parsed.logs) {
+        if (!parsed || typeof parsed !== "object" || !parsed.logs || typeof parsed.logs !== "object" || Array.isArray(parsed.logs)) {
           showToast(msgs.invalid || "קובץ לא תקין");
           return "invalid";
         }
-        if (!confirm("לשחזר גיבוי? הנתונים הנוכחיים יוחלפו.")) return "cancelled";
-        saveData({
+        const program = normalizeProgram(parsed.program); // old backups have no program
+        if (!confirm(program
+          ? "לשחזר גיבוי? הנתונים הנוכחיים יוחלפו (כולל תוכנית האימונים)."
+          : "לשחזר גיבוי? הנתונים הנוכחיים יוחלפו.")) return "cancelled";
+        const current = getData();
+        const next = {
           logs: parsed.logs || {},
-          sessions: parsed.sessions || []
-        });
+          sessions: Array.isArray(parsed.sessions) ? parsed.sessions : []
+        };
+        if (Array.isArray(parsed.hiddenDays)) next.hiddenDays = parsed.hiddenDays;
+        if (Array.isArray(parsed.deletedMarks)) next.deletedMarks = parsed.deletedMarks;
+        if (program) next.program = program;
+        else if (current.program) next.program = current.program; // keep the current program
+        saveData(next);
+        markBackupDone(); // the stored data now matches a backup file
         showToast("השחזור הצליח ✓");
         showHistory();
         return "ok";
@@ -1824,8 +1982,8 @@
           const st = getExerciseStats(logs);
           const pr = st.prHeavy != null ? `PR ${st.prHeavy} ק״ג` : (st.prReps != null ? `PR ${st.prReps} חזרות` : "");
           const ch = st.change == null ? "" : (st.change > 0 ? ` · <span class="cmp-up">+${st.change}%</span>` : ` · <span class="cmp-down">${st.change}%</span>`);
-          html += `<div class="history-item" onclick="showExerciseDetail('${ex.replace(/'/g, "\\'")}')">
-            <strong>${ex}</strong>
+          html += `<div class="history-item" onclick="showExerciseDetail(${jsArg(ex)})">
+            <strong>${esc(ex)}</strong>
             <div class="date">${formatDate(last.date)} · ${pr}${ch} · ${logs.length} רשומות</div>
           </div>`;
         });
@@ -1835,6 +1993,7 @@
       html += `
         <div class="section-title">כלים</div>
         <div class="card">
+          <button class="btn btn-outline" style="margin-bottom:8px;" onclick="showProgramEditor()">✏️ עריכת תוכנית</button>
           <button class="btn btn-outline" onclick="moveTodayDataToYesterday()">↩ העבר את מה שנשמר היום ← לאתמול</button>
           <button class="btn btn-outline" style="margin-top:8px;" onclick="moveLastWorkoutBackOneDay()">↩ העבר את האימון האחרון ← יום אחורה</button>
           <button class="btn btn-outline" style="margin-top:8px;" onclick="restoreLastDeletedMark()">↺ שחזר סימון אחרון שנמחק</button>
@@ -1843,6 +2002,7 @@
             <button class="btn btn-outline" onclick="document.getElementById('backup-file').click()">⬆️ שחזור</button>
             <button class="btn btn-outline" onclick="openPasteBackup()">📋 הדבקת גיבוי</button>
           </div>
+          <p id="last-backup-info" style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;text-align:center;">${lastBackupText()}</p>
           <input type="file" id="backup-file" accept="application/json,.json" style="display:none" onchange="importBackup(event)" />
         </div>`;
 
@@ -2094,7 +2254,442 @@
       showScreen("screen-exercise-detail");
     }
 
+    // ========== BACKUP REMINDER ==========
+    const LAST_BACKUP_KEY = "workoutLastBackup_v1";
+    const BACKUP_SNOOZE_KEY = "workoutBackupSnooze_v1";
+    const BACKUP_BASELINE_KEY = "workoutBackupBaseline_v1";
+    const DAY_MS = 24 * 60 * 60 * 1000;
+
+    function hasAnyData(data) {
+      return (data.sessions || []).length > 0 ||
+        Object.keys(data.logs || {}).some(k => (data.logs[k] || []).length > 0);
+    }
+
+    function readTime(key) {
+      const t = Date.parse(localStorage.getItem(key) || "");
+      return isNaN(t) ? null : t;
+    }
+
+    function shouldShowBackupBanner(now = Date.now()) {
+      if (!hasAnyData(getData())) return false;
+      let ref = readTime(LAST_BACKUP_KEY);
+      if (ref == null) {
+        // No backup recorded yet: start counting from the first time this version runs.
+        ref = readTime(BACKUP_BASELINE_KEY);
+        if (ref == null) {
+          localStorage.setItem(BACKUP_BASELINE_KEY, new Date(now).toISOString());
+          ref = now;
+        }
+      }
+      if (now - ref < 7 * DAY_MS) return false;
+      const snooze = readTime(BACKUP_SNOOZE_KEY);
+      if (snooze != null && now < snooze) return false;
+      return true;
+    }
+
+    function renderBackupBanner() {
+      const el = document.getElementById("backup-banner");
+      if (el) el.classList.toggle("hidden", !shouldShowBackupBanner());
+    }
+
+    function snoozeBackupBanner() {
+      localStorage.setItem(BACKUP_SNOOZE_KEY, new Date(Date.now() + 2 * DAY_MS).toISOString());
+      renderBackupBanner();
+    }
+
+    function markBackupDone() {
+      localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
+      renderBackupBanner();
+      const info = document.getElementById("last-backup-info");
+      if (info) info.textContent = lastBackupText();
+    }
+
+    function lastBackupText() {
+      const t = readTime(LAST_BACKUP_KEY);
+      return t == null ? "עדיין לא נשמר גיבוי" : `גיבוי אחרון: ${formatDate(new Date(t).toISOString())}`;
+    }
+
+    function requestPersistentStorage() {
+      try {
+        if (!navigator.storage || !navigator.storage.persist) return;
+        const check = navigator.storage.persisted ? navigator.storage.persisted() : Promise.resolve(false);
+        check.then(p => p || navigator.storage.persist()).catch(() => {});
+      } catch (e) {}
+    }
+
+    // ========== NEXT-WEIGHT SUGGESTION ==========
+    function numOrNull(v) {
+      const n = v == null || v === "" ? NaN : Number(v);
+      return isFinite(n) && n > 0 ? n : null;
+    }
+
+    // The set the progression is based on: heavy set (normal), heaviest set (simple), best-reps set (max).
+    function getWorkingSet(entry) {
+      if (!entry || !Array.isArray(entry.sets)) return null;
+      const sets = entry.sets.filter(s => s && (numOrNull(s.weight) != null || numOrNull(s.reps) != null))
+        .map(s => ({ weight: numOrNull(s.weight), reps: numOrNull(s.reps) }));
+      if (!sets.length) return null;
+      if (entry.type === "max") {
+        return sets.reduce((a, b) => ((b.reps || 0) > (a.reps || 0) ? b : a));
+      }
+      if (entry.type !== "simple") {
+        const h = entry.sets[2];
+        if (h && (numOrNull(h.weight) != null || numOrNull(h.reps) != null)) {
+          return { weight: numOrNull(h.weight), reps: numOrNull(h.reps) };
+        }
+      }
+      return sets.reduce((a, b) => {
+        const aw = a.weight || 0, bw = b.weight || 0;
+        if (bw !== aw) return bw > aw ? b : a;
+        return (b.reps || 0) > (a.reps || 0) ? b : a;
+      });
+    }
+
+    function computeSuggestion(logs, def) {
+      const entries = (logs || []).filter(e => getWorkingSet(e));
+      if (!entries.length) return null;
+      const last = getWorkingSet(entries[entries.length - 1]);
+      const prev = entries.length >= 2 ? getWorkingSet(entries[entries.length - 2]) : null;
+      const inc = def.increment || 2.5;
+      if (def.type === "max" || last.weight == null) {
+        if (last.reps == null) return null;
+        return { weight: last.weight, reps: last.reps + 1, kind: "reps",
+          rule: "שיטה: מנסים חזרה אחת יותר מהפעם הקודמת." };
+      }
+      const rule = `שיטה: הגעת ל-${def.repMax} חזרות, או השווית/שיפרת פעמיים ברצף באותו משקל? מוסיפים ${fmtKg(inc)} ק״ג וחוזרים ל-${def.repMin} חזרות. אחרת: אותו משקל ועוד חזרה.`;
+      if (last.reps == null) return { weight: last.weight, reps: def.repMin, kind: "same", rule };
+      const hitTop = last.reps >= def.repMax;
+      const twice = !!prev && prev.weight === last.weight && prev.reps != null && last.reps >= prev.reps;
+      if (hitTop || twice) {
+        return { weight: Math.round((last.weight + inc) * 100) / 100, reps: def.repMin, kind: hitTop ? "top" : "twice", rule };
+      }
+      return { weight: last.weight, reps: Math.min(last.reps + 1, def.repMax), kind: "rep", rule };
+    }
+
+    function fmtKg(n) {
+      return String(Math.round(n * 100) / 100);
+    }
+
+    function renderSuggestion(exerciseName) {
+      const box = document.getElementById("suggestion-box");
+      const def = findExerciseDef(exerciseName);
+      const logs = getData().logs[exerciseName] || [];
+      const s = computeSuggestion(logs, def);
+      currentSuggestion = s;
+      if (!s) {
+        box.classList.add("hidden");
+        box.innerHTML = "";
+        return;
+      }
+      const target = def.type === "max"
+        ? `${s.reps} חזרות${s.weight != null ? ` · ${fmtKg(s.weight)} ק״ג` : ""}`
+        : (s.weight != null ? `${fmtKg(s.weight)} ק״ג × ${s.reps}` : `${s.reps} חזרות`);
+      const where = def.type === "normal" ? " (סט כבד)" : (def.type === "max" ? " (הסט הטוב)" : "");
+      const canApply = def.type !== "max";
+      box.innerHTML = `
+        <div class="suggest-main" title="${esc(s.rule)}">🎯 היעד היום${where}: <b>${target}</b></div>
+        <div class="suggest-rule">${esc(s.rule)}</div>
+        ${canApply ? `<button class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="applySuggestion()">${def.type === "normal" ? "החל על הסט הכבד" : "החל על כל הסטים"}</button>` : ""}`;
+      box.classList.remove("hidden");
+    }
+
+    // Only on explicit tap: writes the suggestion into the working-set fields.
+    function applySuggestion() {
+      const s = currentSuggestion;
+      if (!s) return;
+      const setPair = (wId, rId) => {
+        const w = document.getElementById(wId), r = document.getElementById(rId);
+        if (w && s.weight != null) w.value = fmtKg(s.weight);
+        if (r) r.value = s.reps;
+      };
+      if (logMode === "normal") setPair("w3", "r3");
+      else for (let i = 1; i <= dynamicSetCount; i++) setPair("dw" + i, "dr" + i);
+      showToast("היעד הוזן ✓");
+    }
+
+    // ========== PROGRAM EDITOR ==========
+    let editorTarget = null; // { kind: "w" | "a", gi, ei (null = new) }
+
+    function groupsOf(prog, kind) {
+      return kind === "a" ? prog.accessories : prog.workouts;
+    }
+
+    function mutateProgram(fn) {
+      const data = getData();
+      const prog = getProgram(data);
+      if (fn(prog, data) === false) return false;
+      data.program = prog;
+      saveData(data);
+      renderProgramEditor();
+      return true;
+    }
+
+    function showProgramEditor() {
+      renderProgramEditor();
+      showScreen("screen-program");
+    }
+
+    function iconBtn(label, onclick, opts = {}) {
+      return `<button class="icon-btn${opts.danger ? " danger" : ""}" aria-label="${esc(opts.title || "")}" title="${esc(opts.title || "")}" ${opts.disabled ? "disabled" : ""} onclick="${onclick}">${label}</button>`;
+    }
+
+    function groupCardHtml(g, gi, kind, count) {
+      const rows = g.exercises.map((e, ei) => `
+        <div class="pe-row">
+          <div class="pe-info" onclick="openExerciseEditor('${kind}', ${gi}, ${ei})">
+            <div class="exercise-name">${esc(e.name)}</div>
+            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}</div>
+          </div>
+          <div class="pe-btns">
+            ${iconBtn("▲", `moveExercise('${kind}', ${gi}, ${ei}, -1)`, { disabled: ei === 0, title: "הזז למעלה" })}
+            ${iconBtn("▼", `moveExercise('${kind}', ${gi}, ${ei}, 1)`, { disabled: ei === g.exercises.length - 1, title: "הזז למטה" })}
+            ${iconBtn("🗑️", `deleteExercise('${kind}', ${gi}, ${ei})`, { danger: true, title: "מחק תרגיל" })}
+          </div>
+        </div>`).join("");
+      const letter = kind === "w" ? `<span class="pe-letter" style="color:${workoutColor(g.id)}">${esc(g.id)}</span>` : "";
+      return `
+        <div class="card pe-card">
+          <div class="pe-head">
+            <h3>${letter}${esc(g.name)}</h3>
+            <div class="pe-btns">
+              ${iconBtn("▲", `moveGroup('${kind}', ${gi}, -1)`, { disabled: gi === 0, title: "הזז למעלה" })}
+              ${iconBtn("▼", `moveGroup('${kind}', ${gi}, 1)`, { disabled: gi === count - 1, title: "הזז למטה" })}
+              ${iconBtn("✏️", `renameGroup('${kind}', ${gi})`, { title: "שנה שם" })}
+              ${iconBtn("🗑️", `deleteGroup('${kind}', ${gi})`, { danger: true, title: "מחק" })}
+            </div>
+          </div>
+          ${rows || `<div class="empty-state" style="padding:14px;">אין תרגילים</div>`}
+          <button class="btn btn-sm btn-outline" style="width:100%;margin-top:10px;" onclick="openExerciseEditor('${kind}', ${gi}, null)">+ הוסף תרגיל</button>
+        </div>`;
+    }
+
+    function renderProgramEditor() {
+      const box = document.getElementById("program-content");
+      if (!box) return;
+      const prog = getProgram();
+      let html = `<p class="pe-note">לחיצה על תרגיל פותחת עריכה (שם, סוג, טווח חזרות). שינוי שם שומר את ההיסטוריה. השינויים נשמרים מיד.</p>`;
+      html += `<div class="section-title">אימונים</div>`;
+      prog.workouts.forEach((g, gi) => { html += groupCardHtml(g, gi, "w", prog.workouts.length); });
+      html += `<button class="btn btn-outline" onclick="addGroup('w')">+ הוסף אימון</button>`;
+      html += `<div class="section-title" style="margin-top:20px;">תוספות (בטן / תאומים וכו׳)</div>`;
+      prog.accessories.forEach((g, gi) => { html += groupCardHtml(g, gi, "a", prog.accessories.length); });
+      html += `<button class="btn btn-outline" onclick="addGroup('a')">+ הוסף תוספת</button>`;
+
+      const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי"];
+      html += `<div class="section-title" style="margin-top:20px;">איזו תוספת בכל יום</div><div class="card">`;
+      days.forEach((d, i) => {
+        const cur = prog.accessoryByDay[i];
+        html += `<div class="day-map-row"><span>יום ${d}</span>
+          <select class="form-input" onchange="setDayAccessory(${i}, this.value)">
+            <option value="">ללא</option>
+            ${prog.accessories.map(a => `<option value="${esc(a.id)}"${a.id === cur ? " selected" : ""}>${esc(a.name)}</option>`).join("")}
+          </select></div>`;
+      });
+      html += `<div class="day-map-row"><span>שבת</span><span style="color:var(--text-muted);">מנוחה</span></div></div>`;
+
+      html += `<div class="section-title" style="margin-top:20px;">איפוס</div>
+        <div class="card">
+          <button class="btn btn-outline" onclick="resetProgramToDefault()">↺ שחזר תוכנית ברירת מחדל</button>
+          <p class="pe-note" style="margin-top:8px;margin-bottom:0;">ההיסטוריה של התרגילים נשמרת.</p>
+        </div>`;
+      box.innerHTML = html;
+    }
+
+    function moveInArray(arr, i, dir) {
+      const j = i + dir;
+      if (j < 0 || j >= arr.length) return false;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      return true;
+    }
+
+    function touchWorkoutDesc(kind, g) {
+      if (kind === "w") g.desc = null; // home-screen summary is regenerated from the exercises
+    }
+
+    function moveExercise(kind, gi, ei, dir) {
+      mutateProgram(prog => {
+        const g = groupsOf(prog, kind)[gi];
+        if (!g || !moveInArray(g.exercises, ei, dir)) return false;
+        touchWorkoutDesc(kind, g);
+      });
+    }
+
+    function deleteExercise(kind, gi, ei) {
+      const g0 = groupsOf(getProgram(), kind)[gi];
+      const e0 = g0 && g0.exercises[ei];
+      if (!e0) return;
+      if (!confirm(`למחוק את "${e0.name}" מ"${g0.name}"?\nההיסטוריה של התרגיל נשמרת.`)) return;
+      mutateProgram(prog => {
+        const g = groupsOf(prog, kind)[gi];
+        g.exercises.splice(ei, 1);
+        touchWorkoutDesc(kind, g);
+      });
+      showToast("התרגיל נמחק ✓");
+    }
+
+    function moveGroup(kind, gi, dir) {
+      mutateProgram(prog => moveInArray(groupsOf(prog, kind), gi, dir) ? undefined : false);
+    }
+
+    function renameGroup(kind, gi) {
+      const g0 = groupsOf(getProgram(), kind)[gi];
+      if (!g0) return;
+      const name = prompt("שם חדש:", g0.name);
+      if (name == null || !name.trim()) return;
+      mutateProgram(prog => { groupsOf(prog, kind)[gi].name = name.trim(); });
+    }
+
+    function deleteGroup(kind, gi) {
+      const prog0 = getProgram();
+      const g0 = groupsOf(prog0, kind)[gi];
+      if (!g0) return;
+      if (kind === "w" && prog0.workouts.length <= 1) {
+        showToast("חייב להישאר לפחות אימון אחד");
+        return;
+      }
+      if (!confirm(`למחוק את "${g0.name}"?\nהתרגילים יוסרו מהתוכנית, ההיסטוריה נשמרת.`)) return;
+      mutateProgram(prog => {
+        const list = groupsOf(prog, kind);
+        const removed = list.splice(gi, 1)[0];
+        if (kind === "a") prog.accessoryByDay = prog.accessoryByDay.map(id => id === removed.id ? null : id);
+      });
+      showToast("נמחק ✓");
+    }
+
+    function addGroup(kind) {
+      const prog0 = getProgram();
+      let id;
+      if (kind === "w") {
+        const used = new Set(prog0.workouts.map(w => w.id));
+        id = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").find(l => !used.has(l));
+        if (!id) { showToast("הגעת למספר האימונים המקסימלי"); return; }
+      } else {
+        id = "acc_" + Date.now().toString(36);
+      }
+      const name = prompt(kind === "w" ? "שם האימון החדש:" : "שם התוספת החדשה:", kind === "w" ? `אימון ${id}` : "");
+      if (name == null || !name.trim()) return;
+      mutateProgram(prog => {
+        groupsOf(prog, kind).push({ id, name: name.trim(), desc: null, exercises: [] });
+      });
+      showToast("נוסף ✓");
+    }
+
+    function setDayAccessory(day, id) {
+      mutateProgram(prog => {
+        if (day < 0 || day > 5) return false;
+        prog.accessoryByDay[day] = findAccessory(id, prog) ? id : null;
+      });
+      showToast("נשמר ✓");
+    }
+
+    function mergeLogs(data, from, to) {
+      if (from === to || !(data.logs[from] || []).length) return;
+      data.logs[to] = (data.logs[to] || []).concat(data.logs[from])
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      delete data.logs[from];
+    }
+
+    function resetProgramToDefault() {
+      if (!confirm("לשחזר את תוכנית ברירת המחדל?\nכל השינויים בתוכנית יבוטלו. ההיסטוריה נשמרת.")) return;
+      const data = getData();
+      const prog = getProgram(data);
+      const defaults = buildDefaultProgram();
+      const defaultNames = new Set(defaults.workouts.concat(defaults.accessories).flatMap(g => g.exercises.map(e => e.name)));
+      // Exercises renamed from a default one: move their history back to the default name.
+      prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach(e => {
+        if (e.origName && e.origName !== e.name && defaultNames.has(e.origName)) mergeLogs(data, e.name, e.origName);
+      }));
+      delete data.program;
+      saveData(data);
+      renderProgramEditor();
+      showToast("התוכנית שוחזרה לברירת המחדל ✓");
+    }
+
+    function openExerciseEditor(kind, gi, ei) {
+      const g = groupsOf(getProgram(), kind)[gi];
+      if (!g) return;
+      const e = ei == null ? normalizeExercise({ name: "_" }) : g.exercises[ei];
+      if (!e) return;
+      editorTarget = { kind, gi, ei };
+      document.getElementById("ex-modal-title").textContent = ei == null ? `תרגיל חדש – ${g.name}` : "עריכת תרגיל";
+      document.getElementById("ex-name").value = ei == null ? "" : e.name;
+      document.getElementById("ex-type").value = e.type;
+      document.getElementById("ex-repmin").value = e.repMin;
+      document.getElementById("ex-repmax").value = e.repMax;
+      const inc = document.getElementById("ex-inc");
+      const incVal = String(e.increment);
+      if (![...inc.options].some(o => o.value === incVal)) inc.add(new Option(`${incVal} ק״ג`, incVal));
+      inc.value = incVal;
+      updateExerciseEditorFields();
+      document.getElementById("ex-modal").classList.remove("hidden");
+      if (ei == null) setTimeout(() => document.getElementById("ex-name").focus(), 50);
+    }
+
+    function updateExerciseEditorFields() {
+      const isMax = document.getElementById("ex-type").value === "max";
+      document.getElementById("ex-prog-fields").classList.toggle("hidden", isMax);
+    }
+
+    function closeExerciseEditor() {
+      document.getElementById("ex-modal").classList.add("hidden");
+      editorTarget = null;
+    }
+
+    function saveExerciseEditor() {
+      const t = editorTarget;
+      if (!t) return;
+      const name = document.getElementById("ex-name").value.trim();
+      if (!name) { showToast("צריך שם לתרגיל"); return; }
+      const props = normalizeExercise({
+        name,
+        type: document.getElementById("ex-type").value,
+        repMin: document.getElementById("ex-repmin").value,
+        repMax: document.getElementById("ex-repmax").value,
+        increment: document.getElementById("ex-inc").value
+      });
+      const repMinIn = parseInt(document.getElementById("ex-repmin").value, 10);
+      const repMaxIn = parseInt(document.getElementById("ex-repmax").value, 10);
+      if (props.type !== "max" && (!(repMinIn > 0) || !(repMaxIn >= repMinIn))) {
+        showToast("טווח חזרות לא תקין");
+        return;
+      }
+      const ok = mutateProgram((prog, data) => {
+        const g = groupsOf(prog, t.kind)[t.gi];
+        if (!g) return false;
+        if (g.exercises.some((x, i) => i !== t.ei && x.name === name)) {
+          showToast("כבר יש תרגיל בשם הזה כאן");
+          return false;
+        }
+        const apply = (x) => { x.type = props.type; x.repMin = props.repMin; x.repMax = props.repMax; x.increment = props.increment; };
+        if (t.ei == null) {
+          const x = { name };
+          apply(x);
+          g.exercises.push(x);
+          touchWorkoutDesc(t.kind, g);
+          return;
+        }
+        const ex = g.exercises[t.ei];
+        const oldName = ex.name;
+        if (oldName !== name) {
+          const hasOld = (data.logs[oldName] || []).length > 0;
+          const hasNew = (data.logs[name] || []).length > 0;
+          if (hasOld && hasNew && !confirm(`כבר קיימת היסטוריה לתרגיל "${name}".\nלמזג את ההיסטוריה של "${oldName}" לתוכה?`)) return false;
+          mergeLogs(data, oldName, name); // history follows the new name
+          // The same exercise elsewhere in the program shares this history, so rename it there too.
+          prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => {
+            if (x.name === oldName) { x.name = name; touchWorkoutDesc(prog.workouts.includes(gr) ? "w" : "a", gr); }
+          }));
+        }
+        prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => { if (x.name === name) apply(x); }));
+      });
+      if (ok) {
+        closeExerciseEditor();
+        showToast("נשמר ✓");
+      }
+    }
+
     // ========== INIT ==========
+    requestPersistentStorage();
     applySavedBackground();
     initHome();
   </script>
