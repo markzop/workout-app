@@ -1,4 +1,4 @@
-const CACHE = 'workout-pwa-v1';
+const CACHE = 'workout-pwa-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -21,11 +21,23 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+  let fromV1 = false;
+  const activation = (async () => {
+    const keys = await caches.keys();
+    // Pages loaded from the v1 cache have no controllerchange reload handler,
+    // so they are reloaded once from here. Newer pages reload themselves.
+    fromV1 = keys.includes('workout-pwa-v1');
+    await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+    await self.clients.claim();
+  })();
+  event.waitUntil(activation);
+  // Must run AFTER activation finishes: awaiting a navigation inside
+  // waitUntil would deadlock (the navigation's fetch waits for activation).
+  activation.then(async () => {
+    if (!fromV1) return;
+    const wins = await self.clients.matchAll({ type: 'window' });
+    wins.forEach((c) => c.navigate(c.url).catch(() => {}));
+  });
 });
 
 // Cache-first, then update the cache from the network in the background.
