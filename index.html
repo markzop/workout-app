@@ -670,6 +670,8 @@
     .reorder-btns { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
     .reorder-note { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 8px; }
     .btn:disabled { opacity: 0.4; }
+    .today-tag { display: inline-block; font-size: 0.7rem; color: #fff; background: rgba(225, 29, 72, 0.35); border-radius: 8px; padding: 1px 6px; margin-right: 6px; vertical-align: middle; }
+    .optional-drop .btn-sm, .add-set-btn .btn-sm { margin: 0 3px; }
     .paste-modal-box { max-height: calc(100vh - 32px); overflow-y: auto; }
   </style>
 </head>
@@ -715,7 +717,7 @@
 
       <div class="section-head">
         <div class="section-title">תרגילים</div>
-        <button class="reorder-toggle" id="reorder-toggle" onclick="toggleReorderMode()">↕ שנה סדר</button>
+        <button class="reorder-toggle" id="reorder-toggle" onclick="toggleReorderMode()">✏️ סדר ועריכה</button>
       </div>
       <div class="card" id="exercise-list"></div>
 
@@ -735,6 +737,7 @@
       <header>
         <h1 id="log-exercise-name"></h1>
         <p id="log-type-label" style="color:var(--text-muted);font-size:0.9rem;"></p>
+        <button class="btn btn-sm btn-outline" id="log-edit-btn" style="margin-top:8px;" onclick="openSessionExerciseEditor()">⚙️ ערוך תרגיל / סטים</button>
       </header>
 
       <div class="prev-info" id="prev-info">אין נתונים קודמים לתרגיל זה</div>
@@ -756,25 +759,24 @@
           <input type="number" id="w3" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r3" placeholder="חזרות" inputmode="numeric" />
         </div>
-        <div class="set-row">
+        <div class="set-row" id="drop-row-1">
           <div class="set-label drop">דרופ 1</div>
           <input type="number" id="w4" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r4" placeholder="חזרות" inputmode="numeric" />
         </div>
-        <div class="set-row">
+        <div class="set-row" id="drop-row-2">
           <div class="set-label drop">דרופ 2</div>
           <input type="number" id="w5" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r5" placeholder="חזרות" inputmode="numeric" />
         </div>
-        <div id="drop3-container" class="hidden">
-          <div class="set-row">
-            <div class="set-label drop">דרופ 3</div>
-            <input type="number" id="w6" placeholder="ק״ג" inputmode="decimal" />
-            <input type="number" id="r6" placeholder="חזרות" inputmode="numeric" />
-          </div>
+        <div class="set-row hidden" id="drop-row-3">
+          <div class="set-label drop">דרופ 3</div>
+          <input type="number" id="w6" placeholder="ק״ג" inputmode="decimal" />
+          <input type="number" id="r6" placeholder="חזרות" inputmode="numeric" />
         </div>
         <div class="optional-drop">
-          <button class="btn btn-sm btn-outline" id="toggle-drop3" onclick="toggleDrop3()">+ הוסף דרופ 3</button>
+          <button class="btn btn-sm btn-outline" id="add-drop-btn" onclick="addDrop()">+ הוסף דרופ</button>
+          <button class="btn btn-sm btn-outline" id="remove-drop-btn" onclick="removeDrop()">− הסר דרופ</button>
         </div>
       </div>
 
@@ -782,6 +784,7 @@
         <div id="dynamic-sets-container"></div>
         <div class="add-set-btn">
           <button class="btn btn-sm btn-outline" id="add-set-btn" onclick="addDynamicSet()">+ הוסף סט</button>
+          <button class="btn btn-sm btn-outline" id="remove-set-btn" onclick="removeDynamicSet()">− הסר סט</button>
         </div>
         <p id="dynamic-hint" style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;text-align:center;"></p>
       </div>
@@ -860,11 +863,29 @@
       <label class="form-label" for="ex-name">שם התרגיל</label>
       <input type="text" id="ex-name" class="form-input" autocomplete="off" />
       <label class="form-label" for="ex-type">סוג רישום</label>
-      <select id="ex-type" class="form-input" onchange="updateExerciseEditorFields()">
+      <select id="ex-type" class="form-input" onchange="updateStructFields('ex')">
         <option value="normal">2 קלים + כבד + דרופים</option>
         <option value="simple">סטים רגילים (אפשר להוסיף)</option>
         <option value="max">מקסימום חזרות / משקל גוף</option>
       </select>
+
+      <div id="ex-drops-field">
+        <label class="form-label" for="ex-drops">מספר סטי דרופ</label>
+        <select id="ex-drops" class="form-input">
+          <option value="">אוטומטי (2, או 3 אם היו בפעם הקודמת)</option>
+          <option value="0">ללא דרופים</option>
+          <option value="1">1 דרופ</option>
+          <option value="2">2 דרופים</option>
+          <option value="3">3 דרופים</option>
+        </select>
+      </div>
+      <div id="ex-setcount-field">
+        <label class="form-label" for="ex-setcount">מספר סטים</label>
+        <select id="ex-setcount" class="form-input">
+          <option value="">אוטומטי (כמו בפעם הקודמת, לפחות 3)</option>
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+        </select>
+      </div>
       <div id="ex-prog-fields">
         <label class="form-label">טווח חזרות ליעד (לפיו מחושב היעד היומי)</label>
         <div class="form-row">
@@ -883,6 +904,58 @@
         <button class="btn btn-primary" onclick="saveExerciseEditor()">שמור</button>
         <button class="btn btn-outline" onclick="closeExerciseEditor()">ביטול</button>
       </div>
+    </div>
+  </div>
+
+  <div class="paste-modal hidden" id="sx-modal" onclick="if (event.target === this) closeSessionExerciseEditor()">
+    <div class="paste-modal-box">
+      <h3 id="sx-modal-title">עריכת תרגיל</h3>
+      <p class="pe-note">"החל להיום" משנה רק את האימון של היום. "שמור כקבוע" מעדכן גם את התוכנית (שינוי שם שומר את ההיסטוריה).</p>
+      <label class="form-label" for="sx-name">שם התרגיל</label>
+      <input type="text" id="sx-name" class="form-input" autocomplete="off" />
+      <label class="form-label" for="sx-type">סוג רישום</label>
+      <select id="sx-type" class="form-input" onchange="updateStructFields('sx')">
+        <option value="normal">2 קלים + כבד + דרופים</option>
+        <option value="simple">סטים רגילים (אפשר להוסיף)</option>
+        <option value="max">מקסימום חזרות / משקל גוף</option>
+      </select>
+      <div id="sx-drops-field">
+        <label class="form-label" for="sx-drops">מספר סטי דרופ</label>
+        <select id="sx-drops" class="form-input">
+          <option value="">אוטומטי (2, או 3 אם היו בפעם הקודמת)</option>
+          <option value="0">ללא דרופים</option>
+          <option value="1">1 דרופ</option>
+          <option value="2">2 דרופים</option>
+          <option value="3">3 דרופים</option>
+        </select>
+      </div>
+      <div id="sx-setcount-field">
+        <label class="form-label" for="sx-setcount">מספר סטים</label>
+        <select id="sx-setcount" class="form-input">
+          <option value="">אוטומטי (כמו בפעם הקודמת, לפחות 3)</option>
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+        </select>
+      </div>
+      <div id="sx-prog-fields">
+        <label class="form-label">טווח חזרות ליעד (לפיו מחושב היעד היומי)</label>
+        <div class="form-row">
+          <input type="number" id="sx-repmin" inputmode="numeric" min="1" />
+          <span>עד</span>
+          <input type="number" id="sx-repmax" inputmode="numeric" min="1" />
+        </div>
+        <label class="form-label" for="sx-inc">תוספת משקל כשמתקדמים</label>
+        <select id="sx-inc" class="form-input">
+          <option value="1">1 ק״ג (תרגיל קטן / בידוד)</option>
+          <option value="2.5">2.5 ק״ג</option>
+          <option value="5">5 ק״ג</option>
+        </select>
+      </div>
+      <div class="backup-row" style="margin-top:16px;">
+        <button class="btn btn-primary" onclick="applySessionEdit(false)">החל להיום</button>
+        <button class="btn btn-outline" onclick="applySessionEdit(true)">📌 שמור כקבוע</button>
+      </div>
+      <button class="btn btn-sm btn-outline hidden" id="sx-reset" style="width:100%;margin-top:8px;" onclick="resetSessionEdit()">↺ בטל את השינויים של היום</button>
+      <button class="btn btn-sm btn-outline" style="width:100%;margin-top:8px;" onclick="closeSessionExerciseEditor()">ביטול</button>
     </div>
   </div>
 
@@ -950,6 +1023,10 @@
       if (!(increment > 0 && increment <= 50)) increment = base.increment;
       const out = { name, type, repMin, repMax, increment };
       if (typeof e.origName === "string" && e.origName) out.origName = e.origName;
+      const sc = parseInt(e.setCount, 10);
+      if (sc >= 1 && sc <= 8) out.setCount = sc;   // absent = automatic
+      const dr = parseInt(e.drops, 10);
+      if (dr >= 0 && dr <= 3) out.drops = dr;      // absent = automatic (2, or 3 if used last time)
       return out;
     }
 
@@ -1223,7 +1300,8 @@
     // ========== STATE ==========
     let currentWorkout = null;
     let currentExercise = null;
-    let showDrop3 = false;
+    let normalDrops = 2;
+    let removedDynStash = {};
     let logMode = "normal";
     let dynamicSetCount = 3;
     let progressChart = null;
@@ -1294,25 +1372,28 @@
         }
       }
       const check = done ? `<span class="check-done">✓</span>` : `<span class="arrow">‹</span>`;
+      const shown = displayName(name);
+      const tag = getSessionOverride(name) ? `<span class="today-tag">שונה להיום</span>` : "";
       if (reorder) {
         const k = jsArg(reorder.groupKey);
         return `
-        <div class="exercise-item reordering${done ? " done" : ""}">
+        <div class="exercise-item reordering${done ? " done" : ""}" data-name="${esc(name)}">
           <div>
-            <div class="exercise-name">${esc(name)}</div>
+            <div class="exercise-name">${esc(shown)}${tag}</div>
             <div class="exercise-meta">${meta}</div>
           </div>
           <div class="reorder-btns">
             ${done ? `<span class="check-done">✓</span>` : ""}
             <button class="icon-btn" title="הזז למעלה" aria-label="הזז למעלה" ${reorder.idx === 0 ? "disabled" : ""} onclick="moveSessionExercise(${k}, ${reorder.idx}, -1)">▲</button>
             <button class="icon-btn" title="הזז למטה" aria-label="הזז למטה" ${reorder.idx === reorder.count - 1 ? "disabled" : ""} onclick="moveSessionExercise(${k}, ${reorder.idx}, 1)">▼</button>
+            <button class="icon-btn" title="ערוך תרגיל" aria-label="ערוך תרגיל" onclick="openSessionExerciseEditor(${jsArg(name)})">✏️</button>
           </div>
         </div>`;
       }
       return `
-        <div class="exercise-item${done ? " done" : ""}" onclick="openLog(${jsArg(name)})">
+        <div class="exercise-item${done ? " done" : ""}" data-name="${esc(name)}" onclick="openLog(${jsArg(name)})">
           <div>
-            <div class="exercise-name">${esc(name)}</div>
+            <div class="exercise-name">${esc(shown)}${tag}</div>
             <div class="exercise-meta">${meta}</div>
           </div>
           ${check}
@@ -1569,25 +1650,57 @@
       const isMax = logMode === "max";
       const labelClass = isMax ? "max" : "heavy";
       const repsPlaceholder = isMax ? "מקס חזרות" : "חזרות";
-      const container = document.getElementById("dynamic-sets-container");
-      container.innerHTML += `
+      const back = removedDynStash[dynamicSetCount] || { w: "", r: "" };
+      delete removedDynStash[dynamicSetCount];
+      // insertAdjacentHTML (not innerHTML +=) so values already typed in other rows are kept
+      document.getElementById("dynamic-sets-container").insertAdjacentHTML("beforeend", `
         <div class="set-row" id="dyn-row-${dynamicSetCount}">
           <div class="set-label ${labelClass}">סט ${dynamicSetCount}</div>
-          <input type="number" id="dw${dynamicSetCount}" placeholder="ק״ג" inputmode="decimal" />
-          <input type="number" id="dr${dynamicSetCount}" placeholder="${repsPlaceholder}" inputmode="numeric" />
-        </div>`;
+          <input type="number" id="dw${dynamicSetCount}" placeholder="ק״ג" inputmode="decimal" value="${esc(back.w)}" />
+          <input type="number" id="dr${dynamicSetCount}" placeholder="${repsPlaceholder}" inputmode="numeric" value="${esc(back.r)}" />
+        </div>`);
+    }
+
+    function removeDynamicSet() {
+      if (dynamicSetCount <= 1) {
+        showToast("צריך לפחות סט אחד");
+        return;
+      }
+      const row = document.getElementById("dyn-row-" + dynamicSetCount);
+      // keep what was typed, so "+ הוסף סט" brings it back
+      removedDynStash[dynamicSetCount] = { w: document.getElementById("dw" + dynamicSetCount).value, r: document.getElementById("dr" + dynamicSetCount).value };
+      if (row) row.remove();
+      dynamicSetCount--;
+    }
+
+    function setDropsVisible(n) {
+      normalDrops = Math.max(0, Math.min(3, n));
+      for (let i = 1; i <= 3; i++) document.getElementById("drop-row-" + i).classList.toggle("hidden", i > normalDrops);
+      document.getElementById("add-drop-btn").classList.toggle("hidden", normalDrops >= 3);
+      document.getElementById("remove-drop-btn").classList.toggle("hidden", normalDrops <= 0);
+    }
+
+    // Hidden drop rows keep their values; only visible rows are saved.
+    function addDrop() { setDropsVisible(normalDrops + 1); }
+    function removeDrop() { setDropsVisible(normalDrops - 1); }
+
+    function normalTypeLabel(drops) {
+      if (drops == null) return "2 קלים + כבד + דרופים";
+      if (drops === 0) return "2 קלים + כבד (ללא דרופים)";
+      return drops === 1 ? "2 קלים + כבד + דרופ" : `2 קלים + כבד + ${drops} דרופים`;
     }
 
     // ========== LOG SETS ==========
-    function openLog(exerciseName) {
+    const wxr = st => `${st.weight != null ? st.weight : "—"}×${st.reps != null ? st.reps : "—"}`;
+
+    function openLog(exerciseName, typed) {
       currentExercise = exerciseName;
-      showDrop3 = false;
+      const def = getEffectiveDef(exerciseName);
+      logMode = def.type;
+      const isDyn = logMode === "max" || logMode === "simple";
+      removedDynStash = {};
 
-      logMode = findExerciseDef(exerciseName).type;
-
-      document.getElementById("log-exercise-name").textContent = exerciseName;
-      document.getElementById("drop3-container").classList.add("hidden");
-      document.getElementById("toggle-drop3").textContent = "+ הוסף דרופ 3";
+      document.getElementById("log-exercise-name").textContent = displayName(exerciseName);
 
       for (let i = 1; i <= 6; i++) {
         const w = document.getElementById("w" + i);
@@ -1599,18 +1712,31 @@
       document.getElementById("normal-sets").classList.add("hidden");
       document.getElementById("dynamic-sets").classList.add("hidden");
 
-      if (logMode === "max" || logMode === "simple") {
+      const last = getLastPerformance(exerciseName);
+      const lastDyn = !!last && (last.type === "max" || last.type === "simple");
+
+      if (isDyn) {
         document.getElementById("dynamic-sets").classList.remove("hidden");
         document.getElementById("log-type-label").textContent =
           logMode === "max" ? "סטים של מקסימום חזרות (אפשר להוסיף)" : "סטים רגילים (אפשר להוסיף)";
         document.getElementById("dynamic-hint").textContent =
           logMode === "max" ? "* במקבילים ובהרמות רגליים אפשר להשאיר את המשקל ריק" : "";
+        const count = def.setCount != null ? def.setCount
+          : (lastDyn ? Math.max(3, last.sets.filter(s => s).length) : 3);
+        renderDynamicSets(count, lastDyn ? last.sets : []);
       } else {
         document.getElementById("normal-sets").classList.remove("hidden");
-        document.getElementById("log-type-label").textContent = "2 קלים + כבד + דרופים";
+        document.getElementById("log-type-label").textContent = normalTypeLabel(def.drops);
+        const s = last && !lastDyn ? (last.sets || []) : [];
+        for (let i = 0; i < 6; i++) {
+          if (s[i]) {
+            document.getElementById("w" + (i + 1)).value = s[i].weight || "";
+            document.getElementById("r" + (i + 1)).value = s[i].reps || "";
+          }
+        }
+        setDropsVisible(def.drops != null ? def.drops : (s[5] ? 3 : 2));
       }
 
-      const last = getLastPerformance(exerciseName);
       const prevDiv = document.getElementById("prev-info");
       if (last) {
         const data = getData();
@@ -1621,34 +1747,21 @@
         const cmpHtml = beforeLast ? ` ${formatCmp(lastVal, beforeVal)}` : "";
 
         let html = `<strong>פעם קודמת (${formatDate(last.date)})${cmpHtml}</strong><br/>`;
-        if (last.type === "max" || last.type === "simple") {
+        if (lastDyn) {
           last.sets.forEach((s, i) => {
             if (s) {
               const w = s.weight ? s.weight + " ק״ג × " : "";
               html += `סט ${i + 1}: ${w}${s.reps || "—"} חזרות<br/>`;
             }
           });
-          const startCount = Math.max(3, last.sets.filter(s => s).length);
-          renderDynamicSets(startCount, last.sets);
         } else {
           const s = last.sets;
-          if (s[0]) html += `סט 1: ${s[0].weight}×${s[0].reps} · `;
-          if (s[1]) html += `סט 2: ${s[1].weight}×${s[1].reps}<br/>`;
-          if (s[2]) html += `סט 3 (כבד): ${s[2].weight}×${s[2].reps}<br/>`;
-          if (s[3]) html += `דרופ 1: ${s[3].weight}×${s[3].reps} · `;
-          if (s[4]) html += `דרופ 2: ${s[4].weight}×${s[4].reps}`;
-          if (s[5]) html += `<br/>דרופ 3: ${s[5].weight}×${s[5].reps}`;
-          for (let i = 0; i < 6; i++) {
-            if (s[i]) {
-              document.getElementById("w" + (i + 1)).value = s[i].weight || "";
-              document.getElementById("r" + (i + 1)).value = s[i].reps || "";
-            }
-          }
-          if (s[5]) {
-            showDrop3 = true;
-            document.getElementById("drop3-container").classList.remove("hidden");
-            document.getElementById("toggle-drop3").textContent = "− הסר דרופ 3";
-          }
+          if (s[0]) html += `סט 1: ${wxr(s[0])} · `;
+          if (s[1]) html += `סט 2: ${wxr(s[1])}<br/>`;
+          if (s[2]) html += `סט 3 (כבד): ${wxr(s[2])}<br/>`;
+          if (s[3]) html += `דרופ 1: ${wxr(s[3])} · `;
+          if (s[4]) html += `דרופ 2: ${wxr(s[4])}`;
+          if (s[5]) html += `<br/>דרופ 3: ${wxr(s[5])}`;
         }
         if (beforeLast) {
           html += `<div style="margin-top:8px;font-size:0.85rem;">לעומת הפעם שלפניה (${formatDate(beforeLast.date)}): ${formatCmp(lastVal, beforeVal) || "—"}</div>`;
@@ -1656,8 +1769,9 @@
         prevDiv.innerHTML = html;
       } else {
         prevDiv.innerHTML = "אין נתונים קודמים לתרגיל זה";
-        if (logMode === "max" || logMode === "simple") renderDynamicSets(3);
       }
+
+      if (typed) restoreTyped(typed); // unsaved input survives a structure change / rename
 
       renderSuggestion(exerciseName);
       document.getElementById("postpone-btn").classList.toggle("hidden",
@@ -1665,20 +1779,6 @@
       showScreen("screen-log");
     }
 
-    function toggleDrop3() {
-      showDrop3 = !showDrop3;
-      const cont = document.getElementById("drop3-container");
-      const btn = document.getElementById("toggle-drop3");
-      if (showDrop3) {
-        cont.classList.remove("hidden");
-        btn.textContent = "− הסר דרופ 3";
-      } else {
-        cont.classList.add("hidden");
-        btn.textContent = "+ הוסף דרופ 3";
-        document.getElementById("w6").value = "";
-        document.getElementById("r6").value = "";
-      }
-    }
 
     function saveSets() {
       let sets = [];
@@ -1689,7 +1789,7 @@
           sets.push((w || r) ? { weight: w ? parseFloat(w) : null, reps: r ? parseInt(r) : null } : null);
         }
       } else {
-        for (let i = 1; i <= (showDrop3 ? 6 : 5); i++) {
+        for (let i = 1; i <= 3 + normalDrops; i++) {
           const w = document.getElementById("w" + i).value;
           const r = document.getElementById("r" + i).value;
           sets.push((w || r) ? { weight: w ? parseFloat(w) : null, reps: r ? parseInt(r) : null } : null);
@@ -2604,7 +2704,7 @@
 
     function renderSuggestion(exerciseName) {
       const box = document.getElementById("suggestion-box");
-      const def = findExerciseDef(exerciseName);
+      const def = getEffectiveDef(exerciseName);
       const logs = getData().logs[exerciseName] || [];
       const s = computeSuggestion(logs, def);
       currentSuggestion = s;
@@ -2670,7 +2770,7 @@
         <div class="pe-row">
           <div class="pe-info" onclick="openExerciseEditor('${kind}', ${gi}, ${ei})">
             <div class="exercise-name">${esc(e.name)}</div>
-            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}</div>
+            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type === "normal" && e.drops != null ? ` (${e.drops} דרופים)` : ""}${e.type !== "normal" && e.setCount != null ? ` (${e.setCount} סטים)` : ""}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}</div>
           </div>
           <div class="pe-btns">
             ${iconBtn("▲", `moveExercise('${kind}', ${gi}, ${ei}, -1)`, { disabled: ei === 0, title: "הזז למעלה" })}
@@ -2845,22 +2945,11 @@
       editorTarget = { kind, gi, ei };
       document.getElementById("ex-modal-title").textContent = ei == null ? `תרגיל חדש – ${g.name}` : "עריכת תרגיל";
       document.getElementById("ex-name").value = ei == null ? "" : e.name;
-      document.getElementById("ex-type").value = e.type;
-      document.getElementById("ex-repmin").value = e.repMin;
-      document.getElementById("ex-repmax").value = e.repMax;
-      const inc = document.getElementById("ex-inc");
-      const incVal = String(e.increment);
-      if (![...inc.options].some(o => o.value === incVal)) inc.add(new Option(`${incVal} ק״ג`, incVal));
-      inc.value = incVal;
-      updateExerciseEditorFields();
+      fillStructFields("ex", e);
       document.getElementById("ex-modal").classList.remove("hidden");
       if (ei == null) setTimeout(() => document.getElementById("ex-name").focus(), 50);
     }
 
-    function updateExerciseEditorFields() {
-      const isMax = document.getElementById("ex-type").value === "max";
-      document.getElementById("ex-prog-fields").classList.toggle("hidden", isMax);
-    }
 
     function closeExerciseEditor() {
       document.getElementById("ex-modal").classList.add("hidden");
@@ -2872,19 +2961,9 @@
       if (!t) return;
       const name = document.getElementById("ex-name").value.trim();
       if (!name) { showToast("צריך שם לתרגיל"); return; }
-      const props = normalizeExercise({
-        name,
-        type: document.getElementById("ex-type").value,
-        repMin: document.getElementById("ex-repmin").value,
-        repMax: document.getElementById("ex-repmax").value,
-        increment: document.getElementById("ex-inc").value
-      });
-      const repMinIn = parseInt(document.getElementById("ex-repmin").value, 10);
-      const repMaxIn = parseInt(document.getElementById("ex-repmax").value, 10);
-      if (props.type !== "max" && (!(repMinIn > 0) || !(repMaxIn >= repMinIn))) {
-        showToast("טווח חזרות לא תקין");
-        return;
-      }
+      const props = readStructFields("ex");
+      if (!props) return;
+      let renamedFrom = null;
       const ok = mutateProgram((prog, data) => {
         const g = groupsOf(prog, t.kind)[t.gi];
         if (!g) return false;
@@ -2892,29 +2971,21 @@
           showToast("כבר יש תרגיל בשם הזה כאן");
           return false;
         }
-        const apply = (x) => { x.type = props.type; x.repMin = props.repMin; x.repMax = props.repMax; x.increment = props.increment; };
         if (t.ei == null) {
-          const x = { name };
-          apply(x);
-          g.exercises.push(x);
+          g.exercises.push({ name });
+          configureExerciseEverywhere(prog, name, props);
           touchWorkoutDesc(t.kind, g);
           return;
         }
-        const ex = g.exercises[t.ei];
-        const oldName = ex.name;
+        const oldName = g.exercises[t.ei].name;
         if (oldName !== name) {
-          const hasOld = (data.logs[oldName] || []).length > 0;
-          const hasNew = (data.logs[name] || []).length > 0;
-          if (hasOld && hasNew && !confirm(`כבר קיימת היסטוריה לתרגיל "${name}".\nלמזג את ההיסטוריה של "${oldName}" לתוכה?`)) return false;
-          mergeLogs(data, oldName, name); // history follows the new name
-          // The same exercise elsewhere in the program shares this history, so rename it there too.
-          prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => {
-            if (x.name === oldName) { x.name = name; touchWorkoutDesc(prog.workouts.includes(gr) ? "w" : "a", gr); }
-          }));
+          if (!renameExerciseEverywhere(prog, data, oldName, name)) return false;
+          renamedFrom = oldName;
         }
-        prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => { if (x.name === name) apply(x); }));
+        configureExerciseEverywhere(prog, name, props);
       });
       if (ok) {
+        if (renamedFrom) renameInSessionState(renamedFrom, name); // keeps today's position / edits
         closeExerciseEditor();
         showToast("נשמר ✓");
       }
@@ -3037,16 +3108,263 @@
       const bar = document.getElementById("reorder-bar");
       const btn = document.getElementById("reorder-toggle");
       if (!bar || !btn) return;
-      btn.textContent = reorderMode ? "✓ סיום" : "↕ שנה סדר";
+      btn.textContent = reorderMode ? "✓ סיום" : "✏️ סדר ועריכה";
       btn.classList.toggle("active", reorderMode);
       const custom = currentWorkoutSections().some(s => hasSessionOrder(s.key));
       bar.classList.toggle("hidden", !reorderMode);
       bar.innerHTML = `
-        <p class="reorder-note">הסדר החדש נשמר להיום בלבד.</p>
+        <p class="reorder-note">שינויי סדר ו-✏️ עריכה חלים על היום בלבד, אלא אם שומרים כקבוע.</p>
         <div class="backup-row">
           <button class="btn btn-outline" onclick="saveSessionOrderAsPermanent()" ${custom ? "" : "disabled"}>📌 שמור כסדר קבוע</button>
           <button class="btn btn-outline" onclick="resetSessionOrder()" ${custom ? "" : "disabled"}>↺ סדר התוכנית</button>
         </div>`;
+    }
+
+
+    // ========== TODAY-ONLY EXERCISE EDITS ==========
+    // Per-exercise overrides for today's session (structure, rep range, display label).
+    // Own key, not in workoutData_v1 / backups, ignored from the next day.
+    const SESSION_OVERRIDES_KEY = "workoutSessionOverrides_v1";
+    const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops"];
+    let sxTarget = null;
+
+    function readSessionOverrides() {
+      try {
+        const o = JSON.parse(localStorage.getItem(SESSION_OVERRIDES_KEY) || "null");
+        if (o && o.date === toDateKey(new Date()) && o.exercises && typeof o.exercises === "object") return o.exercises;
+      } catch (e) {}
+      return {};
+    }
+
+    function writeSessionOverrides(map) {
+      try { localStorage.setItem(SESSION_OVERRIDES_KEY, JSON.stringify({ date: toDateKey(new Date()), exercises: map })); } catch (e) {}
+    }
+
+    function getSessionOverride(name) {
+      const o = readSessionOverrides()[name];
+      return o && typeof o === "object" ? o : null;
+    }
+
+    // Today-only rename is a display label: sets are still saved under the real name, so history stays linked.
+    function displayName(name) {
+      const o = getSessionOverride(name);
+      return o && typeof o.label === "string" && o.label.trim() ? o.label.trim() : name;
+    }
+
+    function getEffectiveDef(name) {
+      const base = findExerciseDef(name);
+      const o = getSessionOverride(name);
+      if (!o) return base;
+      const merged = Object.assign({}, base);
+      OVERRIDE_FIELDS.forEach(f => {
+        if (o[f] === null) delete merged[f];          // null = automatic (setCount / drops)
+        else if (o[f] !== undefined) merged[f] = o[f];
+      });
+      return normalizeExercise(merged) || base;
+    }
+
+    function writeSessionOrders(orders) {
+      try { localStorage.setItem(SESSION_ORDER_KEY, JSON.stringify({ date: toDateKey(new Date()), orders })); } catch (e) {}
+    }
+
+    // After a real rename: keep the exercise's place in today's order, its today-edits and its checkmark.
+    function renameInSessionState(oldName, newName) {
+      if (oldName === newName) return;
+      const orders = readSessionOrders();
+      let changed = false;
+      Object.keys(orders).forEach(k => {
+        const arr = orders[k];
+        if (!Array.isArray(arr) || !arr.includes(oldName)) return;
+        const out = [];
+        arr.forEach(n => { const m = n === oldName ? newName : n; if (!out.includes(m)) out.push(m); });
+        orders[k] = out;
+        changed = true;
+      });
+      if (changed) writeSessionOrders(orders);
+      const map = readSessionOverrides();
+      if (map[oldName]) {
+        if (!map[newName]) map[newName] = map[oldName];
+        delete map[oldName];
+        delete map[newName].label;
+        writeSessionOverrides(map);
+      }
+      if (sessionCompleted.has(oldName)) { sessionCompleted.delete(oldName); sessionCompleted.add(newName); }
+      if (currentExercise === oldName) currentExercise = newName;
+    }
+
+    // ---- shared structure fields (program editor "ex" and today editor "sx") ----
+    function fillStructFields(prefix, def) {
+      const $ = id => document.getElementById(prefix + "-" + id);
+      $("type").value = def.type;
+      $("repmin").value = def.repMin;
+      $("repmax").value = def.repMax;
+      const inc = $("inc");
+      const incVal = String(def.increment);
+      if (![...inc.options].some(o => o.value === incVal)) inc.add(new Option(`${incVal} ק״ג`, incVal));
+      inc.value = incVal;
+      $("setcount").value = def.setCount != null ? String(def.setCount) : "";
+      $("drops").value = def.drops != null ? String(def.drops) : "";
+      updateStructFields(prefix);
+    }
+
+    function updateStructFields(prefix) {
+      const $ = id => document.getElementById(prefix + "-" + id);
+      const type = $("type").value;
+      $("prog-fields").classList.toggle("hidden", type === "max");
+      $("drops-field").classList.toggle("hidden", type !== "normal");
+      $("setcount-field").classList.toggle("hidden", type === "normal");
+    }
+
+    function readStructFields(prefix) {
+      const $ = id => document.getElementById(prefix + "-" + id);
+      const type = $("type").value;
+      const repMin = parseInt($("repmin").value, 10);
+      const repMax = parseInt($("repmax").value, 10);
+      if (type !== "max" && (!(repMin > 0) || !(repMax >= repMin))) {
+        showToast("טווח חזרות לא תקין");
+        return null;
+      }
+      const n = normalizeExercise({ name: "_", type, repMin, repMax, increment: $("inc").value });
+      const sc = $("setcount").value, dr = $("drops").value;
+      return {
+        type: n.type, repMin: n.repMin, repMax: n.repMax, increment: n.increment,
+        setCount: type !== "normal" && sc !== "" ? parseInt(sc, 10) : null,
+        drops: type === "normal" && dr !== "" ? parseInt(dr, 10) : null
+      };
+    }
+
+    function configureExerciseEverywhere(prog, name, props) {
+      prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => {
+        if (x.name !== name) return;
+        x.type = props.type; x.repMin = props.repMin; x.repMax = props.repMax; x.increment = props.increment;
+        if (props.setCount == null) delete x.setCount; else x.setCount = props.setCount;
+        if (props.drops == null) delete x.drops; else x.drops = props.drops;
+      }));
+    }
+
+    // History follows the new name (merge prompt if the new name already has history);
+    // the same exercise elsewhere in the program shares that history, so it is renamed there too.
+    function renameExerciseEverywhere(prog, data, oldName, newName) {
+      if (oldName === newName) return true;
+      const hasOld = (data.logs[oldName] || []).length > 0;
+      const hasNew = (data.logs[newName] || []).length > 0;
+      if (hasOld && hasNew && !confirm(`כבר קיימת היסטוריה לתרגיל "${newName}".\nלמזג את ההיסטוריה של "${oldName}" לתוכה?`)) return false;
+      mergeLogs(data, oldName, newName);
+      prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => {
+        if (x.name === oldName) { x.name = newName; touchWorkoutDesc(prog.workouts.includes(gr) ? "w" : "a", gr); }
+      }));
+      return true;
+    }
+
+    // ---- unsaved input on the logging screen ----
+    function logScreenOpenFor(name) {
+      return !document.getElementById("screen-log").classList.contains("hidden") && currentExercise === name;
+    }
+
+    function captureTyped() {
+      const vals = [];
+      const dyn = logMode === "max" || logMode === "simple";
+      const n = dyn ? dynamicSetCount : 3 + normalDrops;
+      for (let i = 1; i <= n; i++) {
+        const w = document.getElementById((dyn ? "dw" : "w") + i), r = document.getElementById((dyn ? "dr" : "r") + i);
+        vals.push({ w: w ? w.value : "", r: r ? r.value : "" });
+      }
+      return vals;
+    }
+
+    // Put values back by set position; adds rows if needed so nothing typed disappears.
+    function restoreTyped(vals) {
+      if (!vals || !vals.length) return;
+      let lastFilled = -1;
+      vals.forEach((v, i) => { if (v.w !== "" || v.r !== "") lastFilled = i; });
+      const dyn = logMode === "max" || logMode === "simple";
+      if (dyn) {
+        while (dynamicSetCount < Math.min(8, lastFilled + 1)) addDynamicSet();
+        vals.slice(0, dynamicSetCount).forEach((v, i) => {
+          document.getElementById("dw" + (i + 1)).value = v.w;
+          document.getElementById("dr" + (i + 1)).value = v.r;
+        });
+      } else {
+        if (lastFilled + 1 > 3 + normalDrops) setDropsVisible(Math.min(3, lastFilled + 1 - 3));
+        vals.slice(0, 6).forEach((v, i) => {
+          document.getElementById("w" + (i + 1)).value = v.w;
+          document.getElementById("r" + (i + 1)).value = v.r;
+        });
+      }
+    }
+
+    // ---- today editor modal ----
+    function openSessionExerciseEditor(name) {
+      name = name || currentExercise;
+      if (!name) return;
+      sxTarget = name;
+      document.getElementById("sx-modal-title").textContent = `עריכת תרגיל – ${name}`;
+      document.getElementById("sx-name").value = displayName(name);
+      fillStructFields("sx", getEffectiveDef(name));
+      document.getElementById("sx-reset").classList.toggle("hidden", !getSessionOverride(name));
+      document.getElementById("sx-modal").classList.remove("hidden");
+    }
+
+    function closeSessionExerciseEditor() {
+      document.getElementById("sx-modal").classList.add("hidden");
+      sxTarget = null;
+    }
+
+    function rerenderAfterSessionEdit(name, typed) {
+      if (typed) openLog(name, typed);
+      else if (currentWorkout && !document.getElementById("screen-workout").classList.contains("hidden")) rerenderWorkoutKeepScroll();
+    }
+
+    function applySessionEdit(permanent) {
+      const name = sxTarget;
+      if (!name) return;
+      const newName = document.getElementById("sx-name").value.trim();
+      if (!newName) { showToast("צריך שם לתרגיל"); return; }
+      const props = readStructFields("sx");
+      if (!props) return;
+      const typed = logScreenOpenFor(name) ? captureTyped() : null;
+      if (!permanent) {
+        const map = readSessionOverrides();
+        const o = {};
+        OVERRIDE_FIELDS.forEach(f => { o[f] = props[f]; });
+        if (newName !== name) o.label = newName;
+        map[name] = o;
+        writeSessionOverrides(map);
+        closeSessionExerciseEditor();
+        showToast("השינוי חל על האימון של היום ✓");
+        rerenderAfterSessionEdit(name, typed);
+        return;
+      }
+      const ok = mutateProgram((prog, data) => {
+        if (newName !== name) {
+          const groups = prog.workouts.concat(prog.accessories).filter(g => g.exercises.some(x => x.name === name));
+          if (groups.some(g => g.exercises.some(x => x.name === newName))) {
+            showToast("כבר יש תרגיל בשם הזה באימון");
+            return false;
+          }
+          if (!renameExerciseEverywhere(prog, data, name, newName)) return false;
+        }
+        configureExerciseEverywhere(prog, newName, props);
+      });
+      if (!ok) return;
+      renameInSessionState(name, newName);
+      const map = readSessionOverrides();
+      if (map[newName] || map[name]) { delete map[newName]; delete map[name]; writeSessionOverrides(map); }
+      closeSessionExerciseEditor();
+      showToast("נשמר בתוכנית ✓");
+      rerenderAfterSessionEdit(newName, typed);
+    }
+
+    function resetSessionEdit() {
+      const name = sxTarget;
+      if (!name) return;
+      const typed = logScreenOpenFor(name) ? captureTyped() : null;
+      const map = readSessionOverrides();
+      delete map[name];
+      writeSessionOverrides(map);
+      closeSessionExerciseEditor();
+      showToast("חזר להגדרות התוכנית");
+      rerenderAfterSessionEdit(name, typed);
     }
 
     // ========== INIT ==========
