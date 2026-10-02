@@ -653,6 +653,23 @@
     .day-map-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; }
     .day-map-row span { flex-shrink: 0; width: 80px; }
     .day-map-row .form-input { padding: 10px; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; }
+    .section-head .section-title { margin-bottom: 8px; }
+    .reorder-toggle {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .reorder-toggle.active { border-color: var(--primary); color: #fff; background: rgba(225, 29, 72, 0.25); }
+    .exercise-item.reordering { cursor: default; }
+    .exercise-item.reordering:active { opacity: 1; }
+    .reorder-btns { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+    .reorder-note { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 8px; }
+    .btn:disabled { opacity: 0.4; }
     .paste-modal-box { max-height: calc(100vh - 32px); overflow-y: auto; }
   </style>
 </head>
@@ -696,11 +713,16 @@
         <p id="workout-subtitle"></p>
       </header>
 
-      <div class="section-title">תרגילים</div>
+      <div class="section-head">
+        <div class="section-title">תרגילים</div>
+        <button class="reorder-toggle" id="reorder-toggle" onclick="toggleReorderMode()">↕ שנה סדר</button>
+      </div>
       <div class="card" id="exercise-list"></div>
 
       <div class="section-title" id="accessory-title"></div>
       <div class="card" id="accessory-list"></div>
+
+      <div class="card hidden" id="reorder-bar"></div>
 
       <div style="margin-top: 20px;">
         <button class="btn btn-success" onclick="finishWorkout()">✓ סיים אימון</button>
@@ -766,6 +788,9 @@
 
       <div class="nav-bottom">
         <button class="btn btn-primary" onclick="saveSets()">💾 שמור</button>
+      </div>
+      <div style="text-align:center;margin-top:12px;">
+        <button class="btn btn-sm btn-outline" id="postpone-btn" onclick="postponeCurrentExercise()">⤓ דחה תרגיל זה לסוף הרשימה</button>
       </div>
     </div>
 
@@ -1256,9 +1281,9 @@
       return `<span class="cmp-down">↓ ${diff % 1 === 0 ? diff : diff.toFixed(1)}</span>`;
     }
 
-    function exerciseRowHtml(name) {
+    function exerciseRowHtml(name, reorder) {
       const last = getLastPerformance(name);
-      const done = sessionCompleted.has(name);
+      const done = sessionCompleted.has(name) || loggedToday(name);
       let meta = "עדיין אין נתונים";
       if (last) {
         if (last.type === "max") {
@@ -1269,6 +1294,21 @@
         }
       }
       const check = done ? `<span class="check-done">✓</span>` : `<span class="arrow">‹</span>`;
+      if (reorder) {
+        const k = jsArg(reorder.groupKey);
+        return `
+        <div class="exercise-item reordering${done ? " done" : ""}">
+          <div>
+            <div class="exercise-name">${esc(name)}</div>
+            <div class="exercise-meta">${meta}</div>
+          </div>
+          <div class="reorder-btns">
+            ${done ? `<span class="check-done">✓</span>` : ""}
+            <button class="icon-btn" title="הזז למעלה" aria-label="הזז למעלה" ${reorder.idx === 0 ? "disabled" : ""} onclick="moveSessionExercise(${k}, ${reorder.idx}, -1)">▲</button>
+            <button class="icon-btn" title="הזז למטה" aria-label="הזז למטה" ${reorder.idx === reorder.count - 1 ? "disabled" : ""} onclick="moveSessionExercise(${k}, ${reorder.idx}, 1)">▼</button>
+          </div>
+        </div>`;
+      }
       return `
         <div class="exercise-item${done ? " done" : ""}" onclick="openLog(${jsArg(name)})">
           <div>
@@ -1418,6 +1458,7 @@
     }
 
     function goHome() {
+      reorderMode = false;
       currentWorkout = null;
       currentExercise = null;
       manualAccessory = null;
@@ -1447,7 +1488,7 @@
         : (plannedAcc ? `+ ${plannedAcc.name}` : "");
 
       const list = document.getElementById("exercise-list");
-      list.innerHTML = w.exercises.map(e => exerciseRowHtml(e.name)).join("") ||
+      list.innerHTML = sessionRowsHtml("w:" + w.id, w.exercises.map(e => e.name)) ||
         `<div class="empty-state" style="padding:16px;">אין תרגילים באימון הזה. אפשר להוסיף ב"עריכת תוכנית".</div>`;
 
       const manualAcc = findAccessory(manualAccessory, prog);
@@ -1468,7 +1509,7 @@
       } else {
         const isManual = !!manualAcc && manualAccessory !== accKey;
         accTitle.textContent = chosen.name + (isManual ? " (נוסף ידנית)" : "");
-        accList.innerHTML = chosen.exercises.map(e => exerciseRowHtml(e.name)).join("");
+        accList.innerHTML = sessionRowsHtml("a:" + chosen.id, chosen.exercises.map(e => e.name));
         if (isManual) {
           accList.innerHTML += `
             <div style="text-align:center;margin-top:8px;">
@@ -1477,6 +1518,8 @@
         }
       }
 
+      document.getElementById("reorder-toggle").classList.toggle("hidden", !w.exercises.length && !chosen);
+      renderReorderBar();
       showScreen("screen-workout");
     }
 
@@ -1617,6 +1660,8 @@
       }
 
       renderSuggestion(exerciseName);
+      document.getElementById("postpone-btn").classList.toggle("hidden",
+        !currentWorkoutSections().some(s => s.programNames.includes(exerciseName)));
       showScreen("screen-log");
     }
 
@@ -2873,6 +2918,135 @@
         closeExerciseEditor();
         showToast("נשמר ✓");
       }
+    }
+
+
+    // ========== SESSION EXERCISE ORDER ==========
+    // Today's order lives in its own key (not in workoutData_v1 / backups) and expires at midnight.
+    const SESSION_ORDER_KEY = "workoutSessionOrder_v1";
+    let reorderMode = false;
+
+    function readSessionOrders() {
+      try {
+        const o = JSON.parse(localStorage.getItem(SESSION_ORDER_KEY) || "null");
+        if (o && o.date === toDateKey(new Date()) && o.orders && typeof o.orders === "object") return o.orders;
+      } catch (e) {}
+      return {};
+    }
+
+    function writeSessionOrder(groupKey, names) {
+      const orders = readSessionOrders();
+      if (names) orders[groupKey] = names; else delete orders[groupKey];
+      try { localStorage.setItem(SESSION_ORDER_KEY, JSON.stringify({ date: toDateKey(new Date()), orders })); } catch (e) {}
+    }
+
+    // Program order, overridden by today's order. Exercises added to the program later are appended;
+    // exercises no longer in the program are dropped.
+    function orderedNames(groupKey, programNames) {
+      const saved = readSessionOrders()[groupKey];
+      if (!Array.isArray(saved)) return programNames.slice();
+      const out = saved.filter((n, i) => programNames.includes(n) && saved.indexOf(n) === i);
+      programNames.forEach(n => { if (!out.includes(n)) out.push(n); });
+      return out;
+    }
+
+    function hasSessionOrder(groupKey) {
+      return Array.isArray(readSessionOrders()[groupKey]);
+    }
+
+    function loggedToday(name) {
+      const logs = getData().logs[name] || [];
+      const last = logs[logs.length - 1];
+      return !!(last && last.date && toDateKey(new Date(last.date)) === toDateKey(new Date()));
+    }
+
+    // Which list sections are on the workout screen right now: [{ key, programNames }]
+    function currentWorkoutSections() {
+      const prog = getProgram();
+      const w = findWorkout(currentWorkout, prog);
+      if (!w) return [];
+      const out = [{ key: "w:" + w.id, programNames: w.exercises.map(e => e.name) }];
+      const acc = findAccessory(manualAccessory, prog) || findAccessory(getAccessoryForToday(), prog);
+      if (acc) out.push({ key: "a:" + acc.id, programNames: acc.exercises.map(e => e.name) });
+      return out;
+    }
+
+    function rerenderWorkoutKeepScroll() {
+      const y = window.scrollY;
+      startWorkout(currentWorkout);
+      window.scrollTo(0, y);
+    }
+
+    function toggleReorderMode() {
+      reorderMode = !reorderMode;
+      rerenderWorkoutKeepScroll();
+    }
+
+    function moveSessionExercise(groupKey, idx, dir) {
+      const sec = currentWorkoutSections().find(s => s.key === groupKey);
+      if (!sec) return;
+      const names = orderedNames(groupKey, sec.programNames);
+      const j = idx + dir;
+      if (j < 0 || j >= names.length) return;
+      [names[idx], names[j]] = [names[j], names[idx]];
+      writeSessionOrder(groupKey, names);
+      rerenderWorkoutKeepScroll();
+    }
+
+    function resetSessionOrder() {
+      currentWorkoutSections().forEach(s => writeSessionOrder(s.key, null));
+      showToast("חזר לסדר של התוכנית");
+      rerenderWorkoutKeepScroll();
+    }
+
+    function saveSessionOrderAsPermanent() {
+      const secs = currentWorkoutSections();
+      mutateProgram(prog => {
+        secs.forEach(s => {
+          const [kind, id] = [s.key.slice(0, 1), s.key.slice(2)];
+          const g = kind === "w" ? findWorkout(id, prog) : findAccessory(id, prog);
+          if (!g) return;
+          const order = orderedNames(s.key, g.exercises.map(e => e.name));
+          const before = g.exercises.map(e => e.name).join("\n");
+          g.exercises.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+          if (kind === "w" && g.exercises.map(e => e.name).join("\n") !== before) g.desc = null;
+        });
+      });
+      secs.forEach(s => writeSessionOrder(s.key, null)); // program now has this order
+      showToast("הסדר נשמר בתוכנית ✓");
+      rerenderWorkoutKeepScroll();
+    }
+
+    // From the logging screen: push the current exercise to the end of its list (e.g. machine is taken).
+    // Stays on the logging screen, so anything already typed is kept.
+    function postponeCurrentExercise() {
+      const sec = currentWorkoutSections().find(s => s.programNames.includes(currentExercise));
+      if (!sec) return;
+      const names = orderedNames(sec.key, sec.programNames).filter(n => n !== currentExercise);
+      names.push(currentExercise);
+      writeSessionOrder(sec.key, names);
+      showToast("התרגיל הועבר לסוף הרשימה להיום");
+    }
+
+    function sessionRowsHtml(groupKey, programNames) {
+      const names = orderedNames(groupKey, programNames);
+      return names.map((n, i) => exerciseRowHtml(n, reorderMode ? { groupKey, idx: i, count: names.length } : null)).join("");
+    }
+
+    function renderReorderBar() {
+      const bar = document.getElementById("reorder-bar");
+      const btn = document.getElementById("reorder-toggle");
+      if (!bar || !btn) return;
+      btn.textContent = reorderMode ? "✓ סיום" : "↕ שנה סדר";
+      btn.classList.toggle("active", reorderMode);
+      const custom = currentWorkoutSections().some(s => hasSessionOrder(s.key));
+      bar.classList.toggle("hidden", !reorderMode);
+      bar.innerHTML = `
+        <p class="reorder-note">הסדר החדש נשמר להיום בלבד.</p>
+        <div class="backup-row">
+          <button class="btn btn-outline" onclick="saveSessionOrderAsPermanent()" ${custom ? "" : "disabled"}>📌 שמור כסדר קבוע</button>
+          <button class="btn btn-outline" onclick="resetSessionOrder()" ${custom ? "" : "disabled"}>↺ סדר התוכנית</button>
+        </div>`;
     }
 
     // ========== INIT ==========
