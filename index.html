@@ -673,6 +673,34 @@
     .today-tag { display: inline-block; font-size: 0.7rem; color: #fff; background: rgba(225, 29, 72, 0.35); border-radius: 8px; padding: 1px 6px; margin-right: 6px; vertical-align: middle; }
     .optional-drop .btn-sm, .add-set-btn .btn-sm { margin: 0 3px; }
     .paste-modal-box { max-height: calc(100vh - 32px); overflow-y: auto; }
+    .set-row .set-hint { grid-column: 1 / -1; margin-top: -4px; font-size: 0.78rem; color: var(--text-muted); line-height: 1.35; }
+    .set-row .set-hint:empty { display: none; }
+    .set-label.backoff { color: #60a5fa; }
+    .howto-box { background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.40); border-radius: 12px; padding: 10px 12px; margin-bottom: 16px; font-size: 0.88rem; line-height: 1.45; }
+    .howto-title { font-weight: 700; margin-bottom: 4px; }
+    .howto-steps { padding-right: 20px; }
+    .howto-steps li { margin-bottom: 3px; }
+    .howto-notes { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.12); color: #fde68a; }
+    .cycle-card { background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.45); border-radius: 12px; padding: 10px 14px; margin: -6px 0 12px; cursor: pointer; }
+    .cycle-card.deload { background: rgba(168, 85, 247, 0.14); border-color: rgba(168, 85, 247, 0.5); }
+    .cycle-card .cy-title { font-weight: 700; font-size: 1rem; }
+    .cycle-card .cy-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+    .workout-cycle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+    textarea.form-input { min-height: 70px; resize: vertical; font-family: inherit; line-height: 1.4; }
+    .g-scroll { overflow-x: auto; }
+    .g-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .g-table th, .g-table td { border-bottom: 1px solid var(--border); padding: 6px 5px; text-align: right; vertical-align: top; }
+    .g-table th { color: var(--text-muted); font-weight: 600; }
+    .g-table tr.g-hi td { background: rgba(225, 29, 72, 0.18); }
+    .g-muted { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; }
+    .g-text h4, .g-acc { font-size: 0.95rem; margin: 10px 0 4px; }
+    .g-text h4:first-child { margin-top: 0; }
+    .g-text ul { padding-right: 18px; font-size: 0.88rem; line-height: 1.5; }
+    .g-ex { padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .g-ex:last-of-type { border-bottom: none; }
+    .g-ex-name { font-weight: 700; }
+    .g-ex-plan { font-size: 0.82rem; color: #93c5fd; margin-top: 2px; }
+    .g-ex-notes { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -689,6 +717,8 @@
         <span id="accessory-badge" class="badge"></span>
       </div>
 
+      <div id="cycle-card" class="cycle-card hidden" onclick="openCycleModal()"></div>
+
       <div id="backup-banner" class="backup-banner hidden">
         <span>💾 עבר שבוע מהגיבוי האחרון</span>
         <div class="bb-actions">
@@ -703,7 +733,9 @@
 
       <div style="margin-top: 24px;">
         <button class="btn btn-outline" onclick="showHistory()">📜 היסטוריית אימונים</button>
+        <button class="btn btn-outline" style="margin-top:8px;" onclick="showGuide()">📖 הדרכת התוכנית</button>
         <button class="btn btn-outline" style="margin-top:8px;" onclick="showProgramEditor()">✏️ עריכת תוכנית</button>
+        <button class="btn btn-outline hidden" id="research-load-btn" style="margin-top:8px;" onclick="loadResearchProgram()">🔬 טען תוכנית מבוססת מחקר</button>
       </div>
     </div>
 
@@ -713,6 +745,7 @@
       <header>
         <h1 id="workout-title"></h1>
         <p id="workout-subtitle"></p>
+        <p id="workout-cycle" class="workout-cycle"></p>
       </header>
 
       <div class="section-head">
@@ -740,39 +773,46 @@
         <button class="btn btn-sm btn-outline" id="log-edit-btn" style="margin-top:8px;" onclick="openSessionExerciseEditor()">⚙️ ערוך תרגיל / סטים</button>
       </header>
 
+      <div class="howto-box" id="log-howto"></div>
       <div class="prev-info" id="prev-info">אין נתונים קודמים לתרגיל זה</div>
       <div class="suggest-box hidden" id="suggestion-box"></div>
 
       <div class="card" id="normal-sets">
-        <div class="set-row">
-          <div class="set-label light">סט 1 (קל)</div>
+        <div class="set-row" id="warm-row-1">
+          <div class="set-label light" id="lbl-1">סט 1 (קל)</div>
           <input type="number" id="w1" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r1" placeholder="חזרות" inputmode="numeric" />
+          <div class="set-hint" id="hint-1"></div>
         </div>
-        <div class="set-row">
-          <div class="set-label light">סט 2 (קל)</div>
+        <div class="set-row" id="warm-row-2">
+          <div class="set-label light" id="lbl-2">סט 2 (קל)</div>
           <input type="number" id="w2" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r2" placeholder="חזרות" inputmode="numeric" />
+          <div class="set-hint" id="hint-2"></div>
         </div>
         <div class="set-row">
-          <div class="set-label heavy">סט 3 (כבד)</div>
+          <div class="set-label heavy" id="lbl-3">סט 3 (כבד)</div>
           <input type="number" id="w3" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r3" placeholder="חזרות" inputmode="numeric" />
+          <div class="set-hint" id="hint-3"></div>
         </div>
         <div class="set-row" id="drop-row-1">
-          <div class="set-label drop">דרופ 1</div>
+          <div class="set-label drop" id="lbl-4">דרופ 1</div>
           <input type="number" id="w4" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r4" placeholder="חזרות" inputmode="numeric" />
+          <div class="set-hint" id="hint-4"></div>
         </div>
         <div class="set-row" id="drop-row-2">
-          <div class="set-label drop">דרופ 2</div>
+          <div class="set-label drop" id="lbl-5">דרופ 2</div>
           <input type="number" id="w5" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r5" placeholder="חזרות" inputmode="numeric" />
+          <div class="set-hint" id="hint-5"></div>
         </div>
         <div class="set-row hidden" id="drop-row-3">
-          <div class="set-label drop">דרופ 3</div>
+          <div class="set-label drop" id="lbl-6">דרופ 3</div>
           <input type="number" id="w6" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r6" placeholder="חזרות" inputmode="numeric" />
+          <div class="set-hint" id="hint-6"></div>
         </div>
         <div class="optional-drop">
           <button class="btn btn-sm btn-outline" id="add-drop-btn" onclick="addDrop()">+ הוסף דרופ</button>
@@ -789,6 +829,9 @@
         <p id="dynamic-hint" style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;text-align:center;"></p>
       </div>
 
+      <div style="text-align:center;">
+        <button class="btn btn-sm btn-outline" id="fill-rec-btn" onclick="fillRecommendedWeights()">⤵ מלא משקלים מומלצים</button>
+      </div>
       <div class="nav-bottom">
         <button class="btn btn-primary" onclick="saveSets()">💾 שמור</button>
       </div>
@@ -845,6 +888,15 @@
       <div class="card history-list" id="detail-list"></div>
     </div>
 
+    <!-- PROGRAM GUIDE -->
+    <div id="screen-guide" class="hidden">
+      <button class="back-btn" onclick="goHome()">→ חזרה</button>
+      <header>
+        <h1>📖 הדרכת התוכנית</h1>
+      </header>
+      <div id="guide-content"></div>
+    </div>
+
     <!-- PROGRAM EDITOR -->
     <div id="screen-program" class="hidden">
       <button class="back-btn" onclick="goHome()">→ חזרה</button>
@@ -865,10 +917,29 @@
       <label class="form-label" for="ex-type">סוג רישום</label>
       <select id="ex-type" class="form-input" onchange="updateStructFields('ex')">
         <option value="normal">2 קלים + כבד + דרופים</option>
+        <option value="topback">טופ + בק-אוף (חימום, טופ, בק-אופים)</option>
         <option value="simple">סטים רגילים (אפשר להוסיף)</option>
         <option value="max">מקסימום חזרות / משקל גוף</option>
       </select>
-
+      <div id="ex-warmups-field">
+        <label class="form-label" for="ex-warmups">סטי חימום</label>
+        <select id="ex-warmups" class="form-input">
+          <option value="">ברירת מחדל</option>
+          <option value="0">בלי חימום (השריר כבר חם)</option>
+          <option value="1">סט חימום אחד</option>
+          <option value="2">2 סטי חימום</option>
+        </select>
+      </div>
+      <div id="ex-backoffs-field">
+        <label class="form-label" for="ex-backoffs">מספר סטי בק-אוף</label>
+        <select id="ex-backoffs" class="form-input">
+          <option value="">ברירת מחדל (2)</option>
+          <option value="0">בלי בק-אוף</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
       <div id="ex-drops-field">
         <label class="form-label" for="ex-drops">מספר סטי דרופ</label>
         <select id="ex-drops" class="form-input">
@@ -900,6 +971,10 @@
           <option value="5">5 ק״ג</option>
         </select>
       </div>
+      <label class="form-label" for="ex-rir">יעד RIR (חזרות לפני כשל) – ריק = לפי שבוע המחזור</label>
+      <input type="text" id="ex-rir" class="form-input" autocomplete="off" placeholder="למשל 1-2" />
+      <label class="form-label" for="ex-notes">הערות ביצוע (מוצגות במסך הרישום)</label>
+      <textarea id="ex-notes" class="form-input" rows="3" placeholder="למשל: רגליים גבוה על המשטח"></textarea>
       <div class="backup-row" style="margin-top:16px;">
         <button class="btn btn-primary" onclick="saveExerciseEditor()">שמור</button>
         <button class="btn btn-outline" onclick="closeExerciseEditor()">ביטול</button>
@@ -916,9 +991,29 @@
       <label class="form-label" for="sx-type">סוג רישום</label>
       <select id="sx-type" class="form-input" onchange="updateStructFields('sx')">
         <option value="normal">2 קלים + כבד + דרופים</option>
+        <option value="topback">טופ + בק-אוף (חימום, טופ, בק-אופים)</option>
         <option value="simple">סטים רגילים (אפשר להוסיף)</option>
         <option value="max">מקסימום חזרות / משקל גוף</option>
       </select>
+      <div id="sx-warmups-field">
+        <label class="form-label" for="sx-warmups">סטי חימום</label>
+        <select id="sx-warmups" class="form-input">
+          <option value="">ברירת מחדל</option>
+          <option value="0">בלי חימום (השריר כבר חם)</option>
+          <option value="1">סט חימום אחד</option>
+          <option value="2">2 סטי חימום</option>
+        </select>
+      </div>
+      <div id="sx-backoffs-field">
+        <label class="form-label" for="sx-backoffs">מספר סטי בק-אוף</label>
+        <select id="sx-backoffs" class="form-input">
+          <option value="">ברירת מחדל (2)</option>
+          <option value="0">בלי בק-אוף</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
       <div id="sx-drops-field">
         <label class="form-label" for="sx-drops">מספר סטי דרופ</label>
         <select id="sx-drops" class="form-input">
@@ -950,12 +1045,35 @@
           <option value="5">5 ק״ג</option>
         </select>
       </div>
+      <label class="form-label" for="sx-rir">יעד RIR (חזרות לפני כשל) – ריק = לפי שבוע המחזור</label>
+      <input type="text" id="sx-rir" class="form-input" autocomplete="off" placeholder="למשל 1-2" />
+      <label class="form-label" for="sx-notes">הערות ביצוע (מוצגות במסך הרישום)</label>
+      <textarea id="sx-notes" class="form-input" rows="3" placeholder="למשל: רגליים גבוה על המשטח"></textarea>
       <div class="backup-row" style="margin-top:16px;">
         <button class="btn btn-primary" onclick="applySessionEdit(false)">החל להיום</button>
         <button class="btn btn-outline" onclick="applySessionEdit(true)">📌 שמור כקבוע</button>
       </div>
       <button class="btn btn-sm btn-outline hidden" id="sx-reset" style="width:100%;margin-top:8px;" onclick="resetSessionEdit()">↺ בטל את השינויים של היום</button>
       <button class="btn btn-sm btn-outline" style="width:100%;margin-top:8px;" onclick="closeSessionExerciseEditor()">ביטול</button>
+    </div>
+  </div>
+
+  <div class="paste-modal hidden" id="cycle-modal" onclick="if (event.target === this) closeCycleModal()">
+    <div class="paste-modal-box">
+      <h3>📅 מחזור אימונים</h3>
+      <p class="pe-note" id="cycle-modal-status"></p>
+      <label class="form-label" for="cycle-week-select">קבע ידנית באיזה שבוע אני</label>
+      <div class="form-row">
+        <select id="cycle-week-select" class="form-input">
+          <option value="1">שבוע 1</option><option value="2">שבוע 2</option><option value="3">שבוע 3</option>
+          <option value="4">שבוע 4</option><option value="5">שבוע 5</option><option value="6">שבוע 6</option>
+          <option value="7">שבוע 7 – הורדה</option>
+        </select>
+        <button class="btn btn-sm btn-primary" id="cycle-set-btn" onclick="setCycleWeek(document.getElementById('cycle-week-select').value)">קבע</button>
+      </div>
+      <button class="btn btn-outline" id="cycle-new-btn" style="margin-top:12px;" onclick="startNewCycle()">↺ התחל מחזור חדש (שבוע 1 מהשבוע הזה)</button>
+      <button class="btn btn-sm btn-outline" id="cycle-stop-btn" style="width:100%;margin-top:8px;" onclick="stopCycle()">עצור מעקב מחזור</button>
+      <button class="btn btn-sm btn-outline" style="width:100%;margin-top:8px;" onclick="closeCycleModal()">סגור</button>
     </div>
   </div>
 
@@ -981,7 +1099,7 @@
     const LEGACY_SIMPLE = ["דדליפט"];
     const SMALL_INCREMENT = ["הרחקה לצדדים", "פשיטת מרפק מאחורי הראש עם משקולת", "כפיפה בפריצ'ר", "פטישים"];
     const DEFAULT_ACCESSORY_BY_DAY = ["calves", "abs", "calves", "abs", "calves", "abs", null]; // Sun..Sat
-    const TYPE_LABELS = { normal: "2 קלים + כבד + דרופים", simple: "סטים רגילים", max: "מקס חזרות" };
+    const TYPE_LABELS = { normal: "2 קלים + כבד + דרופים", topback: "טופ + בק-אוף", simple: "סטים רגילים", max: "מקס חזרות" };
 
     function defaultExercise(name) {
       const type = LEGACY_MAX_REPS.includes(name) ? "max" : (LEGACY_SIMPLE.includes(name) ? "simple" : "normal");
@@ -1014,7 +1132,7 @@
       const name = String(e.name == null ? "" : e.name).trim();
       if (!name) return null;
       const base = defaultExercise(name);
-      const type = ["normal", "max", "simple"].includes(e.type) ? e.type : base.type;
+      const type = ["normal", "max", "simple", "topback"].includes(e.type) ? e.type : base.type;
       let repMin = parseInt(e.repMin, 10);
       let repMax = parseInt(e.repMax, 10);
       if (!(repMin > 0 && repMin <= 100)) repMin = base.repMin;
@@ -1027,6 +1145,15 @@
       if (sc >= 1 && sc <= 8) out.setCount = sc;   // absent = automatic
       const dr = parseInt(e.drops, 10);
       if (dr >= 0 && dr <= 3) out.drops = dr;      // absent = automatic (2, or 3 if used last time)
+      const wu = parseInt(e.warmups, 10);
+      if (wu >= 0 && wu <= 2) out.warmups = wu;    // absent = 2 (normal / top+back-off), 0 otherwise
+      const bo = parseInt(e.backoffs, 10);
+      if (bo >= 0 && bo <= 3) out.backoffs = bo;   // top+back-off only; absent = 2
+      if (typeof e.rir === "string" || typeof e.rir === "number") {
+        const r = String(e.rir).trim().slice(0, 12);
+        if (r) out.rir = r;                        // absent = by cycle week
+      }
+      if (typeof e.notes === "string" && e.notes.trim()) out.notes = e.notes.trim().slice(0, 600);
       return out;
     }
 
@@ -1400,14 +1527,14 @@
         </div>`;
     }
 
-    function savePerformance(exerciseName, sets) {
+    function savePerformance(exerciseName, sets, extra) {
       const data = getData();
       if (!data.logs[exerciseName]) data.logs[exerciseName] = [];
-      data.logs[exerciseName].push({
+      data.logs[exerciseName].push(Object.assign({
         date: new Date().toISOString(),
         sets: sets,
         type: logMode
-      });
+      }, extra || {}));
       if (data.logs[exerciseName].length > 50) {
         data.logs[exerciseName] = data.logs[exerciseName].slice(-50);
       }
@@ -1535,6 +1662,12 @@
           <h2>${esc(w.name)}</h2>
           <p>${esc(w.desc != null ? w.desc : (w.exercises.map(e => e.name).join(" • ") || "אין תרגילים עדיין"))}</p>
         </div>`).join("");
+      const cyc = getCycleInfo();
+      const cc = document.getElementById("cycle-card");
+      cc.classList.toggle("hidden", !cyc);
+      cc.classList.toggle("deload", !!(cyc && cyc.deload));
+      cc.innerHTML = cyc ? `<div class="cy-title">${esc(cycleTitleText(cyc))}</div><div class="cy-sub">${esc(cycleSummaryText(cyc))}</div>` : "";
+      document.getElementById("research-load-btn").classList.toggle("hidden", getData().programSource === RESEARCH_PROGRAM_ID);
       renderBackupBanner();
     }
 
@@ -1567,6 +1700,8 @@
       document.getElementById("workout-subtitle").textContent = isRestDay
         ? "שבת – יום מנוחה (אימון ידני)"
         : (plannedAcc ? `+ ${plannedAcc.name}` : "");
+      const wc = getCycleInfo();
+      document.getElementById("workout-cycle").textContent = wc ? `${cycleTitleText(wc)} · ${cycleSummaryText(wc)}` : "";
 
       const list = document.getElementById("exercise-list");
       list.innerHTML = sessionRowsHtml("w:" + w.id, w.exercises.map(e => e.name)) ||
@@ -1636,6 +1771,7 @@
             <div class="set-label ${labelClass}">סט ${i}</div>
             <input type="number" id="dw${i}" placeholder="ק״ג" inputmode="decimal" value="${prev.weight || ""}" />
             <input type="number" id="dr${i}" placeholder="${repsPlaceholder}" inputmode="numeric" value="${prev.reps || ""}" />
+            <div class="set-hint" id="dhint-${i}"></div>
           </div>`;
       }
       dynamicSetCount = count;
@@ -1658,7 +1794,9 @@
           <div class="set-label ${labelClass}">סט ${dynamicSetCount}</div>
           <input type="number" id="dw${dynamicSetCount}" placeholder="ק״ג" inputmode="decimal" value="${esc(back.w)}" />
           <input type="number" id="dr${dynamicSetCount}" placeholder="${repsPlaceholder}" inputmode="numeric" value="${esc(back.r)}" />
+          <div class="set-hint" id="dhint-${dynamicSetCount}"></div>
         </div>`);
+      renderSetHints();
     }
 
     function removeDynamicSet() {
@@ -1671,6 +1809,7 @@
       removedDynStash[dynamicSetCount] = { w: document.getElementById("dw" + dynamicSetCount).value, r: document.getElementById("dr" + dynamicSetCount).value };
       if (row) row.remove();
       dynamicSetCount--;
+      renderSetHints();
     }
 
     function setDropsVisible(n) {
@@ -1678,6 +1817,33 @@
       for (let i = 1; i <= 3; i++) document.getElementById("drop-row-" + i).classList.toggle("hidden", i > normalDrops);
       document.getElementById("add-drop-btn").classList.toggle("hidden", normalDrops >= 3);
       document.getElementById("remove-drop-btn").classList.toggle("hidden", normalDrops <= 0);
+      renderSetHints();
+    }
+
+    let warmVisible = 2;
+    function setWarmupsVisible(n) {
+      warmVisible = Math.max(0, Math.min(2, n));
+      for (let i = 1; i <= 2; i++) document.getElementById("warm-row-" + i).classList.toggle("hidden", i > warmVisible);
+    }
+
+    function setNormalLabels(tb) {
+      const L = tb ? [["light", "חימום 1"], ["light", "חימום 2"], ["heavy", "טופ"], ["backoff", "בק-אוף 1"], ["backoff", "בק-אוף 2"], ["backoff", "בק-אוף 3"]]
+                   : [["light", "סט 1 (קל)"], ["light", "סט 2 (קל)"], ["heavy", "סט 3 (כבד)"], ["drop", "דרופ 1"], ["drop", "דרופ 2"], ["drop", "דרופ 3"]];
+      L.forEach(([c, t], i) => { const el = document.getElementById("lbl-" + (i + 1)); el.className = "set-label " + c; el.textContent = t; });
+      document.getElementById("add-drop-btn").textContent = tb ? "+ הוסף בק-אוף" : "+ הוסף דרופ";
+      document.getElementById("remove-drop-btn").textContent = tb ? "− הסר בק-אוף" : "− הסר דרופ";
+    }
+
+    function typeLabelFor(def) {
+      const w = warmCount(def);
+      if (def.type === "topback") {
+        const b = backoffCount(def);
+        return `${w ? (w === 1 ? "חימום + " : w + " חימום + ") : ""}טופ${b ? ` + ${b} בק-אוף` : ""}`;
+      }
+      if (def.warmups == null || def.warmups === 2) return normalTypeLabel(def.drops);
+      const d = def.drops;
+      const tail = d == null ? " + דרופים" : (d === 0 ? " (ללא דרופים)" : (d === 1 ? " + דרופ" : ` + ${d} דרופים`));
+      return `${w === 1 ? "חימום + " : ""}כבד${tail}`;
     }
 
     // Hidden drop rows keep their values; only visible rows are saved.
@@ -1714,6 +1880,9 @@
 
       const last = getLastPerformance(exerciseName);
       const lastDyn = !!last && (last.type === "max" || last.type === "simple");
+      currentDef = def;
+      currentPlan = planFor(exerciseName, def);
+      renderHowTo(def, currentPlan);
 
       if (isDyn) {
         document.getElementById("dynamic-sets").classList.remove("hidden");
@@ -1726,15 +1895,21 @@
         renderDynamicSets(count, lastDyn ? last.sets : []);
       } else {
         document.getElementById("normal-sets").classList.remove("hidden");
-        document.getElementById("log-type-label").textContent = normalTypeLabel(def.drops);
+        const tb = logMode === "topback";
+        setNormalLabels(tb);
+        document.getElementById("log-type-label").textContent = typeLabelFor(def);
         const s = last && !lastDyn ? (last.sets || []) : [];
+        const sameKind = !!last && (last.type || "normal") === logMode;
+        setWarmupsVisible(warmCount(def));
         for (let i = 0; i < 6; i++) {
-          if (s[i]) {
+          // rows 1-3 share meaning between "normal" and "top+back-off"; drops vs back-offs do not
+          if (s[i] && (i < 3 || sameKind) && !(i < 2 && i >= warmVisible)) {
             document.getElementById("w" + (i + 1)).value = s[i].weight || "";
             document.getElementById("r" + (i + 1)).value = s[i].reps || "";
           }
         }
-        setDropsVisible(def.drops != null ? def.drops : (s[5] ? 3 : 2));
+        if (tb) setDropsVisible(backoffCount(def));
+        else setDropsVisible(def.drops != null ? def.drops : (s[5] && sameKind ? 3 : 2));
       }
 
       const prevDiv = document.getElementById("prev-info");
@@ -1754,6 +1929,12 @@
               html += `סט ${i + 1}: ${w}${s.reps || "—"} חזרות<br/>`;
             }
           });
+        } else if (last.type === "topback") {
+          const s = last.sets;
+          const parts = [];
+          if (s[2]) parts.push(`טופ: ${wxr(s[2])}`);
+          for (let i = 3; i < s.length; i++) if (s[i]) parts.push(`בק-אוף ${i - 2}: ${wxr(s[i])}`);
+          html += parts.join("<br/>");
         } else {
           const s = last.sets;
           if (s[0]) html += `סט 1: ${wxr(s[0])} · `;
@@ -1774,6 +1955,7 @@
       if (typed) restoreTyped(typed); // unsaved input survives a structure change / rename
 
       renderSuggestion(exerciseName);
+      renderSetHints();
       document.getElementById("postpone-btn").classList.toggle("hidden",
         !currentWorkoutSections().some(s => s.programNames.includes(exerciseName)));
       showScreen("screen-log");
@@ -1790,6 +1972,7 @@
         }
       } else {
         for (let i = 1; i <= 3 + normalDrops; i++) {
+          if (i <= 2 && i > warmVisible) { sets.push(null); continue; } // hidden warm-up rows are not saved
           const w = document.getElementById("w" + i).value;
           const r = document.getElementById("r" + i).value;
           sets.push((w || r) ? { weight: w ? parseFloat(w) : null, reps: r ? parseInt(r) : null } : null);
@@ -1801,7 +1984,7 @@
         return;
       }
 
-      savePerformance(currentExercise, sets);
+      savePerformance(currentExercise, sets, currentDef && currentDef.deload ? { deload: true } : null);
       sessionCompleted.add(currentExercise);
       showToast("נשמר ✓");
       setTimeout(() => backToWorkout(), 800);
@@ -2218,6 +2401,10 @@
         if (Array.isArray(parsed.deletedMarks)) next.deletedMarks = parsed.deletedMarks;
         if (program) next.program = program;
         else if (current.program) next.program = current.program; // keep the current program
+        ["cycle", "programPrev", "programSource"].forEach(k => {
+          if (parsed[k] != null) next[k] = parsed[k];
+          else if (!program && current[k] != null) next[k] = current[k];
+        });
         saveData(next);
         markBackupDone(); // the stored data now matches a backup file
         showToast("השחזור הצליח ✓");
@@ -2565,7 +2752,9 @@
             }
           });
         } else {
-          const labelsArr = ["סט 1 (קל)", "סט 2 (קל)", "סט 3 (כבד)", "דרופ 1", "דרופ 2", "דרופ 3"];
+          const labelsArr = entry.type === "topback"
+            ? ["חימום 1", "חימום 2", "טופ", "בק-אוף 1", "בק-אוף 2", "בק-אוף 3"]
+            : ["סט 1 (קל)", "סט 2 (קל)", "סט 3 (כבד)", "דרופ 1", "דרופ 2", "דרופ 3"];
           entry.sets.forEach((s, i) => {
             if (s) {
               setsHtml += `${labelsArr[i] || "סט " + (i+1)}: ${s.weight ?? "—"} × ${s.reps ?? "—"}<br/>`;
@@ -2577,7 +2766,7 @@
           ? `<div style="margin-top:6px;color:#e11d48;font-weight:700;">עצימות: ${inten.value} ${inten.unit}</div>`
           : "";
         html += `<div class="history-item" style="cursor:default;">
-          <div class="date">${formatFullDate(entry.date)}</div>
+          <div class="date">${formatFullDate(entry.date)}${entry.deload ? " · שבוע הורדה" : ""}</div>
           <div class="detail-sets">${setsHtml || "אין פירוט סטים"}${intenLine}</div>
         </div>`;
       });
@@ -2677,9 +2866,21 @@
       });
     }
 
-    function computeSuggestion(logs, def) {
-      const entries = (logs || []).filter(e => getWorkingSet(e));
-      if (!entries.length) return null;
+    function computeSuggestion(logs, def, opts) {
+      const all = (logs || []).filter(e => getWorkingSet(e));
+      if (!all.length) return null;
+      // deload-week sessions are lighter on purpose: progression ignores them
+      const normal = all.filter(e => !e.deload);
+      const entries = normal.length ? normal : all;
+      if (opts && opts.deload) {
+        const w = getWorkingSet(entries[entries.length - 1]);
+        const rule = "שבוע הורדה: כ-10% פחות משקל מהפעם האחרונה, חצי מהסטים, RIR 3-4. לא מתקדמים השבוע.";
+        if (def.type === "max" || w.weight == null) {
+          if (w.reps == null) return null;
+          return { weight: w.weight != null ? roundStep(w.weight * 0.9, def.increment) : null, reps: Math.max(1, w.reps - 3), kind: "deload", rule };
+        }
+        return { weight: roundStep(w.weight * 0.9, def.increment), reps: w.reps != null ? Math.max(def.repMin, Math.min(w.reps, def.repMax)) : def.repMin, kind: "deload", rule };
+      }
       const last = getWorkingSet(entries[entries.length - 1]);
       const prev = entries.length >= 2 ? getWorkingSet(entries[entries.length - 2]) : null;
       const inc = def.increment || 2.5;
@@ -2706,7 +2907,7 @@
       const box = document.getElementById("suggestion-box");
       const def = getEffectiveDef(exerciseName);
       const logs = getData().logs[exerciseName] || [];
-      const s = computeSuggestion(logs, def);
+      const s = computeSuggestion(logs, def, { deload: !!def.deload });
       currentSuggestion = s;
       if (!s) {
         box.classList.add("hidden");
@@ -2716,12 +2917,12 @@
       const target = def.type === "max"
         ? `${s.reps} חזרות${s.weight != null ? ` · ${fmtKg(s.weight)} ק״ג` : ""}`
         : (s.weight != null ? `${fmtKg(s.weight)} ק״ג × ${s.reps}` : `${s.reps} חזרות`);
-      const where = def.type === "normal" ? " (סט כבד)" : (def.type === "max" ? " (הסט הטוב)" : "");
+      const where = def.type === "normal" ? " (סט כבד)" : (def.type === "topback" ? " (טופ)" : (def.type === "max" ? " (הסט הטוב)" : ""));
       const canApply = def.type !== "max";
       box.innerHTML = `
         <div class="suggest-main" title="${esc(s.rule)}">🎯 היעד היום${where}: <b>${target}</b></div>
         <div class="suggest-rule">${esc(s.rule)}</div>
-        ${canApply ? `<button class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="applySuggestion()">${def.type === "normal" ? "החל על הסט הכבד" : "החל על כל הסטים"}</button>` : ""}`;
+        ${canApply ? `<button class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="applySuggestion()">${def.type === "normal" ? "החל על הסט הכבד" : (def.type === "topback" ? "החל על הטופ" : "החל על כל הסטים")}</button>` : ""}`;
       box.classList.remove("hidden");
     }
 
@@ -2734,8 +2935,9 @@
         if (w && s.weight != null) w.value = fmtKg(s.weight);
         if (r) r.value = s.reps;
       };
-      if (logMode === "normal") setPair("w3", "r3");
+      if (logMode === "normal" || logMode === "topback") setPair("w3", "r3");
       else for (let i = 1; i <= dynamicSetCount; i++) setPair("dw" + i, "dr" + i);
+      renderSetHints();
       showToast("היעד הוזן ✓");
     }
 
@@ -2770,7 +2972,7 @@
         <div class="pe-row">
           <div class="pe-info" onclick="openExerciseEditor('${kind}', ${gi}, ${ei})">
             <div class="exercise-name">${esc(e.name)}</div>
-            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type === "normal" && e.drops != null ? ` (${e.drops} דרופים)` : ""}${e.type !== "normal" && e.setCount != null ? ` (${e.setCount} סטים)` : ""}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}</div>
+            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type === "normal" && e.drops != null ? ` (${e.drops} דרופים)` : ""}${e.type === "topback" ? ` (${backoffCount(e)} בק-אוף)` : ""}${(e.type === "simple" || e.type === "max") && e.setCount != null ? ` (${e.setCount} סטים)` : ""}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}${e.warmups != null ? ` · ${e.warmups ? e.warmups + " חימום" : "בלי חימום"}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}${e.notes ? " · 📝" : ""}</div>
           </div>
           <div class="pe-btns">
             ${iconBtn("▲", `moveExercise('${kind}', ${gi}, ${ei}, -1)`, { disabled: ei === 0, title: "הזז למעלה" })}
@@ -2819,6 +3021,15 @@
       });
       html += `<div class="day-map-row"><span>שבת</span><span style="color:var(--text-muted);">מנוחה</span></div></div>`;
 
+      const d0 = getData();
+      const cyc0 = getCycleInfo(d0);
+      html += `<div class="section-title" style="margin-top:20px;">תוכנית מבוססת מחקר ומחזור</div>
+        <div class="card">
+          <button class="btn btn-primary" onclick="loadResearchProgram()">🔬 ${d0.programSource === RESEARCH_PROGRAM_ID ? "טען מחדש תוכנית מבוססת מחקר" : "טען תוכנית מבוססת מחקר"}</button>
+          ${d0.programPrev ? `<button class="btn btn-outline" style="margin-top:8px;" id="restore-prev-btn" onclick="restorePreviousProgram()">↩ שחזר את התוכנית הקודמת</button>` : ""}
+          <button class="btn btn-outline" style="margin-top:8px;" onclick="openCycleModal()">📅 מחזור: ${cyc0 ? esc(cycleTitleText(cyc0)) : "לא פעיל"}</button>
+          <p class="pe-note" style="margin-top:8px;margin-bottom:0;">ההיסטוריה נשמרת בכל מקרה.</p>
+        </div>`;
       html += `<div class="section-title" style="margin-top:20px;">איפוס</div>
         <div class="card">
           <button class="btn btn-outline" onclick="resetProgramToDefault()">↺ שחזר תוכנית ברירת מחדל</button>
@@ -2932,6 +3143,7 @@
         if (e.origName && e.origName !== e.name && defaultNames.has(e.origName)) mergeLogs(data, e.name, e.origName);
       }));
       delete data.program;
+      delete data.programSource;
       saveData(data);
       renderProgramEditor();
       showToast("התוכנית שוחזרה לברירת המחדל ✓");
@@ -3125,7 +3337,7 @@
     // Per-exercise overrides for today's session (structure, rep range, display label).
     // Own key, not in workoutData_v1 / backups, ignored from the next day.
     const SESSION_OVERRIDES_KEY = "workoutSessionOverrides_v1";
-    const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops"];
+    const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "rir", "notes"];
     let sxTarget = null;
 
     function readSessionOverrides() {
@@ -3151,16 +3363,21 @@
       return o && typeof o.label === "string" && o.label.trim() ? o.label.trim() : name;
     }
 
-    function getEffectiveDef(name) {
+    // program def -> today's overrides -> deload-week adjustments (for fields not explicitly set today)
+    function getEffectiveDef(name, opts) {
       const base = findExerciseDef(name);
       const o = getSessionOverride(name);
-      if (!o) return base;
-      const merged = Object.assign({}, base);
-      OVERRIDE_FIELDS.forEach(f => {
-        if (o[f] === null) delete merged[f];          // null = automatic (setCount / drops)
-        else if (o[f] !== undefined) merged[f] = o[f];
-      });
-      return normalizeExercise(merged) || base;
+      let def = base;
+      if (o) {
+        const merged = Object.assign({}, base);
+        OVERRIDE_FIELDS.forEach(f => {
+          if (o[f] === null) delete merged[f];          // null = automatic / none
+          else if (o[f] !== undefined) merged[f] = o[f];
+        });
+        def = normalizeExercise(merged) || base;
+      }
+      if (!(opts && opts.noDeload) && isDeloadWeek()) def = deloadDef(def, o);
+      return def;
     }
 
     function writeSessionOrders(orders) {
@@ -3204,6 +3421,10 @@
       inc.value = incVal;
       $("setcount").value = def.setCount != null ? String(def.setCount) : "";
       $("drops").value = def.drops != null ? String(def.drops) : "";
+      $("warmups").value = def.warmups != null ? String(def.warmups) : "";
+      $("backoffs").value = def.backoffs != null ? String(def.backoffs) : "";
+      $("rir").value = def.rir || "";
+      $("notes").value = def.notes || "";
       updateStructFields(prefix);
     }
 
@@ -3212,7 +3433,8 @@
       const type = $("type").value;
       $("prog-fields").classList.toggle("hidden", type === "max");
       $("drops-field").classList.toggle("hidden", type !== "normal");
-      $("setcount-field").classList.toggle("hidden", type === "normal");
+      $("backoffs-field").classList.toggle("hidden", type !== "topback");
+      $("setcount-field").classList.toggle("hidden", type === "normal" || type === "topback");
     }
 
     function readStructFields(prefix) {
@@ -3225,11 +3447,16 @@
         return null;
       }
       const n = normalizeExercise({ name: "_", type, repMin, repMax, increment: $("inc").value });
-      const sc = $("setcount").value, dr = $("drops").value;
+      const sc = $("setcount").value, dr = $("drops").value, wu = $("warmups").value, bo = $("backoffs").value;
+      const rir = $("rir").value.trim().slice(0, 12), notes = $("notes").value.trim().slice(0, 600);
       return {
         type: n.type, repMin: n.repMin, repMax: n.repMax, increment: n.increment,
-        setCount: type !== "normal" && sc !== "" ? parseInt(sc, 10) : null,
-        drops: type === "normal" && dr !== "" ? parseInt(dr, 10) : null
+        setCount: (type === "simple" || type === "max") && sc !== "" ? parseInt(sc, 10) : null,
+        drops: type === "normal" && dr !== "" ? parseInt(dr, 10) : null,
+        warmups: wu !== "" ? parseInt(wu, 10) : null,
+        backoffs: type === "topback" && bo !== "" ? parseInt(bo, 10) : null,
+        rir: rir || null,
+        notes: notes || null
       };
     }
 
@@ -3237,8 +3464,9 @@
       prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => {
         if (x.name !== name) return;
         x.type = props.type; x.repMin = props.repMin; x.repMax = props.repMax; x.increment = props.increment;
-        if (props.setCount == null) delete x.setCount; else x.setCount = props.setCount;
-        if (props.drops == null) delete x.drops; else x.drops = props.drops;
+        ["setCount", "drops", "warmups", "backoffs", "rir", "notes"].forEach(f => {
+          if (props[f] == null) delete x[f]; else x[f] = props[f];
+        });
       }));
     }
 
@@ -3286,6 +3514,7 @@
         });
       } else {
         if (lastFilled + 1 > 3 + normalDrops) setDropsVisible(Math.min(3, lastFilled + 1 - 3));
+        for (let i = 1; i >= 0; i--) if (vals[i] && (vals[i].w !== "" || vals[i].r !== "") && warmVisible < i + 1) { setWarmupsVisible(i + 1); break; }
         vals.slice(0, 6).forEach((v, i) => {
           document.getElementById("w" + (i + 1)).value = v.w;
           document.getElementById("r" + (i + 1)).value = v.r;
@@ -3300,7 +3529,7 @@
       sxTarget = name;
       document.getElementById("sx-modal-title").textContent = `עריכת תרגיל – ${name}`;
       document.getElementById("sx-name").value = displayName(name);
-      fillStructFields("sx", getEffectiveDef(name));
+      fillStructFields("sx", getEffectiveDef(name, { noDeload: true })); // never write deload values into the program
       document.getElementById("sx-reset").classList.toggle("hidden", !getSessionOverride(name));
       document.getElementById("sx-modal").classList.remove("hidden");
     }
@@ -3367,7 +3596,487 @@
       rerenderAfterSessionEdit(name, typed);
     }
 
+    // ========== V7: RESEARCH PROGRAM, MESOCYCLE, RECOMMENDED WEIGHTS, HOW-TO ==========
+    const RESEARCH_PROGRAM_ID = "research-ppl6-v1";
+    const RESEARCH_PROGRAM = {
+      version: 1,
+      workouts: [
+        { id: "A", name: "אימון A – רגליים",
+          desc: "לחיצת רגליים (טופ+בק-אוף) • בולגרי • דדליפט רומני • כפיפת ברך בישיבה • פשיטת ברך • הרחקה לצדדים במכונה",
+          exercises: [
+            { name: "לחיצת רגליים", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 5, origName: "לחיצת רגליים",
+              notes: "טווח תנועה קצר יותר, בלי כאב בברך, רגליים גבוה על המשטח. הורדה מבוקרת 2-3 שנ׳, בלי לקפוץ מהתחתית." },
+            { name: "לאנץ' בולגרי", type: "simple", setCount: 2, warmups: 0, repMin: 8, repMax: 12, increment: 2, rir: "1-2", origName: "לאנץ' בולגרי",
+              notes: "2 סטים לכל רגל. משקולות ביד, צעד ארוך, נטייה קלה קדימה (דגש על הישבן)." },
+            { name: "דדליפט רומני", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, rir: "1-2",
+              notes: "מחליף את הדדליפט הרגיל. יורדים עד מתיחה חזקה בירך האחורית, גב ניטרלי. בלי כשל – תמיד לפחות חזרה אחת ברזרבה." },
+            { name: "כפיפת ברך במכונה", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 2.5, origName: "כפיפת ברך במכונה",
+              notes: "עדיף בישיבה (מתיחה גדולה יותר בירך האחורית). בדרופ האחרון: 3-6 חזרות חלקיות בטווח המתיחה." },
+            { name: "פשיטת ברך במכונה", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 2.5, origName: "פשיטת ברך במכונה",
+              notes: "גב מעט אחורה. בדרופ האחרון: 3-6 חזרות חלקיות בחלק התחתון (המתוח)." },
+            { name: "הרחקה לצדדים במכונה", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 2.5,
+              notes: "כתף אמצעית – גם באימון הרגליים, כדי להגיע לנפח שבועי מספיק. תנועה נקייה בלי תנופה." }
+          ] },
+        { id: "B", name: "אימון B – דחיפה (חזה, כתפיים, יד אחורית)",
+          desc: "באנץ' עליון (טופ+בק-אוף) • מקבילים • פרפר • הרחקה לצדדים • פשיטה מאחורי הראש • פשיטה בפולי",
+          exercises: [
+            { name: "באנץ' עליון", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "באנץ' עליון",
+              notes: "מוט או סמית', ספסל בשיפוע של כ-30°. בטופ – עם שומר. בק-אוף ולא דרופ." },
+            { name: "מקבילים", type: "max", setCount: 2, warmups: 0, repMin: 6, repMax: 15, increment: 2.5, origName: "מקבילים",
+              notes: "גוף נוטה קדימה, יורדים עמוק למתיחה בחזה. מעל 15 חזרות – מוסיפים משקל בחגורה." },
+            { name: "פרפר", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 2.5, origName: "פרפר",
+              notes: "מתיחה מלאה בפתיחה. בדרופ האחרון: חזרות חלקיות בטווח הפתוח." },
+            { name: "הרחקה לצדדים", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 1, origName: "הרחקה לצדדים",
+              notes: "משקולות, בלי תנופה, קפיצה של 1 ק״ג. בדרופ האחרון: חזרות חלקיות." },
+            { name: "פשיטת מרפק מאחורי הראש עם משקולת", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 1, origName: "פשיטת מרפק מאחורי הראש עם משקולת",
+              notes: "מעל הראש – הראש הארוך של התלת-ראשי עובד במתיחה (Maeo 2023). אפשר גם בכבל." },
+            { name: "פשיטת מרפק בפולי", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 2.5, origName: "פשיטת מרפק בפולי",
+              notes: "מרפקים צמודים לגוף, יישור מלא בכל חזרה." }
+          ] },
+        { id: "C", name: "אימון C – משיכה (גב, כתף אחורית, יד קדמית)",
+          desc: "משיכה רחבה • טי-בר (טופ+בק-אוף) • חתירה ביד אחת בכבל • הרחקה אופקית • הרחקה לצדדים בכבל • פריצ'ר • פטישים",
+          exercises: [
+            { name: "משיכה בפולי רחב", type: "normal", warmups: 2, drops: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "משיכה בפולי רחב",
+              notes: "מכונה – לכן דרופים. מתיחה מלאה למעלה, מושכים לחזה העליון." },
+            { name: "חתירה בטי-בר רחב", type: "topback", warmups: 1, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "חתירה בטי-בר רחב",
+              notes: "בק-אוף ולא דרופ. אם יש – עדיף טי-בר עם תמיכה לחזה." },
+            { name: "חתירה ביד אחת בכבל", type: "normal", warmups: 0, drops: 2, repMin: 8, repMax: 12, increment: 2.5,
+              notes: "טווח ארוך: נותנים לשכמה להימתח קדימה, ומושכים לכיוון המותן." },
+            { name: "הרחקה אופקית במכונה", type: "normal", warmups: 0, drops: 2, repMin: 12, repMax: 20, increment: 2.5, origName: "הרחקה אופקית במכונה",
+              notes: "כתף אחורית. ידיות בגובה הכתפיים, בלי לסחוב עם הגב." },
+            { name: "הרחקה לצדדים בכבל", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 1,
+              notes: "הכבל עובר מאחורי הגוף – עבודה במתיחה. בדרופ האחרון: חזרות חלקיות." },
+            { name: "כפיפה בפריצ'ר", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 1, origName: "כפיפה בפריצ'ר",
+              notes: "יורדים כמעט עד יישור מלא, לאט." },
+            { name: "פטישים", type: "normal", warmups: 0, drops: 2, repMin: 8, repMax: 12, increment: 1, origName: "פטישים",
+              notes: "אחיזה ניטרלית, בלי נדנוד של הגוף." }
+          ] }
+      ],
+      accessories: [
+        { id: "abs", name: "בטן", desc: null, exercises: [
+          { name: "כפיפת בטן במכשיר", type: "normal", warmups: 1, drops: 1, repMin: 10, repMax: 15, increment: 2.5, origName: "כפיפת בטן במכשיר",
+            notes: "כבד + דרופ אחד. מעגלים את הגב, נושפים בירידה." },
+          { name: "הרמות רגליים במתח", type: "max", setCount: 2, warmups: 0, repMin: 6, repMax: 15, increment: 2.5, origName: "הרמות רגליים במתח",
+            notes: "עד כשל טכני, בלי נדנוד. מעל 15 חזרות – מוסיפים קושי." }
+        ] },
+        { id: "calves", name: "תאומים", desc: null, exercises: [
+          { name: "הרמת עקבים בעמידה", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 2.5, origName: "הרמת עקבים בעמידה",
+            notes: "עצירה של 2 שנ׳ בתחתית (במתיחה), טווח מלא." },
+          { name: "הרמת עקבים בישיבה", type: "normal", warmups: 0, drops: 2, repMin: 12, repMax: 20, increment: 2.5, origName: "הרמת עקבים בישיבה",
+            notes: "עצירה של 1-2 שנ׳ בתחתית, טווח מלא." }
+        ] }
+      ],
+      accessoryByDay: ["calves", "abs", "calves", "abs", "calves", "abs", null]
+    };
+    const CYCLE_WEEKS = 6; // + week 7 = deload
+    const REST = { warm: "כדקה", top: "2.5-3 דק׳", backoff: "2 דק׳", heavy: "1.5-2 דק׳", drop: "0-10 שנ׳", set: "2 דק׳" };
+
+    function parseDateKey(k) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(k || "");
+      return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+    }
+    // Weeks run Sunday–Friday; loading on Saturday starts the cycle tomorrow.
+    function cycleStartSunday(d = new Date()) {
+      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      if (x.getDay() === 6) x.setDate(x.getDate() + 1);
+      else x.setDate(x.getDate() - x.getDay());
+      return x;
+    }
+    function getCycleInfo(data) {
+      data = data || getData();
+      const c = data.cycle;
+      if (!c || typeof c !== "object") return null;
+      const s = parseDateKey(c.start);
+      if (!s) return null;
+      const t = new Date();
+      const today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+      const days = Math.round((today - s) / DAY_MS);
+      const idx = Math.max(0, Math.floor(days / 7));
+      const week = idx % (CYCLE_WEEKS + 1) + 1;
+      const num = (parseInt(c.num, 10) || 1) + Math.floor(idx / (CYCLE_WEEKS + 1));
+      return { week, num, deload: week === CYCLE_WEEKS + 1, early: week <= 2, start: c.start };
+    }
+    function isDeloadWeek() { const c = getCycleInfo(); return !!(c && c.deload); }
+
+    function deloadDef(def, o) {
+      const d = Object.assign({}, def);
+      const has = f => o && o[f] != null;
+      if (d.type === "normal" && !has("drops")) d.drops = 0;
+      if (d.type === "topback" && !has("backoffs")) d.backoffs = 1;
+      if ((d.type === "simple" || d.type === "max") && !has("setCount")) d.setCount = Math.max(1, Math.ceil((d.setCount || 3) / 2));
+      d.deload = true;
+      return d;
+    }
+
+    // role: top | backoff | heavy | drop | simple | max
+    function rirFor(role, def, cyc) {
+      if (cyc && cyc.deload) return "3-4";
+      if (def && def.rir && role !== "backoff" && role !== "drop") return def.rir;
+      const early = !!(cyc && cyc.early);
+      const t = { top: ["2", "0-1"], backoff: ["2-3", "1-2"], heavy: ["1", "0"], drop: ["1", "0"], simple: ["2", "1-2"], max: ["1", "0"] }[role];
+      return t ? t[early ? 0 : 1] : null;
+    }
+    const dash = s => String(s); // keep "-" : an en dash between digits flips to "3–2" in RTL text
+    const rirTxt = r => r == null ? "" : `\u2066RIR\u00a0${dash(r).replace(/-/g, "-\u2060")}\u2069${r === "0" ? " (עד כשל)" : ""}`; // LTR isolate keeps "RIR 1-2" intact inside Hebrew
+
+    function cycleSummaryText(c) {
+      if (!c) return "";
+      if (c.deload) return "שבוע הורדה: חצי מהסטים, בלי דרופים, ‎-10% משקל, RIR 3-4";
+      return c.early
+        ? "יעד RIR: טופ 2 · בק-אוף 2-3 · בידוד 1 (שבועות לימוד)"
+        : `יעד RIR: טופ 0-1 · בק-אוף 1-2 · בידוד 0 (כשל)${c.week === 5 ? " · אפשר להוסיף סט לשריר שמפגר" : ""}`;
+    }
+    function cycleTitleText(c) {
+      if (!c) return "";
+      const pre = c.num > 1 ? `מחזור ${c.num} · ` : "";
+      return c.deload ? `${pre}🧘 שבוע ${CYCLE_WEEKS + 1} – שבוע הורדה` : `${pre}📅 שבוע ${c.week} מתוך ${CYCLE_WEEKS}`;
+    }
+
+    function roundStep(x, inc) {
+      inc = inc || 2.5;
+      return Math.round(Math.round(x / inc) * inc * 100) / 100;
+    }
+    function stepBelow(x, ref, inc) {
+      let v = roundStep(x, inc);
+      if (ref != null && v >= ref) v = Math.round((ref - inc) * 100) / 100;
+      return v > 0 ? v : null;
+    }
+    function warmupScheme(n) {
+      return n >= 2 ? [[0.5, 10], [0.75, 5]] : (n === 1 ? [[0.6, 8]] : []);
+    }
+    function warmCount(def) {
+      if (def.warmups != null) return def.warmups;
+      return def.type === "normal" || def.type === "topback" ? 2 : 0;
+    }
+    function backoffCount(def) { return def.backoffs != null ? def.backoffs : 2; }
+    function dropCount(def) { return def.drops != null ? def.drops : 2; }
+    function setCountOf(def) { return def.setCount != null ? def.setCount : 3; }
+    const repRange = def => `${def.repMin}-${def.repMax}`;
+    const backoffReps = def => `${def.repMin + 2}-${def.repMax + 2}`;
+
+    // Short plan line, e.g. "2 חימום · טופ 6-10 · 2 בק-אוף"
+    function planText(def) {
+      const w = warmCount(def);
+      const wt = w ? `${w === 1 ? "חימום אחד" : w + " חימום"} · ` : "בלי חימום · ";
+      if (def.type === "topback") return `${wt}טופ ${repRange(def)} · ${backoffCount(def)} בק-אוף ${backoffReps(def)}`;
+      if (def.type === "normal") {
+        const d = dropCount(def);
+        return `${wt}כבד ${repRange(def)}${d ? ` + ${d === 1 ? "דרופ" : d + " דרופים"}` : " (בלי דרופים)"}`;
+      }
+      if (def.type === "max") return `${w ? wt : ""}${setCountOf(def)} × מקס חזרות (כשל טכני)`;
+      return `${w ? wt : ""}${setCountOf(def)} × ${repRange(def)}`;
+    }
+
+    // Reference weight for today's top / heavy set (progression or deload).
+    function planFor(name, def) {
+      const cyc = getCycleInfo();
+      const logs = getData().logs[name] || [];
+      const s = computeSuggestion(logs, def, { deload: !!def.deload });
+      return { cyc, s, top: s && s.weight != null ? s.weight : null, reps: s && s.reps != null ? s.reps : null };
+    }
+
+    let currentDef = null, currentPlan = null, currentRecs = {};
+    const kg = w => `${fmtKg(w)} ק״ג`;
+    const valOf = id => { const el = document.getElementById(id); return el ? numOrNull(el.value) : null; };
+
+    function renderSetHints() {
+      const def = currentDef, plan = currentPlan;
+      if (!def || !plan) return;
+      const inc = def.increment || 2.5, cyc = plan.cyc;
+      currentRecs = {};
+      const put = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+      if (def.type === "normal" || def.type === "topback") {
+        const tb = def.type === "topback";
+        const top = valOf("w3") != null ? valOf("w3") : plan.top;
+        warmupScheme(warmCount(def)).forEach(([p, r], i) => {
+          const w = top ? roundStep(top * p, inc) : null;
+          if (w) currentRecs["w" + (i + 1)] = w;
+          put("hint-" + (i + 1), `חימום: ${w ? "כ-" + kg(w) : `כ-${Math.round(p * 100)}%`} × ${r} · לא לכשל · מנוחה ${REST.warm}`);
+        });
+        if (plan.top) currentRecs.w3 = plan.top;
+        const tgt = plan.top ? `${kg(plan.top)} × ${plan.reps != null ? plan.reps : repRange(def)}` : `${repRange(def)} חזרות`;
+        put("hint-3", `🎯 ${tgt} · ${rirTxt(rirFor(tb ? "top" : "heavy", def, cyc))} · מנוחה לפני: ${tb ? REST.top : REST.heavy}`);
+        let prev = valOf("w3") != null ? valOf("w3") : plan.top;
+        for (let i = 4; i <= 6; i++) {
+          let w = null;
+          if (tb) {
+            w = top ? stepBelow(top * 0.875, top, inc) : null;
+            const pct = w && top ? ` (‎-${Math.round((1 - w / top) * 100)}%)` : " (‎-10-15%)";
+            put("hint-" + i, `בק-אוף: ${w ? "כ-" + kg(w) : "—"}${pct} × ${backoffReps(def)} · ${rirTxt(rirFor("backoff", def, cyc))} · מנוחה לפני: ${REST.backoff}`);
+          } else {
+            w = prev ? stepBelow(prev * 0.75, prev, inc) : null;
+            put("hint-" + i, `דרופ: ${w ? "כ-" + kg(w) : "—"} (‎-20-30%) · ${rirTxt(rirFor("drop", def, cyc))} · מנוחה ${REST.drop}`);
+            const typed = valOf("w" + i);
+            prev = typed != null ? typed : w;
+          }
+          if (w) currentRecs["w" + i] = w;
+        }
+      } else {
+        for (let i = 1; i <= dynamicSetCount; i++) {
+          const w = plan.top;
+          if (w) currentRecs["dw" + i] = w;
+          const what = def.type === "max"
+            ? `עד כשל טכני${w ? ` · ${kg(w)}` : ""}${plan.reps ? ` · יעד ${plan.reps} חזרות` : ""}`
+            : `${w ? kg(w) + " × " : ""}${plan.reps != null ? plan.reps : repRange(def)}`;
+          put("dhint-" + i, `${what} · ${rirTxt(rirFor(def.type === "max" ? "max" : "simple", def, cyc))} · מנוחה ${REST.set}`);
+        }
+      }
+    }
+
+    function fillRecommendedWeights() {
+      let n = 0;
+      Object.keys(currentRecs).forEach(id => {
+        const el = document.getElementById(id);
+        const row = el && el.closest(".set-row");
+        if (!el || el.value !== "" || (row && row.classList.contains("hidden"))) return;
+        el.value = fmtKg(currentRecs[id]);
+        n++;
+      });
+      renderSetHints();
+      showToast(n ? "המשקלים המומלצים הוזנו ✓" : "אין שדות ריקים עם המלצה");
+    }
+
+    // Step-by-step "how to perform" box, generated from the exercise config (stays correct after edits).
+    function howToSteps(def, plan) {
+      const steps = [];
+      const cyc = plan ? plan.cyc : null;
+      const top = plan ? plan.top : null;
+      const inc = def.increment || 2.5;
+      const wn = warmCount(def);
+      const logged = def.type === "normal" || def.type === "topback";
+      if (wn === 0) steps.push("בלי חימום – השריר כבר חם מהתרגילים הקודמים.");
+      else {
+        const parts = warmupScheme(wn).map(([p, r]) => `${top ? "כ-" + kg(roundStep(top * p, inc)) : "כ-" + Math.round(p * 100) + "%"} × ${r}`);
+        steps.push(`${wn === 1 ? "סט חימום קל אחד" : wn + " סטי חימום קלים"} (${wn === 1 ? "כ-60%" : "כ-50% ואז כ-75%"} ממשקל העבודה): ${parts.join(" ← ")}. לא לכשל, מנוחה ${REST.warm}.${logged ? " (רישום החימום לא חובה)" : ""}`);
+      }
+      const tgt = top ? `${kg(top)} × ${plan.reps != null ? plan.reps : repRange(def)}` : `${repRange(def)} חזרות`;
+      if (def.type === "topback") {
+        steps.push(`סט טופ אחד: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("top", def, cyc))}. מנוחה לפניו ${REST.top}.`);
+        const b = backoffCount(def);
+        if (b) {
+          const bw = top ? stepBelow(top * 0.875, top, inc) : null;
+          steps.push(`${b === 1 ? "סט בק-אוף אחד" : b + " סטי בק-אוף"}: מורידים 10-15% ממשקל הטופ של היום${bw ? ` (כ-${kg(bw)})` : ""} × ${backoffReps(def)}, ${rirTxt(rirFor("backoff", def, cyc))}. מנוחה ${REST.backoff} בין הסטים.`);
+        } else steps.push("בלי סטי בק-אוף.");
+      } else if (def.type === "normal") {
+        steps.push(`סט כבד: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("heavy", def, cyc))}. מנוחה לפניו ${REST.heavy}.`);
+        const d = dropCount(def);
+        if (d) steps.push(`מיד אחריו ${d === 1 ? "דרופ אחד" : d + " דרופים"}: בכל דרופ מורידים 20-30% מהמשקל וממשיכים עד כשל, מנוחה ${REST.drop} בלבד.`);
+        else steps.push("בלי דרופים" + (def.deload ? " (שבוע הורדה)." : "."));
+      } else if (def.type === "max") {
+        steps.push(`${setCountOf(def)} סטים עד כשל טכני${top ? ` (${kg(top)})` : ""}${plan && plan.reps ? `, יעד ${plan.reps} חזרות` : ""}, ${rirTxt(rirFor("max", def, cyc))}. מנוחה ${REST.set} בין הסטים. מעל ${def.repMax} חזרות – מוסיפים משקל.`);
+      } else {
+        steps.push(`${setCountOf(def)} סטים: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("simple", def, cyc))}. מנוחה ${REST.set} בין הסטים.`);
+      }
+      if (def.deload) steps.push("🧘 שבוע הורדה: כ-10% פחות משקל, חצי מהסטים, בלי דרופים, RIR 3-4. לא מתקדמים השבוע.");
+      else if (def.type !== "max") steps.push(`התקדמות: כשמגיעים ל-${def.repMax} חזרות ב${def.type === "topback" ? "טופ" : (def.type === "normal" ? "סט הכבד" : "סטים")} (או משווים פעמיים ברצף) – מוסיפים ${fmtKg(inc)} ק״ג וחוזרים ל-${def.repMin}.`);
+      return steps;
+    }
+
+    function renderHowTo(def, plan) {
+      const box = document.getElementById("log-howto");
+      if (!box) return;
+      const steps = howToSteps(def, plan);
+      box.innerHTML = `<div class="howto-title">📋 איך לבצע</div>
+        <ol class="howto-steps">${steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+        ${def.notes ? `<div class="howto-notes" id="log-notes">📝 ${esc(def.notes)}</div>` : ""}`;
+    }
+
+    // ---- program loading / restore ----
+    function loadResearchProgram() {
+      const data0 = getData();
+      const already = data0.programSource === RESEARCH_PROGRAM_ID;
+      const msg = (already ? "התוכנית מבוססת המחקר כבר טעונה. לטעון אותה מחדש? (שינויים שעשית בה יוחלפו)\n\n" : "לטעון את התוכנית מבוססת המחקר (6 ימים – A/B/C פעמיים בשבוע)?\n\n") +
+        "• כל ההיסטוריה נשמרת – שמות התרגילים הקיימים נשארים.\n• התוכנית הנוכחית נשמרת ואפשר לשחזר אותה מ\"עריכת תוכנית\".\n• מתחיל מחזור: 6 שבועות + שבוע הורדה, החל מהשבוע הזה.";
+      if (!confirm(msg)) return false;
+      const data = getData();
+      if (!(already && data.programPrev)) {
+        data.programPrev = { savedAt: new Date().toISOString(), program: data.program ? getProgram(data) : null,
+          cycle: data.cycle || null, source: data.programSource || null };
+      }
+      data.program = normalizeProgram(JSON.parse(JSON.stringify(RESEARCH_PROGRAM)));
+      data.programSource = RESEARCH_PROGRAM_ID;
+      data.cycle = { start: toDateKey(cycleStartSunday()), num: 1 };
+      saveData(data);
+      showToast("התוכנית נטענה ✓ שבוע 1 מתוך 6");
+      refreshAfterProgramChange();
+      return true;
+    }
+
+    function restorePreviousProgram() {
+      const data = getData();
+      const prev = data.programPrev;
+      if (!prev) { showToast("אין תוכנית קודמת שמורה"); return; }
+      if (!confirm("לשחזר את התוכנית הקודמת?\nההיסטוריה נשמרת. התוכנית הנוכחית תישמר במקומה, כך שאפשר לחזור אליה.")) return;
+      const cur = { savedAt: new Date().toISOString(), program: data.program ? getProgram(data) : null, cycle: data.cycle || null, source: data.programSource || null };
+      const p = normalizeProgram(prev.program);
+      if (p) data.program = p; else delete data.program;
+      if (prev.cycle) data.cycle = prev.cycle; else delete data.cycle;
+      if (prev.source) data.programSource = prev.source; else delete data.programSource;
+      data.programPrev = cur;
+      saveData(data);
+      showToast("התוכנית הקודמת שוחזרה ✓");
+      refreshAfterProgramChange();
+    }
+
+    function refreshAfterProgramChange() {
+      if (!document.getElementById("screen-program").classList.contains("hidden")) renderProgramEditor();
+      else if (!document.getElementById("screen-guide").classList.contains("hidden")) renderGuide();
+      else initHome();
+    }
+
+    // ---- cycle modal ----
+    function openCycleModal() {
+      const c = getCycleInfo();
+      document.getElementById("cycle-modal-status").textContent = c ? `${cycleTitleText(c)} · ${cycleSummaryText(c)}` : "אין מחזור פעיל.";
+      const sel = document.getElementById("cycle-week-select");
+      sel.value = c ? String(c.week) : "1";
+      document.getElementById("cycle-stop-btn").classList.toggle("hidden", !c);
+      document.getElementById("cycle-modal").classList.remove("hidden");
+    }
+    function closeCycleModal() { document.getElementById("cycle-modal").classList.add("hidden"); }
+    function setCycleWeek(w) {
+      w = parseInt(w, 10);
+      if (!(w >= 1 && w <= CYCLE_WEEKS + 1)) return;
+      const data = getData();
+      const c = getCycleInfo(data);
+      const s = cycleStartSunday();
+      s.setDate(s.getDate() - (w - 1) * 7);
+      data.cycle = { start: toDateKey(s), num: c ? c.num : 1 };
+      saveData(data);
+      closeCycleModal();
+      showToast(w === CYCLE_WEEKS + 1 ? "עכשיו: שבוע הורדה ✓" : `עכשיו: שבוע ${w} מתוך ${CYCLE_WEEKS} ✓`);
+      refreshAfterProgramChange();
+    }
+    function startNewCycle() {
+      const data = getData();
+      const c = getCycleInfo(data);
+      if (c && !confirm("להתחיל מחזור חדש? השבוע הנוכחי יהיה שבוע 1.")) return;
+      data.cycle = { start: toDateKey(cycleStartSunday()), num: c ? c.num + 1 : 1 };
+      saveData(data);
+      closeCycleModal();
+      showToast("מחזור חדש התחיל – שבוע 1 ✓");
+      refreshAfterProgramChange();
+    }
+    function stopCycle() {
+      if (!confirm("להפסיק את מעקב המחזור? (אפשר להתחיל שוב בכל רגע)")) return;
+      const data = getData();
+      delete data.cycle;
+      saveData(data);
+      closeCycleModal();
+      showToast("מעקב המחזור הופסק");
+      refreshAfterProgramChange();
+    }
+
+    // ---- program guide screen ----
+    function showGuide() {
+      renderGuide();
+      showScreen("screen-guide");
+    }
+
+    function guideTable(head, rows, hi) {
+      return `<div class="g-scroll"><table class="g-table"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${
+        rows.map((r, i) => `<tr${hi === i ? ' class="g-hi"' : ""}>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    }
+
+    function renderGuide() {
+      const box = document.getElementById("guide-content");
+      if (!box) return;
+      const data = getData();
+      const loaded = data.programSource === RESEARCH_PROGRAM_ID;
+      const prog = loaded ? getProgram(data) : normalizeProgram(JSON.parse(JSON.stringify(RESEARCH_PROGRAM)));
+      const c = getCycleInfo(data);
+      let h = "";
+      h += `<div class="card">
+        <p>תוכנית היפרטרופיה טבעית ל-6 ימים בשבוע (דחיפה, משיכה ורגליים – כל אחד פעמיים בשבוע): כל שריר מאומן פעמיים בשבוע, עם 72 שעות בין שני אימונים של אותו שריר.</p>
+        ${c ? `<p style="margin-top:8px;"><b>${esc(cycleTitleText(c))}</b><br/><span class="g-muted">${esc(cycleSummaryText(c))}</span></p>` : ""}
+        ${loaded ? `<p class="g-muted" style="margin-top:8px;">✓ התוכנית טעונה באפליקציה.</p>`
+          : `<button class="btn btn-primary" style="margin-top:10px;" onclick="loadResearchProgram()">🔬 טען תוכנית מבוססת מחקר</button>
+             <p class="g-muted" style="margin-top:6px;">ההיסטוריה נשמרת, והתוכנית הנוכחית נשמרת לשחזור.</p>`}
+      </div>`;
+
+      h += `<div class="section-title">מבנה השבוע</div><div class="card">` + guideTable(["יום", "אימון", "תוספת", "זמן"], [
+        ["ראשון", "<b>A – רגליים</b>", "תאומים", "70-75 דק׳"], ["שני", "<b>B – דחיפה</b>", "בטן", "60-65 דק׳"],
+        ["שלישי", "<b>C – משיכה</b>", "תאומים", "70-75 דק׳"], ["רביעי", "<b>A – רגליים</b>", "בטן", "70 דק׳"],
+        ["חמישי", "<b>B – דחיפה</b>", "תאומים", "65-70 דק׳"], ["שישי", "<b>C – משיכה</b>", "בטן", "65-70 דק׳"], ["שבת", "מנוחה", "–", "–"]
+      ], new Date().getDay()) + `<p class="g-muted">B = חזה, כתפיים, יד אחורית. C = גב, כתף אחורית, יד קדמית. התוספת (תאומים/בטן) נקבעת אוטומטית לפי היום.</p></div>`;
+
+      h += `<div class="section-title">שיטות הביצוע</div><div class="card g-text">
+        <h4>טופ + בק-אוף</h4>
+        <ul><li>קודם 2 סטי חימום (לא חובה לרשום): כ-50% × 10, ואז כ-75% × 5.</li>
+        <li><b>סט טופ אחד:</b> 6-10 חזרות, 0-1 חזרות לפני כשל (בשבועות 1-2: 2 לפני כשל).</li>
+        <li><b>סטי בק-אוף:</b> מורידים 10-15% מהמשקל של הטופ של היום, עוצרים 1-2 חזרות לפני כשל – בדרך כלל יוצא 8-12 חזרות.</li>
+        <li>האפליקציה מחשבת לבד את משקל הבק-אוף לפי מה שהקלדת בטופ, ואת ההתקדמות לפי הטופ בלבד.</li></ul>
+        <h4>כבד + דרופים</h4>
+        <ul><li>סט כבד עד כשל, או חזרה אחת לפני כשל.</li>
+        <li>מיד אחריו 2 דרופים: בכל דרופ מורידים 20-30% מהמשקל ועובדים עד כשל, עם 0-10 שניות מנוחה.</li></ul>
+        <h4>חימום</h4>
+        <ul><li>תרגיל ראשון לשריר: 2 סטים קלים. תרגיל שני לאותו שריר: סט קל אחד. בידוד כשהשריר כבר חם: בלי חימום.</li>
+        <li>מספר סטי החימום מוגדר לכל תרגיל, ומופיע במסך הרישום.</li></ul>
+        <h4>מקס חזרות</h4>
+        <ul><li>סטים עד כשל טכני. כשמגיעים ל-15 חזרות – מוסיפים משקל בחגורה.</li></ul>
+        <h4>חזרות חלקיות בטווח המתיחה</h4>
+        <ul><li>בדרופ האחרון של פשיטת ברך, כפיפת ברך, פרפר והרחקות: כשאין חזרה מלאה, עוד 3-6 חזרות של חצי טווח בחלק שבו השריר מתוח.</li></ul>
+        <h4>קצב</h4>
+        <ul><li>הורדה מבוקרת של 2-3 שניות, בלי לקפוץ מהתחתית. בתאומים עוצרים 1-2 שניות בתחתית.</li></ul>
+      </div>`;
+
+      h += `<div class="section-title">מנוחה</div><div class="card">` + guideTable(["מצב", "מנוחה"], [
+        ["לפני טופ סט", REST.top], ["בין טופ לבק-אוף ובין בק-אופים", REST.backoff], ["לפני סט כבד בבידוד", REST.heavy],
+        ["בתוך דרופים", REST.drop], ["בין תרגילים", "2 דק׳"]]) + `</div>`;
+
+      const exCard = e => `<div class="g-ex"><div class="g-ex-name">${esc(e.name)}</div>
+        <div class="g-ex-plan">${esc(TYPE_LABELS[e.type] || "")} · ${esc(planText(e))}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}</div>
+        ${e.notes ? `<div class="g-ex-notes">${esc(e.notes)}</div>` : ""}</div>`;
+      const days = { A: "ראשון ורביעי", B: "שני וחמישי", C: "שלישי ושישי" };
+      prog.workouts.forEach(w => {
+        h += `<div class="section-title">${esc(w.name)}${days[w.id] ? ` (${days[w.id]})` : ""}</div><div class="card">${w.exercises.map(exCard).join("")}
+          <p class="g-muted">+ תאומים או בטן לפי היום.</p></div>`;
+      });
+      h += `<div class="section-title">תוספות</div><div class="card">${prog.accessories.map(a =>
+        `<h4 class="g-acc">${esc(a.name)} (${a.id === "calves" ? "ראשון, שלישי, חמישי" : (a.id === "abs" ? "שני, רביעי, שישי" : "")})</h4>${a.exercises.map(exCard).join("")}`).join("")}</div>`;
+
+      const week = c ? c.week : null;
+      h += `<div class="section-title">מאמץ (RIR = חזרות לפני כשל)</div><div class="card">` + guideTable(["סוג תרגיל", "שבועות 1-2", "שבועות 3-6"], [
+        ["טופ בתרגיל מורכב (לחיצת רגליים, באנץ', טי-בר, דדליפט רומני)", "2", "0-1 (בדדליפט רומני לא פחות מ-1)"],
+        ["בק-אוף", "2-3", "1-2"], ["בידוד ומכונות (סט כבד ודרופים)", "1", "0 – כשל מלא"]]) +
+        `<p class="g-muted">${week ? (c.deload ? "השבוע: שבוע הורדה – RIR 3-4 בכל הסטים." : `השבוע: שבוע ${week} – עמודת ${week <= 2 ? "שבועות 1-2" : "שבועות 3-6"}.`) : ""} יעד ה-RIR מוצג גם ליד כל סט במסך הרישום.</p></div>`;
+
+      h += `<div class="section-title">התקדמות</div><div class="card g-text"><ul>
+        <li>פרוגרסיה כפולה: מגיעים לסוף טווח החזרות בטופ או בסט הכבד, או משווים/משפרים פעמיים ברצף באותו משקל? מוסיפים את הקפיצה של התרגיל וחוזרים לתחתית הטווח.</li>
+        <li>בבק-אוף שומרים על 10-15% פחות מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
+        <li>אימונים של שבוע ההורדה לא נחשבים בחישוב ההתקדמות.</li></ul></div>`;
+
+      h += `<div class="section-title">מחזור של 7 שבועות</div><div class="card">` + guideTable(["שבועות", "מה עושים"], [
+        ["1-2", "מתחילים קצת בשמרנות: RIR גבוה יותר, לומדים את התרגילים החדשים."],
+        ["3-6", "עבודה מלאה. אם ההתאוששות טובה (שינה טובה, ביצועים עולים, אין כאבי מפרקים) – בשבוע 5 אפשר להוסיף סט אחד לשריר שמפגר, למשל עוד דרופ בהרחקה לצדדים."],
+        ["7 (דילואד)", "אותם תרגילים, בערך חצי מהסטים: בק-אוף אחד ובלי דרופים. משקל 10% פחות, RIR 3-4."]
+      ], week == null ? -1 : (week <= 2 ? 0 : (week <= 6 ? 1 : 2))) +
+        `<p class="g-muted">אחרי הדילואד מתחילים מחזור חדש (האפליקציה עוברת לבד). כל 6-10 שבועות דילואד; אם הביצועים יורדים שבועיים ברצף – דילואד מוקדם.</p>
+        <button class="btn btn-sm btn-outline" onclick="openCycleModal()">📅 ניהול מחזור (קבע שבוע / מחזור חדש)</button></div>`;
+
+      h += `<div class="section-title">נפח שבועי – סטים קשים לכל שריר</div><div class="card">` + guideTable(["שריר", "מה תורם (לאימון)", "בשבוע", "מטרה"], [
+        ["חזה", "באנץ' 3, מקבילים 2, פרפר 2", "14", "12-18"], ["ארבע-ראשי", "לחיצת רגליים 3, בולגרי 2, פשיטה 2", "14", "12-18"],
+        ["גב", "פולי 2, טי-בר 3, חתירה בכבל 2", "14", "12-16"], ["ירך אחורית", "דדליפט רומני 3, כפיפת ברך 2", "10", "~10"],
+        ["כתף אמצעית", "הרחקה ב-A 2, ב-B 2, ב-C 2", "12", "10-12+"], ["כתף אחורית", "הרחקה אופקית 2 + עקיף מחתירות", "9", "8-12"],
+        ["כתף קדמית", "עקיף: באנץ', מקבילים", "5", "מספיק"], ["תלת-ראשי", "2 פשיטות × 2 + עקיף", "13", "10-16"],
+        ["דו-ראשי", "פריצ'ר 2, פטישים 2 + עקיף", "15", "10-16"], ["ישבן", "עקיף: לחיצה, בולגרי, דדליפט רומני", "8-10", "~8-12"],
+        ["זוקפי גב", "דדליפט רומני 3", "6", "מספיק"], ["תאומים", "2 תרגילים × 2, 3 פעמים בשבוע", "12", "10-15"], ["בטן", "כפיפה + הרמות, 3 פעמים בשבוע", "10.5", "8-12"]
+      ]) + `<p class="g-muted">ספירה: טופ/בק-אוף/סט כבד = 1, דרופ = 0.5, חימום = 0, עקיף = חצי. עד 7 סטים לשריר באימון (מתחת לסף של כ-11). בערך 15-18 סטים קשים לאימון + 4-6 בתוספת.</p>
+        <p class="g-muted">לעומת התוכנית הקודמת: כתף אמצעית 4 ← 12, גב 8 ← 14, ירך אחורית 7 ← 10, כתף אחורית 6 ← 9.</p></div>`;
+
+      h += `<div class="section-title">הערות</div><div class="card g-text"><ul>
+        <li>עדיף לשמור על הסדר: A בראשון ורביעי, B בשני וחמישי, C בשלישי ושישי – כך התאומים והבטן יוצאים 3 פעמים בשבוע כל אחד.</li>
+        <li>אין זמן? מוותרים על התרגיל האחרון (פטישים / פשיטה בפולי / הרחקה במכונה) או עושים דרופ אחד במקום שניים. <b>לא</b> מוותרים על הרחקות לצדדים ועל ירך אחורית.</li>
+        <li>לחיצת רגליים: לחיצה רגילה, טווח תנועה קצר יותר, בלי כאב בברך, רגליים גבוה על המשטח.</li>
+        <li>השמות הקיימים נשמרו כדי שההיסטוריה וההמלצות יימשכו. "כפיפת ברך במכונה" – מומלץ בישיבה.</li></ul></div>`;
+      box.innerHTML = h;
+    }
+
+
     // ========== INIT ==========
+    document.addEventListener("input", ev => {
+      if (ev.target && ev.target.closest && ev.target.closest("#normal-sets, #dynamic-sets")) renderSetHints();
+    });
     repairStoredData();
     requestPersistentStorage();
     applySavedBackground();
