@@ -3767,7 +3767,7 @@
         { id: "C", name: "אימון C – משיכה (גב, כתף אחורית, יד קדמית)",
           desc: "משיכה רחבה • טי-בר (טופ+בק-אוף) • חתירה ביד אחת בכבל • הרחקה אופקית • הרחקה לצדדים בכבל • פריצ'ר • פטישים",
           exercises: [
-            { name: "משיכה בפולי רחב", equip: "cable", type: "normal", warmups: 2, drops: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "משיכה בפולי רחב",
+            { name: "משיכה בפולי רחב", equip: "machine", type: "normal", warmups: 2, drops: 2, repMin: 6, repMax: 10, increment: 5, origName: "משיכה בפולי רחב",
               notes: "מכונה – לכן דרופים. מתיחה מלאה למעלה, מושכים לחזה העליון." },
             { name: "חתירה בטי-בר רחב", equip: "barbell", type: "topback", warmups: 1, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "חתירה בטי-בר רחב",
               notes: "בק-אוף ולא דרופ. אם יש – עדיף טי-בר עם תמיכה לחזה." },
@@ -4285,6 +4285,23 @@
       } catch (e) { console.warn("equipment migration failed", e); }
     }
 
+    // v9: lat pulldown is a Technogym machine (step 5). Fix only if still at the v8 auto-assigned cable/2.5.
+    function migrateLatPulldownV9() {
+      try {
+        const data = getData();
+        if (data.programSource !== RESEARCH_PROGRAM_ID || data.latV9 || !data.program) return;
+        const prog = normalizeProgram(data.program);
+        if (!prog) return;
+        const LAT = "משיכה בפולי רחב";
+        prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach(x => {
+          if ((x.name === LAT || x.origName === LAT) && x.equip === "cable" && Number(x.increment) === 2.5) { x.equip = "machine"; x.increment = 5; }
+        }));
+        data.program = prog;
+        data.latV9 = true;
+        saveData(data);
+      } catch (e) { console.warn("lat pulldown migration failed", e); }
+    }
+
 
     // ========== INIT ==========
     document.addEventListener("input", ev => {
@@ -4292,6 +4309,7 @@
     });
     repairStoredData();
     migrateResearchEquipment();
+    migrateLatPulldownV9();
     requestPersistentStorage();
     applySavedBackground();
     initHome();
