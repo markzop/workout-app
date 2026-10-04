@@ -673,6 +673,15 @@
     .today-tag { display: inline-block; font-size: 0.7rem; color: #fff; background: rgba(225, 29, 72, 0.35); border-radius: 8px; padding: 1px 6px; margin-right: 6px; vertical-align: middle; }
     .optional-drop .btn-sm, .add-set-btn .btn-sm { margin: 0 3px; }
     .paste-modal-box { max-height: calc(100vh - 32px); overflow-y: auto; }
+    .stopwatch { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 8px); left: 8px; z-index: 900; display: flex; align-items: center; gap: 4px;
+      background: rgba(17,17,17,0.88); border: 1px solid var(--border); border-radius: 22px; padding: 4px 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.45); direction: ltr; }
+    .stopwatch.running { border-color: rgba(34,197,94,0.7); }
+    .stopwatch .sw-time { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1rem; min-width: 52px; text-align: center; color: #fff; }
+    .stopwatch button { width: 32px; height: 32px; border-radius: 16px; border: 1px solid var(--border); background: var(--card2); color: var(--text); font-size: 0.85rem; cursor: pointer; padding: 0; }
+    .stopwatch button:active { border-color: var(--primary); }
+    .suggest-explain { font-size: 0.9rem; margin-top: 4px; color: #fde68a; line-height: 1.4; }
+    .rir-actual-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; font-size: 0.85rem; color: var(--text-muted); }
+    .rir-actual-row select { width: auto; padding: 8px 10px; }
     .set-row .set-hint { grid-column: 1 / -1; margin-top: -4px; font-size: 0.78rem; color: var(--text-muted); line-height: 1.35; }
     .set-row .set-hint:empty { display: none; }
     .set-label.backoff { color: #60a5fa; }
@@ -829,6 +838,13 @@
         <p id="dynamic-hint" style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;text-align:center;"></p>
       </div>
 
+      <div class="rir-actual-row card" style="padding:10px 14px;">
+        <label for="rir-actual" id="rir-actual-label">RIR בפועל בסט הכבד (לא חובה)</label>
+        <select id="rir-actual" class="form-input">
+          <option value="">—</option><option value="0">0 (כשל)</option><option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4">4</option><option value="5">5+</option>
+        </select>
+      </div>
       <div style="text-align:center;">
         <button class="btn btn-sm btn-outline" id="fill-rec-btn" onclick="fillRecommendedWeights()">⤵ מלא משקלים מומלצים</button>
       </div>
@@ -909,6 +925,13 @@
 
   <div class="toast" id="toast">נשמר בהצלחה ✓</div>
 
+  <div class="stopwatch hidden" id="stopwatch" role="timer" aria-label="סטופר">
+    <button id="sw-toggle" onclick="stopwatchToggle()" title="התחל" aria-label="התחל">▶</button>
+    <span class="sw-time" id="sw-time">00:00</span>
+    <button id="sw-restart" onclick="stopwatchRestart()" title="מהתחלה (אחרי סט)" aria-label="מהתחלה">⟲</button>
+    <button id="sw-reset" onclick="stopwatchReset()" title="איפוס" aria-label="איפוס">✕</button>
+  </div>
+
   <div class="paste-modal hidden" id="ex-modal" onclick="if (event.target === this) closeExerciseEditor()">
     <div class="paste-modal-box">
       <h3 id="ex-modal-title">עריכת תרגיל</h3>
@@ -957,6 +980,15 @@
           <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
         </select>
       </div>
+      <label class="form-label" for="ex-equip">ציוד (קובע את קפיצת המשקל)</label>
+      <select id="ex-equip" class="form-input" onchange="applyEquipStep('ex')">
+        <option value="">לא מוגדר</option>
+        <option value="machine">מכונה – 5 ק״ג</option>
+        <option value="cable">כבל – 2.5 ק״ג</option>
+        <option value="db">משקולות יד – 2 ק״ג</option>
+        <option value="barbell">מוט – 2.5 ק״ג</option>
+        <option value="bw">משקל גוף (+ חגורה) – 2.5 ק״ג</option>
+      </select>
       <div id="ex-prog-fields">
         <label class="form-label">טווח חזרות ליעד (לפיו מחושב היעד היומי)</label>
         <div class="form-row">
@@ -967,6 +999,7 @@
         <label class="form-label" for="ex-inc">תוספת משקל כשמתקדמים</label>
         <select id="ex-inc" class="form-input">
           <option value="1">1 ק״ג (תרגיל קטן / בידוד)</option>
+          <option value="2">2 ק״ג (משקולות יד)</option>
           <option value="2.5">2.5 ק״ג</option>
           <option value="5">5 ק״ג</option>
         </select>
@@ -1031,6 +1064,15 @@
           <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
         </select>
       </div>
+      <label class="form-label" for="sx-equip">ציוד (קובע את קפיצת המשקל)</label>
+      <select id="sx-equip" class="form-input" onchange="applyEquipStep('sx')">
+        <option value="">לא מוגדר</option>
+        <option value="machine">מכונה – 5 ק״ג</option>
+        <option value="cable">כבל – 2.5 ק״ג</option>
+        <option value="db">משקולות יד – 2 ק״ג</option>
+        <option value="barbell">מוט – 2.5 ק״ג</option>
+        <option value="bw">משקל גוף (+ חגורה) – 2.5 ק״ג</option>
+      </select>
       <div id="sx-prog-fields">
         <label class="form-label">טווח חזרות ליעד (לפיו מחושב היעד היומי)</label>
         <div class="form-row">
@@ -1041,6 +1083,7 @@
         <label class="form-label" for="sx-inc">תוספת משקל כשמתקדמים</label>
         <select id="sx-inc" class="form-input">
           <option value="1">1 ק״ג (תרגיל קטן / בידוד)</option>
+          <option value="2">2 ק״ג (משקולות יד)</option>
           <option value="2.5">2.5 ק״ג</option>
           <option value="5">5 ק״ג</option>
         </select>
@@ -1099,6 +1142,13 @@
     const LEGACY_SIMPLE = ["דדליפט"];
     const SMALL_INCREMENT = ["הרחקה לצדדים", "פשיטת מרפק מאחורי הראש עם משקולת", "כפיפה בפריצ'ר", "פטישים"];
     const DEFAULT_ACCESSORY_BY_DAY = ["calves", "abs", "calves", "abs", "calves", "abs", null]; // Sun..Sat
+    const EQUIP = {
+      machine: { label: "מכונה", step: 5 },
+      cable: { label: "כבל", step: 2.5 },
+      db: { label: "משקולות יד", step: 2 },
+      barbell: { label: "מוט", step: 2.5 },
+      bw: { label: "משקל גוף", step: 2.5 }
+    };
     const TYPE_LABELS = { normal: "2 קלים + כבד + דרופים", topback: "טופ + בק-אוף", simple: "סטים רגילים", max: "מקס חזרות" };
 
     function defaultExercise(name) {
@@ -1154,6 +1204,7 @@
         if (r) out.rir = r;                        // absent = by cycle week
       }
       if (typeof e.notes === "string" && e.notes.trim()) out.notes = e.notes.trim().slice(0, 600);
+      if (EQUIP[e.equip]) out.equip = e.equip;     // label + default step; the step itself is `increment`
       return out;
     }
 
@@ -1583,6 +1634,7 @@
       document.querySelectorAll("[id^=screen-]").forEach(el => el.classList.add("hidden"));
       document.getElementById(id).classList.remove("hidden");
       window.scrollTo(0, 0);
+      if (typeof renderStopwatch === "function") renderStopwatch();
     }
 
     function showToast(msg = "נשמר בהצלחה ✓") {
@@ -1882,6 +1934,9 @@
       const lastDyn = !!last && (last.type === "max" || last.type === "simple");
       currentDef = def;
       currentPlan = planFor(exerciseName, def);
+      document.getElementById("rir-actual").value = "";
+      document.getElementById("rir-actual-label").textContent =
+        `RIR בפועל ב${def.type === "topback" ? "טופ" : (def.type === "normal" ? "סט הכבד" : "סט הטוב")} (לא חובה)`;
       renderHowTo(def, currentPlan);
 
       if (isDyn) {
@@ -1952,6 +2007,7 @@
         prevDiv.innerHTML = "אין נתונים קודמים לתרגיל זה";
       }
 
+      markPrefills();
       if (typed) restoreTyped(typed); // unsaved input survives a structure change / rename
 
       renderSuggestion(exerciseName);
@@ -1984,7 +2040,15 @@
         return;
       }
 
-      savePerformance(currentExercise, sets, currentDef && currentDef.deload ? { deload: true } : null);
+      const extra = {};
+      if (currentDef && currentDef.deload) extra.deload = true;
+      const rirA = document.getElementById("rir-actual").value;
+      if (rirA !== "") {
+        extra.rir = parseInt(rirA, 10);
+        const t = currentDef ? rirFor(mainRole(currentDef), currentDef, getCycleInfo()) : null;
+        if (t) extra.rirT = t; // target at the time, so later weeks judge it fairly
+      }
+      savePerformance(currentExercise, sets, Object.keys(extra).length ? extra : null);
       sessionCompleted.add(currentExercise);
       showToast("נשמר ✓");
       setTimeout(() => backToWorkout(), 800);
@@ -2866,37 +2930,89 @@
       });
     }
 
+    // Role of the set the progression is based on (top / heavy / best set).
+    function mainRole(def) {
+      return def.type === "topback" ? "top" : (def.type === "normal" ? "heavy" : (def.type === "max" ? "max" : "simple"));
+    }
+    function parseRirRange(t) {
+      const m = /^\s*(\d+)\s*(?:-\s*(\d+))?\s*$/.exec(String(t == null ? "" : t));
+      if (!m) return null;
+      const a = +m[1], b = m[2] != null ? +m[2] : a;
+      return [Math.min(a, b), Math.max(a, b)];
+    }
+    const PROGRESSION_RULE = "שיטה: לפי הסט הקובע בפעם הקודמת (טופ / סט כבד / הסט הטוב). מעל הטווח ← מוסיפים קפיצה (2 קפיצות אם 2+ חזרות מעל). בסוף הטווח ← קפיצה אחת. בתוך הטווח ← אותו משקל ועוד חזרה. מתחת לטווח ← מורידים קפיצה; אם חסרה רק חזרה אחת – בפעם הראשונה נשארים באותו משקל. RIR שנרשם נלקח בחשבון.";
+
+    // Double progression from last session's working set (deload sessions ignored).
     function computeSuggestion(logs, def, opts) {
       const all = (logs || []).filter(e => getWorkingSet(e));
       if (!all.length) return null;
-      // deload-week sessions are lighter on purpose: progression ignores them
       const normal = all.filter(e => !e.deload);
       const entries = normal.length ? normal : all;
-      if (opts && opts.deload) {
-        const w = getWorkingSet(entries[entries.length - 1]);
-        const rule = "שבוע הורדה: כ-10% פחות משקל מהפעם האחרונה, חצי מהסטים, RIR 3-4. לא מתקדמים השבוע.";
-        if (def.type === "max" || w.weight == null) {
-          if (w.reps == null) return null;
-          return { weight: w.weight != null ? roundStep(w.weight * 0.9, def.increment) : null, reps: Math.max(1, w.reps - 3), kind: "deload", rule };
-        }
-        return { weight: roundStep(w.weight * 0.9, def.increment), reps: w.reps != null ? Math.max(def.repMin, Math.min(w.reps, def.repMax)) : def.repMin, kind: "deload", rule };
-      }
-      const last = getWorkingSet(entries[entries.length - 1]);
-      const prev = entries.length >= 2 ? getWorkingSet(entries[entries.length - 2]) : null;
+      const lastE = entries[entries.length - 1];
+      const prevE = entries.length >= 2 ? entries[entries.length - 2] : null;
+      const last = getWorkingSet(lastE);
+      const prev = prevE ? getWorkingSet(prevE) : null;
       const inc = def.increment || 2.5;
+      const lo = def.repMin, hi = def.repMax;
+      const W = w => `${fmtKg(w)} ק״ג`;
+      const did = (w, r) => (w != null ? `${W(w)} × ${r != null ? r : "—"}` : `${r} חזרות`);
+      if (opts && opts.deload) {
+        const rule = "שבוע הורדה: כ-10% פחות משקל מהפעם האחרונה, חצי מהסטים, RIR 3-4. לא מתקדמים השבוע.";
+        if (def.type === "max" || last.weight == null) {
+          if (last.reps == null) return null;
+          const w = last.weight != null ? roundStep(last.weight * 0.9, inc) : null;
+          const r = Math.max(1, last.reps - 3);
+          return { weight: w, reps: r, kind: "deload", rule, explain: `בפעם הקודמת: ${did(last.weight, last.reps)} ← השבוע (הורדה): ${did(w, r)}` };
+        }
+        const w = roundStep(last.weight * 0.9, inc);
+        const r = last.reps != null ? Math.max(lo, Math.min(last.reps, hi)) : lo;
+        return { weight: w, reps: r, kind: "deload", rule, explain: `בפעם הקודמת: ${did(last.weight, last.reps)} ← השבוע (הורדה, ‎-10%): ${W(w)} × ${r}` };
+      }
+      // max-reps / bodyweight: one more rep each time
       if (def.type === "max" || last.weight == null) {
         if (last.reps == null) return null;
-        return { weight: last.weight, reps: last.reps + 1, kind: "reps",
-          rule: "שיטה: מנסים חזרה אחת יותר מהפעם הקודמת." };
+        const over = last.reps >= hi ? ` (מעל ${hi} – אפשר להוסיף משקל)` : "";
+        return { weight: last.weight, reps: last.reps + 1, kind: "reps", rule: "שיטה: מנסים חזרה אחת יותר מהפעם הקודמת." + (def.type === "max" ? ` מעל ${hi} חזרות – מוסיפים משקל.` : ""),
+          explain: `בפעם הקודמת: ${did(last.weight, last.reps)}${over} ← היום: ${did(last.weight, last.reps + 1)}` };
       }
-      const rule = `שיטה: הגעת ל-${def.repMax} חזרות, או השווית/שיפרת פעמיים ברצף באותו משקל? מוסיפים ${fmtKg(inc)} ק״ג וחוזרים ל-${def.repMin} חזרות. אחרת: אותו משקל ועוד חזרה.`;
-      if (last.reps == null) return { weight: last.weight, reps: def.repMin, kind: "same", rule };
-      const hitTop = last.reps >= def.repMax;
-      const twice = !!prev && prev.weight === last.weight && prev.reps != null && last.reps >= prev.reps;
-      if (hitTop || twice) {
-        return { weight: Math.round((last.weight + inc) * 100) / 100, reps: def.repMin, kind: hitTop ? "top" : "twice", rule };
+      const rule = PROGRESSION_RULE;
+      if (last.reps == null) return { weight: last.weight, reps: lo, kind: "same", rule, explain: `בפעם הקודמת: ${W(last.weight)} (בלי חזרות) ← היום: ${W(last.weight)} × ${lo}` };
+      // RIR logged with the set: easier than the target counts as extra reps; harder = no extra rep
+      let eff = last.reps, rirNote = "", hard = false;
+      if (typeof lastE.rir === "number") {
+        const tgt = parseRirRange(lastE.rirT || rirFor(mainRole(def), def, getCycleInfo()));
+        rirNote = `, RIR ${lastE.rir}`;
+        if (tgt && lastE.rir > tgt[1]) { eff = last.reps + (lastE.rir - tgt[1]); rirNote += ` – קל מהיעד (${tgt[0] === tgt[1] ? tgt[0] : tgt[0] + "-" + tgt[1]})`; }
+        else if (tgt && lastE.rir < tgt[0]) { hard = true; rirNote += " – קשה מהיעד"; }
       }
-      return { weight: last.weight, reps: Math.min(last.reps + 1, def.repMax), kind: "rep", rule };
+      const range = `${lo}-${hi}`;
+      const head = `בפעם הקודמת: ${W(last.weight)} × ${last.reps}`;
+      const up = n => Math.round((last.weight + n * inc) * 100) / 100;
+      if (eff > hi) {
+        const n = eff - hi >= 2 ? 2 : 1;
+        const w = up(n);
+        return { weight: w, reps: lo, kind: "over", steps: n, rule,
+          explain: `${head} (מעל הטווח ${range}${rirNote}) ← היום: ${W(w)} × ${lo}${n === 2 ? " (2 קפיצות)" : ""}` };
+      }
+      if (eff === hi) {
+        const w = up(1);
+        return { weight: w, reps: lo, kind: "top", steps: 1, rule, explain: `${head} (סוף הטווח ${range}${rirNote}) ← היום: ${W(w)} × ${lo}` };
+      }
+      if (last.reps >= lo) {
+        const r = hard ? last.reps : Math.min(Math.max(last.reps, eff) + 1, hi);
+        return { weight: last.weight, reps: r, kind: "rep", rule,
+          explain: `${head} (בתוך הטווח ${range}${rirNote}) ← היום: אותו משקל, ${W(last.weight)} × ${r}` };
+      }
+      // below the range
+      const short = lo - last.reps;
+      const missedBefore = !!prev && prev.weight === last.weight && prev.reps != null && prev.reps < lo;
+      if (short >= 2 || missedBefore) {
+        const w = Math.round((last.weight - inc) * 100) / 100;
+        if (w > 0) return { weight: w, reps: lo, kind: "down", rule,
+          explain: `${head} (מתחת לטווח ${range}${missedBefore && short < 2 ? ", פעם שנייה ברצף" : ""}${rirNote}) ← היום: ${W(w)} × ${lo} (קפיצה אחת למטה)` };
+      }
+      return { weight: last.weight, reps: lo, kind: "short", rule,
+        explain: `${head} (חסרה חזרה אחת לטווח ${range}${rirNote}) ← היום: אותו משקל, ${W(last.weight)} × ${lo}` };
     }
 
     function fmtKg(n) {
@@ -2921,6 +3037,7 @@
       const canApply = def.type !== "max";
       box.innerHTML = `
         <div class="suggest-main" title="${esc(s.rule)}">🎯 היעד היום${where}: <b>${target}</b></div>
+        ${s.explain ? `<div class="suggest-explain" id="suggest-explain">${esc(s.explain)}</div>` : ""}
         <div class="suggest-rule">${esc(s.rule)}</div>
         ${canApply ? `<button class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="applySuggestion()">${def.type === "normal" ? "החל על הסט הכבד" : (def.type === "topback" ? "החל על הטופ" : "החל על כל הסטים")}</button>` : ""}`;
       box.classList.remove("hidden");
@@ -2972,7 +3089,7 @@
         <div class="pe-row">
           <div class="pe-info" onclick="openExerciseEditor('${kind}', ${gi}, ${ei})">
             <div class="exercise-name">${esc(e.name)}</div>
-            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type === "normal" && e.drops != null ? ` (${e.drops} דרופים)` : ""}${e.type === "topback" ? ` (${backoffCount(e)} בק-אוף)` : ""}${(e.type === "simple" || e.type === "max") && e.setCount != null ? ` (${e.setCount} סטים)` : ""}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}${e.warmups != null ? ` · ${e.warmups ? e.warmups + " חימום" : "בלי חימום"}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}${e.notes ? " · 📝" : ""}</div>
+            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type === "normal" && e.drops != null ? ` (${e.drops} דרופים)` : ""}${e.type === "topback" ? ` (${backoffCount(e)} בק-אוף)` : ""}${(e.type === "simple" || e.type === "max") && e.setCount != null ? ` (${e.setCount} סטים)` : ""}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}${e.warmups != null ? ` · ${e.warmups ? e.warmups + " חימום" : "בלי חימום"}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}${e.equip ? ` · ${EQUIP[e.equip].label}` : ""}${e.notes ? " · 📝" : ""}</div>
           </div>
           <div class="pe-btns">
             ${iconBtn("▲", `moveExercise('${kind}', ${gi}, ${ei}, -1)`, { disabled: ei === 0, title: "הזז למעלה" })}
@@ -3337,7 +3454,7 @@
     // Per-exercise overrides for today's session (structure, rep range, display label).
     // Own key, not in workoutData_v1 / backups, ignored from the next day.
     const SESSION_OVERRIDES_KEY = "workoutSessionOverrides_v1";
-    const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "rir", "notes"];
+    const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "rir", "notes", "equip"];
     let sxTarget = null;
 
     function readSessionOverrides() {
@@ -3425,6 +3542,7 @@
       $("backoffs").value = def.backoffs != null ? String(def.backoffs) : "";
       $("rir").value = def.rir || "";
       $("notes").value = def.notes || "";
+      $("equip").value = def.equip || "";
       updateStructFields(prefix);
     }
 
@@ -3435,6 +3553,16 @@
       $("drops-field").classList.toggle("hidden", type !== "normal");
       $("backoffs-field").classList.toggle("hidden", type !== "topback");
       $("setcount-field").classList.toggle("hidden", type === "normal" || type === "topback");
+    }
+
+    // Picking equipment sets the weight step (still editable afterwards).
+    function applyEquipStep(prefix) {
+      const eq = EQUIP[document.getElementById(prefix + "-equip").value];
+      if (!eq) return;
+      const inc = document.getElementById(prefix + "-inc");
+      const v = String(eq.step);
+      if (![...inc.options].some(o => o.value === v)) inc.add(new Option(`${v} ק״ג`, v));
+      inc.value = v;
     }
 
     function readStructFields(prefix) {
@@ -3456,7 +3584,8 @@
         warmups: wu !== "" ? parseInt(wu, 10) : null,
         backoffs: type === "topback" && bo !== "" ? parseInt(bo, 10) : null,
         rir: rir || null,
-        notes: notes || null
+        notes: notes || null,
+        equip: EQUIP[$("equip").value] ? $("equip").value : null
       };
     }
 
@@ -3464,7 +3593,7 @@
       prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => {
         if (x.name !== name) return;
         x.type = props.type; x.repMin = props.repMin; x.repMax = props.repMax; x.increment = props.increment;
-        ["setCount", "drops", "warmups", "backoffs", "rir", "notes"].forEach(f => {
+        ["setCount", "drops", "warmups", "backoffs", "rir", "notes", "equip"].forEach(f => {
           if (props[f] == null) delete x[f]; else x[f] = props[f];
         });
       }));
@@ -3497,11 +3626,13 @@
         const w = document.getElementById((dyn ? "dw" : "w") + i), r = document.getElementById((dyn ? "dr" : "r") + i);
         vals.push({ w: w ? w.value : "", r: r ? r.value : "" });
       }
+      vals.rir = document.getElementById("rir-actual").value;
       return vals;
     }
 
     // Put values back by set position; adds rows if needed so nothing typed disappears.
     function restoreTyped(vals) {
+      if (vals && vals.rir) document.getElementById("rir-actual").value = vals.rir;
       if (!vals || !vals.length) return;
       let lastFilled = -1;
       vals.forEach((v, i) => { if (v.w !== "" || v.r !== "") lastFilled = i; });
@@ -3604,65 +3735,65 @@
         { id: "A", name: "אימון A – רגליים",
           desc: "לחיצת רגליים (טופ+בק-אוף) • בולגרי • דדליפט רומני • כפיפת ברך בישיבה • פשיטת ברך • הרחקה לצדדים במכונה",
           exercises: [
-            { name: "לחיצת רגליים", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 5, origName: "לחיצת רגליים",
+            { name: "לחיצת רגליים", equip: "machine", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 5, origName: "לחיצת רגליים",
               notes: "טווח תנועה קצר יותר, בלי כאב בברך, רגליים גבוה על המשטח. הורדה מבוקרת 2-3 שנ׳, בלי לקפוץ מהתחתית." },
-            { name: "לאנץ' בולגרי", type: "simple", setCount: 2, warmups: 0, repMin: 8, repMax: 12, increment: 2, rir: "1-2", origName: "לאנץ' בולגרי",
+            { name: "לאנץ' בולגרי", equip: "db", type: "simple", setCount: 2, warmups: 0, repMin: 8, repMax: 12, increment: 2, rir: "1-2", origName: "לאנץ' בולגרי",
               notes: "2 סטים לכל רגל. משקולות ביד, צעד ארוך, נטייה קלה קדימה (דגש על הישבן)." },
-            { name: "דדליפט רומני", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, rir: "1-2",
+            { name: "דדליפט רומני", equip: "barbell", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, rir: "1-2",
               notes: "מחליף את הדדליפט הרגיל. יורדים עד מתיחה חזקה בירך האחורית, גב ניטרלי. בלי כשל – תמיד לפחות חזרה אחת ברזרבה." },
-            { name: "כפיפת ברך במכונה", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 2.5, origName: "כפיפת ברך במכונה",
+            { name: "כפיפת ברך במכונה", equip: "machine", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 5, origName: "כפיפת ברך במכונה",
               notes: "עדיף בישיבה (מתיחה גדולה יותר בירך האחורית). בדרופ האחרון: 3-6 חזרות חלקיות בטווח המתיחה." },
-            { name: "פשיטת ברך במכונה", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 2.5, origName: "פשיטת ברך במכונה",
+            { name: "פשיטת ברך במכונה", equip: "machine", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 5, origName: "פשיטת ברך במכונה",
               notes: "גב מעט אחורה. בדרופ האחרון: 3-6 חזרות חלקיות בחלק התחתון (המתוח)." },
-            { name: "הרחקה לצדדים במכונה", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 2.5,
+            { name: "הרחקה לצדדים במכונה", equip: "machine", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 5,
               notes: "כתף אמצעית – גם באימון הרגליים, כדי להגיע לנפח שבועי מספיק. תנועה נקייה בלי תנופה." }
           ] },
         { id: "B", name: "אימון B – דחיפה (חזה, כתפיים, יד אחורית)",
           desc: "באנץ' עליון (טופ+בק-אוף) • מקבילים • פרפר • הרחקה לצדדים • פשיטה מאחורי הראש • פשיטה בפולי",
           exercises: [
-            { name: "באנץ' עליון", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "באנץ' עליון",
+            { name: "באנץ' עליון", equip: "barbell", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "באנץ' עליון",
               notes: "מוט או סמית', ספסל בשיפוע של כ-30°. בטופ – עם שומר. בק-אוף ולא דרופ." },
-            { name: "מקבילים", type: "max", setCount: 2, warmups: 0, repMin: 6, repMax: 15, increment: 2.5, origName: "מקבילים",
+            { name: "מקבילים", equip: "bw", type: "max", setCount: 2, warmups: 0, repMin: 6, repMax: 15, increment: 2.5, origName: "מקבילים",
               notes: "גוף נוטה קדימה, יורדים עמוק למתיחה בחזה. מעל 15 חזרות – מוסיפים משקל בחגורה." },
-            { name: "פרפר", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 2.5, origName: "פרפר",
+            { name: "פרפר", equip: "machine", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 5, origName: "פרפר",
               notes: "מתיחה מלאה בפתיחה. בדרופ האחרון: חזרות חלקיות בטווח הפתוח." },
-            { name: "הרחקה לצדדים", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 1, origName: "הרחקה לצדדים",
+            { name: "הרחקה לצדדים", equip: "db", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 2, origName: "הרחקה לצדדים",
               notes: "משקולות, בלי תנופה, קפיצה של 1 ק״ג. בדרופ האחרון: חזרות חלקיות." },
-            { name: "פשיטת מרפק מאחורי הראש עם משקולת", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 1, origName: "פשיטת מרפק מאחורי הראש עם משקולת",
+            { name: "פשיטת מרפק מאחורי הראש עם משקולת", equip: "db", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 2, origName: "פשיטת מרפק מאחורי הראש עם משקולת",
               notes: "מעל הראש – הראש הארוך של התלת-ראשי עובד במתיחה (Maeo 2023). אפשר גם בכבל." },
-            { name: "פשיטת מרפק בפולי", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 2.5, origName: "פשיטת מרפק בפולי",
+            { name: "פשיטת מרפק בפולי", equip: "cable", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 2.5, origName: "פשיטת מרפק בפולי",
               notes: "מרפקים צמודים לגוף, יישור מלא בכל חזרה." }
           ] },
         { id: "C", name: "אימון C – משיכה (גב, כתף אחורית, יד קדמית)",
           desc: "משיכה רחבה • טי-בר (טופ+בק-אוף) • חתירה ביד אחת בכבל • הרחקה אופקית • הרחקה לצדדים בכבל • פריצ'ר • פטישים",
           exercises: [
-            { name: "משיכה בפולי רחב", type: "normal", warmups: 2, drops: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "משיכה בפולי רחב",
+            { name: "משיכה בפולי רחב", equip: "cable", type: "normal", warmups: 2, drops: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "משיכה בפולי רחב",
               notes: "מכונה – לכן דרופים. מתיחה מלאה למעלה, מושכים לחזה העליון." },
-            { name: "חתירה בטי-בר רחב", type: "topback", warmups: 1, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "חתירה בטי-בר רחב",
+            { name: "חתירה בטי-בר רחב", equip: "barbell", type: "topback", warmups: 1, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "חתירה בטי-בר רחב",
               notes: "בק-אוף ולא דרופ. אם יש – עדיף טי-בר עם תמיכה לחזה." },
-            { name: "חתירה ביד אחת בכבל", type: "normal", warmups: 0, drops: 2, repMin: 8, repMax: 12, increment: 2.5,
+            { name: "חתירה ביד אחת בכבל", equip: "cable", type: "normal", warmups: 0, drops: 2, repMin: 8, repMax: 12, increment: 2.5,
               notes: "טווח ארוך: נותנים לשכמה להימתח קדימה, ומושכים לכיוון המותן." },
-            { name: "הרחקה אופקית במכונה", type: "normal", warmups: 0, drops: 2, repMin: 12, repMax: 20, increment: 2.5, origName: "הרחקה אופקית במכונה",
+            { name: "הרחקה אופקית במכונה", equip: "machine", type: "normal", warmups: 0, drops: 2, repMin: 12, repMax: 20, increment: 5, origName: "הרחקה אופקית במכונה",
               notes: "כתף אחורית. ידיות בגובה הכתפיים, בלי לסחוב עם הגב." },
-            { name: "הרחקה לצדדים בכבל", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 1,
+            { name: "הרחקה לצדדים בכבל", equip: "cable", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 2.5,
               notes: "הכבל עובר מאחורי הגוף – עבודה במתיחה. בדרופ האחרון: חזרות חלקיות." },
-            { name: "כפיפה בפריצ'ר", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 1, origName: "כפיפה בפריצ'ר",
+            { name: "כפיפה בפריצ'ר", equip: "barbell", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 2.5, origName: "כפיפה בפריצ'ר",
               notes: "יורדים כמעט עד יישור מלא, לאט." },
-            { name: "פטישים", type: "normal", warmups: 0, drops: 2, repMin: 8, repMax: 12, increment: 1, origName: "פטישים",
+            { name: "פטישים", equip: "db", type: "normal", warmups: 0, drops: 2, repMin: 8, repMax: 12, increment: 2, origName: "פטישים",
               notes: "אחיזה ניטרלית, בלי נדנוד של הגוף." }
           ] }
       ],
       accessories: [
         { id: "abs", name: "בטן", desc: null, exercises: [
-          { name: "כפיפת בטן במכשיר", type: "normal", warmups: 1, drops: 1, repMin: 10, repMax: 15, increment: 2.5, origName: "כפיפת בטן במכשיר",
+          { name: "כפיפת בטן במכשיר", equip: "machine", type: "normal", warmups: 1, drops: 1, repMin: 10, repMax: 15, increment: 5, origName: "כפיפת בטן במכשיר",
             notes: "כבד + דרופ אחד. מעגלים את הגב, נושפים בירידה." },
-          { name: "הרמות רגליים במתח", type: "max", setCount: 2, warmups: 0, repMin: 6, repMax: 15, increment: 2.5, origName: "הרמות רגליים במתח",
+          { name: "הרמות רגליים במתח", equip: "bw", type: "max", setCount: 2, warmups: 0, repMin: 6, repMax: 15, increment: 2.5, origName: "הרמות רגליים במתח",
             notes: "עד כשל טכני, בלי נדנוד. מעל 15 חזרות – מוסיפים קושי." }
         ] },
         { id: "calves", name: "תאומים", desc: null, exercises: [
-          { name: "הרמת עקבים בעמידה", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 2.5, origName: "הרמת עקבים בעמידה",
+          { name: "הרמת עקבים בעמידה", equip: "machine", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 5, origName: "הרמת עקבים בעמידה",
             notes: "עצירה של 2 שנ׳ בתחתית (במתיחה), טווח מלא." },
-          { name: "הרמת עקבים בישיבה", type: "normal", warmups: 0, drops: 2, repMin: 12, repMax: 20, increment: 2.5, origName: "הרמת עקבים בישיבה",
+          { name: "הרמת עקבים בישיבה", equip: "machine", type: "normal", warmups: 0, drops: 2, repMin: 12, repMax: 20, increment: 5, origName: "הרמת עקבים בישיבה",
             notes: "עצירה של 1-2 שנ׳ בתחתית, טווח מלא." }
         ] }
       ],
@@ -3777,7 +3908,12 @@
 
     let currentDef = null, currentPlan = null, currentRecs = {};
     const kg = w => `${fmtKg(w)} ק״ג`;
-    const valOf = id => { const el = document.getElementById(id); return el ? numOrNull(el.value) : null; };
+    // A value pre-filled from last session (and not changed since) is not "typed today".
+    const isPrefill = el => el.dataset.prefill != null && el.dataset.prefill !== "" && el.value === el.dataset.prefill;
+    const valOf = id => { const el = document.getElementById(id); return el && !isPrefill(el) ? numOrNull(el.value) : null; };
+    function markPrefills() {
+      document.querySelectorAll("#normal-sets input, #dynamic-sets input").forEach(el => { el.dataset.prefill = el.value; });
+    }
 
     function renderSetHints() {
       const def = currentDef, plan = currentPlan;
@@ -3828,7 +3964,7 @@
       Object.keys(currentRecs).forEach(id => {
         const el = document.getElementById(id);
         const row = el && el.closest(".set-row");
-        if (!el || el.value !== "" || (row && row.classList.contains("hidden"))) return;
+        if (!el || (el.value !== "" && !isPrefill(el)) || (row && row.classList.contains("hidden"))) return;
         el.value = fmtKg(currentRecs[id]);
         n++;
       });
@@ -3868,7 +4004,12 @@
         steps.push(`${setCountOf(def)} סטים: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("simple", def, cyc))}. מנוחה ${REST.set} בין הסטים.`);
       }
       if (def.deload) steps.push("🧘 שבוע הורדה: כ-10% פחות משקל, חצי מהסטים, בלי דרופים, RIR 3-4. לא מתקדמים השבוע.");
-      else if (def.type !== "max") steps.push(`התקדמות: כשמגיעים ל-${def.repMax} חזרות ב${def.type === "topback" ? "טופ" : (def.type === "normal" ? "סט הכבד" : "סטים")} (או משווים פעמיים ברצף) – מוסיפים ${fmtKg(inc)} ק״ג וחוזרים ל-${def.repMin}.`);
+      else {
+        const s = plan && plan.s;
+        if (s && s.explain) steps.push(`התקדמות: ${s.explain}.`);
+        if (def.type !== "max") steps.push(`כלל ההתקדמות (קפיצה ${fmtKg(inc)} ק״ג${def.equip ? ", " + EQUIP[def.equip].label : ""}): מעל הטווח ← +קפיצה (2 קפיצות אם 2+ חזרות מעל) · סוף הטווח ← +קפיצה · בתוך הטווח ← +חזרה · מתחת לטווח ← קפיצה למטה (חסרה חזרה אחת פעם ראשונה – נשארים).`);
+        else steps.push(`כלל ההתקדמות: עוד חזרה בכל פעם. מעל ${def.repMax} חזרות ← מוסיפים משקל.`);
+      }
       return steps;
     }
 
@@ -4025,7 +4166,7 @@
         ["בתוך דרופים", REST.drop], ["בין תרגילים", "2 דק׳"]]) + `</div>`;
 
       const exCard = e => `<div class="g-ex"><div class="g-ex-name">${esc(e.name)}</div>
-        <div class="g-ex-plan">${esc(TYPE_LABELS[e.type] || "")} · ${esc(planText(e))}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}</div>
+        <div class="g-ex-plan">${esc(TYPE_LABELS[e.type] || "")} · ${esc(planText(e))}${e.equip ? ` · ${EQUIP[e.equip].label} (${fmtKg(e.increment)} ק״ג)` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}</div>
         ${e.notes ? `<div class="g-ex-notes">${esc(e.notes)}</div>` : ""}</div>`;
       const days = { A: "ראשון ורביעי", B: "שני וחמישי", C: "שלישי ושישי" };
       prog.workouts.forEach(w => {
@@ -4042,7 +4183,12 @@
         `<p class="g-muted">${week ? (c.deload ? "השבוע: שבוע הורדה – RIR 3-4 בכל הסטים." : `השבוע: שבוע ${week} – עמודת ${week <= 2 ? "שבועות 1-2" : "שבועות 3-6"}.`) : ""} יעד ה-RIR מוצג גם ליד כל סט במסך הרישום.</p></div>`;
 
       h += `<div class="section-title">התקדמות</div><div class="card g-text"><ul>
-        <li>פרוגרסיה כפולה: מגיעים לסוף טווח החזרות בטופ או בסט הכבד, או משווים/משפרים פעמיים ברצף באותו משקל? מוסיפים את הקפיצה של התרגיל וחוזרים לתחתית הטווח.</li>
+        <li>פרוגרסיה כפולה לפי הסט הקובע בפעם הקודמת (טופ / סט כבד):</li>
+        <li>מעל הטווח ← מוסיפים קפיצה, ו-2 קפיצות אם עברת את הטווח ב-2+ חזרות. בסוף הטווח ← קפיצה אחת וחוזרים לתחתית הטווח.</li>
+        <li>בתוך הטווח ← אותו משקל, ומנסים עוד חזרה.</li>
+        <li>מתחת לטווח ← מורידים קפיצה. אם חסרה רק חזרה אחת – בפעם הראשונה נשארים באותו משקל, ואם זה קורה פעמיים ברצף – מורידים.</li>
+        <li>אם רושמים RIR בפועל: קל מהיעד נחשב כחזרות נוספות, קשה מהיעד – לא מוסיפים חזרה.</li>
+        <li>קפיצות משקל לפי ציוד: מכונה 5 ק״ג, כבל 2.5 ק״ג, משקולות יד 2 ק״ג, מוט 2.5 ק״ג. כל המשקלים המומלצים (חימום, בק-אוף, דרופים, הורדה) מעוגלים לקפיצה של התרגיל.</li>
         <li>בבק-אוף שומרים על 10-15% פחות מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
         <li>אימונים של שבוע ההורדה לא נחשבים בחישוב ההתקדמות.</li></ul></div>`;
 
@@ -4073,14 +4219,83 @@
     }
 
 
+    // ========== V8: STOPWATCH (count-up; survives screens, backgrounding and reloads) ==========
+    const STOPWATCH_KEY = "workoutStopwatch_v1"; // { start: ms timestamp | null, acc: ms }
+    function readStopwatch() {
+      try {
+        const o = JSON.parse(localStorage.getItem(STOPWATCH_KEY) || "null");
+        if (o && typeof o === "object") return { start: typeof o.start === "number" ? o.start : null, acc: Math.max(0, +o.acc || 0) };
+      } catch (e) {}
+      return { start: null, acc: 0 };
+    }
+    function writeStopwatch(st) { try { localStorage.setItem(STOPWATCH_KEY, JSON.stringify(st)); } catch (e) {} }
+    function stopwatchElapsed(st = readStopwatch()) {
+      return st.acc + (st.start != null ? Math.max(0, Date.now() - st.start) : 0);
+    }
+    function fmtElapsed(ms) {
+      const t = Math.floor(ms / 1000), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = t % 60;
+      const pad = n => String(n).padStart(2, "0");
+      return h ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+    }
+    function stopwatchToggle() {
+      const st = readStopwatch();
+      if (st.start != null) { st.acc = stopwatchElapsed(st); st.start = null; }
+      else st.start = Date.now();
+      writeStopwatch(st);
+      renderStopwatch();
+    }
+    function stopwatchRestart() { writeStopwatch({ start: Date.now(), acc: 0 }); renderStopwatch(); }
+    function stopwatchReset() { writeStopwatch({ start: null, acc: 0 }); renderStopwatch(); }
+    function renderStopwatch() {
+      const el = document.getElementById("stopwatch");
+      if (!el) return;
+      const st = readStopwatch();
+      const running = st.start != null;
+      const onWorkout = ["screen-workout", "screen-log"].some(id => !document.getElementById(id).classList.contains("hidden"));
+      el.classList.toggle("hidden", !(onWorkout || running || st.acc > 0)); // paused with time stays visible
+      el.classList.toggle("running", running);
+      document.getElementById("sw-time").textContent = fmtElapsed(stopwatchElapsed(st));
+      const tg = document.getElementById("sw-toggle");
+      tg.textContent = running ? "⏸" : "▶";
+      tg.title = running ? "השהה" : (st.acc ? "המשך" : "התחל");
+      tg.setAttribute("aria-label", tg.title);
+    }
+    function startStopwatchTicker() {
+      renderStopwatch();
+      setInterval(renderStopwatch, 500);
+      document.addEventListener("visibilitychange", renderStopwatch);
+    }
+
+    // v8: research program loaded under v7 gets equipment + step (only exercises without equipment set yet).
+    function migrateResearchEquipment() {
+      try {
+        const data = getData();
+        if (data.programSource !== RESEARCH_PROGRAM_ID || data.equipV8 || !data.program) return;
+        const src = {};
+        RESEARCH_PROGRAM.workouts.concat(RESEARCH_PROGRAM.accessories).forEach(g => g.exercises.forEach(e => { src[e.name] = e; }));
+        const prog = normalizeProgram(data.program);
+        if (!prog) return;
+        prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach(x => {
+          const r = src[x.name];
+          if (r && r.equip && !x.equip) { x.equip = r.equip; x.increment = r.increment; }
+        }));
+        data.program = prog;
+        data.equipV8 = true;
+        saveData(data);
+      } catch (e) { console.warn("equipment migration failed", e); }
+    }
+
+
     // ========== INIT ==========
     document.addEventListener("input", ev => {
       if (ev.target && ev.target.closest && ev.target.closest("#normal-sets, #dynamic-sets")) renderSetHints();
     });
     repairStoredData();
+    migrateResearchEquipment();
     requestPersistentStorage();
     applySavedBackground();
     initHome();
+    startStopwatchTicker();
   </script>
   <script>
     if ('serviceWorker' in navigator) {
