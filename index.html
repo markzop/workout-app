@@ -988,7 +988,23 @@
         <option value="db">משקולות יד – 2 ק״ג</option>
         <option value="barbell">מוט – 2.5 ק״ג</option>
         <option value="bw">משקל גוף (+ חגורה) – 2.5 ק״ג</option>
+        <option value="machine_lb">מכונה בליברות (סטק מותאם)</option>
       </select>
+
+      <div id="ex-stack-fields" class="hidden">
+        <label class="form-label">סטק בליברות (מכונות Paramount וכד׳)</label>
+        <div class="form-row">
+          <div style="flex:1"><label class="form-label" for="ex-stack-start">התחלה</label>
+            <input type="number" id="ex-stack-start" class="form-input" inputmode="decimal" min="1" step="any" placeholder="15" oninput="updateStackPreview('ex')" /></div>
+          <div style="flex:1"><label class="form-label" for="ex-stack-step">קפיצה</label>
+            <input type="number" id="ex-stack-step" class="form-input" inputmode="decimal" min="0.5" step="any" placeholder="15" oninput="updateStackPreview('ex')" /></div>
+          <div style="flex:1"><label class="form-label" for="ex-stack-plates">מס׳ פלטות</label>
+            <input type="number" id="ex-stack-plates" class="form-input" inputmode="numeric" min="0" max="40" placeholder="16" oninput="updateStackPreview('ex')" /></div>
+        </div>
+        <label class="form-label" for="ex-stack-list">רשימת משקלים (אופציונלי – דורסת את החישוב; מופרד בפסיקים)</label>
+        <input type="text" id="ex-stack-list" class="form-input" dir="ltr" placeholder="15, 30, 45, …" oninput="updateStackPreview('ex')" />
+        <div id="ex-stack-preview" class="pe-note" style="margin-top:6px;"></div>
+      </div>
       <div id="ex-prog-fields">
         <label class="form-label">טווח חזרות ליעד (לפיו מחושב היעד היומי)</label>
         <div class="form-row">
@@ -1072,7 +1088,23 @@
         <option value="db">משקולות יד – 2 ק״ג</option>
         <option value="barbell">מוט – 2.5 ק״ג</option>
         <option value="bw">משקל גוף (+ חגורה) – 2.5 ק״ג</option>
+        <option value="machine_lb">מכונה בליברות (סטק מותאם)</option>
       </select>
+
+      <div id="sx-stack-fields" class="hidden">
+        <label class="form-label">סטק בליברות (מכונות Paramount וכד׳)</label>
+        <div class="form-row">
+          <div style="flex:1"><label class="form-label" for="sx-stack-start">התחלה</label>
+            <input type="number" id="sx-stack-start" class="form-input" inputmode="decimal" min="1" step="any" placeholder="15" oninput="updateStackPreview('sx')" /></div>
+          <div style="flex:1"><label class="form-label" for="sx-stack-step">קפיצה</label>
+            <input type="number" id="sx-stack-step" class="form-input" inputmode="decimal" min="0.5" step="any" placeholder="15" oninput="updateStackPreview('sx')" /></div>
+          <div style="flex:1"><label class="form-label" for="sx-stack-plates">מס׳ פלטות</label>
+            <input type="number" id="sx-stack-plates" class="form-input" inputmode="numeric" min="0" max="40" placeholder="16" oninput="updateStackPreview('sx')" /></div>
+        </div>
+        <label class="form-label" for="sx-stack-list">רשימת משקלים (אופציונלי – דורסת את החישוב; מופרד בפסיקים)</label>
+        <input type="text" id="sx-stack-list" class="form-input" dir="ltr" placeholder="15, 30, 45, …" oninput="updateStackPreview('sx')" />
+        <div id="sx-stack-preview" class="pe-note" style="margin-top:6px;"></div>
+      </div>
       <div id="sx-prog-fields">
         <label class="form-label">טווח חזרות ליעד (לפיו מחושב היעד היומי)</label>
         <div class="form-row">
@@ -1147,7 +1179,8 @@
       cable: { label: "כבל", step: 2.5 },
       db: { label: "משקולות יד", step: 2 },
       barbell: { label: "מוט", step: 2.5 },
-      bw: { label: "משקל גוף", step: 2.5 }
+      bw: { label: "משקל גוף", step: 2.5 },
+      machine_lb: { label: "מכונה בליברות", step: 15, unit: "lb" }
     };
     const TYPE_LABELS = { normal: "2 קלים + כבד + דרופים", topback: "טופ + בק-אוף", simple: "סטים רגילים", max: "מקס חזרות" };
 
@@ -1188,7 +1221,7 @@
       if (!(repMin > 0 && repMin <= 100)) repMin = base.repMin;
       if (!(repMax >= repMin && repMax <= 100)) repMax = Math.max(repMin, base.repMax);
       let increment = parseFloat(e.increment);
-      if (!(increment > 0 && increment <= 50)) increment = base.increment;
+      if (!(increment > 0 && increment <= 100)) increment = base.increment;
       const out = { name, type, repMin, repMax, increment };
       if (typeof e.origName === "string" && e.origName) out.origName = e.origName;
       const sc = parseInt(e.setCount, 10);
@@ -1205,7 +1238,115 @@
       }
       if (typeof e.notes === "string" && e.notes.trim()) out.notes = e.notes.trim().slice(0, 600);
       if (EQUIP[e.equip]) out.equip = e.equip;     // label + default step; the step itself is `increment`
+      if (out.equip === "machine_lb" || e.unit === "lb") out.unit = "lb";
+      const stack = normalizeStack(e.stack);
+      if (stack) out.stack = stack;
+      else {
+        const ss = parseFloat(e.stackStart), sp = parseInt(e.stackPlates, 10);
+        if (ss > 0 && sp >= 0 && sp <= 40) {
+          out.stackStart = ss;
+          out.stackPlates = sp;
+          const built = buildStack(ss, out.increment, sp);
+          if (built) out.stack = built;
+        }
+      }
+      if (out.equip === "machine_lb" && out.stack && out.stack.length && out.stackStart == null) {
+        out.stackStart = out.stack[0];
+        out.stackPlates = out.stack.length - 1;
+      }
       return out;
+    }
+
+    function normalizeStack(raw) {
+      if (!Array.isArray(raw)) return null;
+      const nums = raw.map(x => parseFloat(x)).filter(x => x > 0 && x <= 2000);
+      if (nums.length < 2) return null;
+      const uniq = [];
+      nums.sort((a, b) => a - b).forEach(n => {
+        const v = Math.round(n * 100) / 100;
+        if (!uniq.length || Math.abs(uniq[uniq.length - 1] - v) > 1e-6) uniq.push(v);
+      });
+      return uniq.length >= 2 ? uniq : null;
+    }
+    function buildStack(start, step, plates) {
+      start = Number(start); step = Number(step); plates = parseInt(plates, 10);
+      if (!(start > 0) || !(step > 0) || !(plates >= 0 && plates <= 40)) return null;
+      const out = [];
+      for (let i = 0; i <= plates; i++) out.push(Math.round((start + i * step) * 100) / 100);
+      return out;
+    }
+    function parseStackList(text) {
+      if (!text || !String(text).trim()) return null;
+      return normalizeStack(String(text).split(/[,\s]+/).filter(Boolean));
+    }
+    const DB_STACK = (() => { const a = []; for (let w = 4; w <= 50; w += 2) a.push(w); return a; })();
+    function stackWeights(def) {
+      if (!def) return null;
+      if (def.stack && def.stack.length >= 2) return def.stack;
+      if (def.equip === "machine_lb") return buildStack(def.stackStart, def.increment, def.stackPlates);
+      if (def.equip === "db") return DB_STACK;
+      return null;
+    }
+    function unitOf(def) {
+      return def && (def.unit === "lb" || def.equip === "machine_lb") ? "lb" : "kg";
+    }
+    function unitLabel(def) {
+      return unitOf(def) === "lb" ? "lb" : "ק״ג";
+    }
+    function wt(w, def) {
+      return w == null ? "—" : `${fmtKg(w)} ${unitLabel(def)}`;
+    }
+    function snapNearest(x, stack) {
+      let best = stack[0], bd = Math.abs(x - best);
+      for (const w of stack) { const d = Math.abs(x - w); if (d < bd - 1e-9) { best = w; bd = d; } }
+      return best;
+    }
+    function snapDown(x, stack) {
+      let best = null;
+      for (const w of stack) { if (w <= x + 1e-9) best = w; }
+      return best != null ? best : stack[0];
+    }
+    function snapUp(x, stack) {
+      for (const w of stack) { if (w >= x - 1e-9) return w; }
+      return stack[stack.length - 1];
+    }
+    function stackIndex(weight, stack) {
+      let best = 0, bd = Math.abs(weight - stack[0]);
+      for (let i = 1; i < stack.length; i++) {
+        const d = Math.abs(weight - stack[i]);
+        if (d < bd - 1e-9) { best = i; bd = d; }
+      }
+      return best;
+    }
+    function roundWeight(x, def, mode) {
+      const stack = stackWeights(def);
+      if (!stack) return roundStep(x, (def && def.increment) || 2.5);
+      if (mode === "down") return snapDown(x, stack);
+      if (mode === "up") return snapUp(x, stack);
+      return snapNearest(x, stack);
+    }
+    function moveStack(weight, n, def) {
+      const stack = stackWeights(def);
+      if (!stack) return Math.round((weight + n * ((def && def.increment) || 2.5)) * 100) / 100;
+      const i = Math.min(stack.length - 1, Math.max(0, stackIndex(weight, stack) + n));
+      return stack[i];
+    }
+    function stepBelowDef(x, ref, def) {
+      const stack = stackWeights(def);
+      if (!stack) return stepBelow(x, ref, (def && def.increment) || 2.5);
+      let v = snapDown(x, stack);
+      if (ref != null && v >= ref - 1e-9) {
+        const ri = stackIndex(ref, stack);
+        v = ri > 0 ? stack[ri - 1] : null;
+      }
+      return v != null && v > 0 ? v : null;
+    }
+    function stackSummary(def) {
+      const stack = stackWeights(def);
+      if (!stack) return "";
+      const head = stack.slice(0, 3).join(", ");
+      const tail = stack[stack.length - 1];
+      return `${head} … ${tail} (${stack.length} עמדות)`;
     }
 
     function normalizeGroup(g) {
@@ -1546,7 +1687,7 @@
           meta = `פעם קודמת: ${last.sets.map(s => s?.reps || "—").join(" / ")} חזרות`;
         } else {
           const heavy = last.sets[2] || last.sets[0];
-          meta = `פעם קודמת: ${heavy?.weight || "—"} ק״ג`;
+          meta = `פעם קודמת: ${heavy?.weight != null ? wt(heavy.weight, getEffectiveDef(name)) : "—"}`;
         }
       }
       const check = done ? `<span class="check-done">✓</span>` : `<span class="arrow">‹</span>`;
@@ -1821,7 +1962,7 @@
         container.innerHTML += `
           <div class="set-row" id="dyn-row-${i}">
             <div class="set-label ${labelClass}">סט ${i}</div>
-            <input type="number" id="dw${i}" placeholder="ק״ג" inputmode="decimal" value="${prev.weight || ""}" />
+            <input type="number" id="dw${i}" placeholder="${unitLabel(currentDef)}" inputmode="decimal" value="${prev.weight || ""}" />
             <input type="number" id="dr${i}" placeholder="${repsPlaceholder}" inputmode="numeric" value="${prev.reps || ""}" />
             <div class="set-hint" id="dhint-${i}"></div>
           </div>`;
@@ -1844,7 +1985,7 @@
       document.getElementById("dynamic-sets-container").insertAdjacentHTML("beforeend", `
         <div class="set-row" id="dyn-row-${dynamicSetCount}">
           <div class="set-label ${labelClass}">סט ${dynamicSetCount}</div>
-          <input type="number" id="dw${dynamicSetCount}" placeholder="ק״ג" inputmode="decimal" value="${esc(back.w)}" />
+          <input type="number" id="dw${dynamicSetCount}" placeholder="${unitLabel(currentDef)}" inputmode="decimal" value="${esc(back.w)}" />
           <input type="number" id="dr${dynamicSetCount}" placeholder="${repsPlaceholder}" inputmode="numeric" value="${esc(back.r)}" />
           <div class="set-hint" id="dhint-${dynamicSetCount}"></div>
         </div>`);
@@ -1909,7 +2050,7 @@
     }
 
     // ========== LOG SETS ==========
-    const wxr = st => `${st.weight != null ? st.weight : "—"}×${st.reps != null ? st.reps : "—"}`;
+    const wxr = (st, def) => `${st.weight != null ? wt(st.weight, def || currentDef) : "—"}×${st.reps != null ? st.reps : "—"}`;
 
     function openLog(exerciseName, typed) {
       currentExercise = exerciseName;
@@ -1934,6 +2075,8 @@
       const lastDyn = !!last && (last.type === "max" || last.type === "simple");
       currentDef = def;
       currentPlan = planFor(exerciseName, def);
+      const ph = unitLabel(def);
+      for (let i = 1; i <= 6; i++) { const w = document.getElementById("w" + i); if (w) w.placeholder = ph; }
       document.getElementById("rir-actual").value = "";
       document.getElementById("rir-actual-label").textContent =
         `RIR בפועל ב${def.type === "topback" ? "טופ" : (def.type === "normal" ? "סט הכבד" : "סט הטוב")} (לא חובה)`;
@@ -1980,7 +2123,7 @@
         if (lastDyn) {
           last.sets.forEach((s, i) => {
             if (s) {
-              const w = s.weight ? s.weight + " ק״ג × " : "";
+              const w = s.weight ? wt(s.weight, def) + " × " : "";
               html += `סט ${i + 1}: ${w}${s.reps || "—"} חזרות<br/>`;
             }
           });
@@ -2563,7 +2706,7 @@
           if (!Array.isArray(logs) || !logs.length) return;
           const last = logs[logs.length - 1];
           const st = getExerciseStats(logs);
-          const pr = st.prHeavy != null ? `PR ${st.prHeavy} ק״ג` : (st.prReps != null ? `PR ${st.prReps} חזרות` : "");
+          const pr = st.prHeavy != null ? `PR ${wt(st.prHeavy, findExerciseDef(ex))}` : (st.prReps != null ? `PR ${st.prReps} חזרות` : "");
           const ch = st.change == null ? "" : (st.change > 0 ? ` · <span class="cmp-up">+${st.change}%</span>` : ` · <span class="cmp-down">${st.change}%</span>`);
           html += `<div class="history-item" onclick="showExerciseDetail(${jsArg(ex)})">
             <strong>${esc(ex)}</strong>
@@ -2773,6 +2916,7 @@
       document.getElementById("detail-title").textContent = exerciseName;
       document.getElementById("detail-subtitle").textContent = `${logs.length} אימונים שמורים`;
 
+      const def = getEffectiveDef(exerciseName);
       const st = getExerciseStats(logs);
       const avg3 = movingAvg(logs.map(e => getSessionIntensity(e).value)).slice(-1)[0];
       const changeTxt = st.change == null ? "—" : (st.change > 0 ? `+${st.change}%` : `${st.change}%`);
@@ -2780,8 +2924,8 @@
       document.getElementById("detail-stats").innerHTML = `
         <div class="stat-box"><div class="lbl">שיא עצימות (PR)</div><div class="val">${st.prVol ?? "—"}</div></div>
         <div class="stat-box"><div class="lbl">שינוי מול פעם שעברה</div><div class="val" style="${changeClr}">${changeTxt}</div></div>
-        <div class="stat-box"><div class="lbl">שיא משקל כבד</div><div class="val">${st.prHeavy != null ? st.prHeavy + " ק״ג" : (st.prReps != null ? st.prReps + " חזרות" : "—")}</div></div>
-        <div class="stat-box"><div class="lbl">1RM משוער / ממוצע 3</div><div class="val">${st.oneRm != null ? st.oneRm + " ק״ג" : "—"} <span style="font-size:0.75rem;color:var(--text-muted);font-weight:500;">· ממוצע ${avg3 ?? "—"}</span></div></div>
+        <div class="stat-box"><div class="lbl">שיא משקל כבד</div><div class="val">${st.prHeavy != null ? wt(st.prHeavy, def) : (st.prReps != null ? st.prReps + " חזרות" : "—")}</div></div>
+        <div class="stat-box"><div class="lbl">1RM משוער / ממוצע 3</div><div class="val">${st.oneRm != null ? wt(st.oneRm, def) : "—"} <span style="font-size:0.75rem;color:var(--text-muted);font-weight:500;">· ממוצע ${avg3 ?? "—"}</span></div></div>
       `;
 
       const labels = [];
@@ -2811,7 +2955,7 @@
         if (entry.type === "max" || entry.type === "simple") {
           entry.sets.forEach((s, i) => {
             if (s) {
-              const w = s.weight != null ? s.weight + " ק״ג × " : "";
+              const w = s.weight != null ? wt(s.weight, def) + " × " : "";
               setsHtml += `סט ${i + 1}: ${w}${s.reps ?? "—"} חזרות<br/>`;
             }
           });
@@ -2954,17 +3098,17 @@
       const prev = prevE ? getWorkingSet(prevE) : null;
       const inc = def.increment || 2.5;
       const lo = def.repMin, hi = def.repMax;
-      const W = w => `${fmtKg(w)} ק״ג`;
+      const W = w => wt(w, def);
       const did = (w, r) => (w != null ? `${W(w)} × ${r != null ? r : "—"}` : `${r} חזרות`);
       if (opts && opts.deload) {
         const rule = "שבוע הורדה: כ-10% פחות משקל מהפעם האחרונה, חצי מהסטים, RIR 3-4. לא מתקדמים השבוע.";
         if (def.type === "max" || last.weight == null) {
           if (last.reps == null) return null;
-          const w = last.weight != null ? roundStep(last.weight * 0.9, inc) : null;
+          const w = last.weight != null ? roundWeight(last.weight * 0.9, def, "down") : null;
           const r = Math.max(1, last.reps - 3);
           return { weight: w, reps: r, kind: "deload", rule, explain: `בפעם הקודמת: ${did(last.weight, last.reps)} ← השבוע (הורדה): ${did(w, r)}` };
         }
-        const w = roundStep(last.weight * 0.9, inc);
+        const w = roundWeight(last.weight * 0.9, def, "down");
         const r = last.reps != null ? Math.max(lo, Math.min(last.reps, hi)) : lo;
         return { weight: w, reps: r, kind: "deload", rule, explain: `בפעם הקודמת: ${did(last.weight, last.reps)} ← השבוע (הורדה, ‎-10%): ${W(w)} × ${r}` };
       }
@@ -2987,15 +3131,43 @@
       }
       const range = `${lo}-${hi}`;
       const head = `בפעם הקודמת: ${W(last.weight)} × ${last.reps}`;
-      const up = n => Math.round((last.weight + n * inc) * 100) / 100;
+      const stack = stackWeights(def);
+      const stackMax = stack ? stack[stack.length - 1] : null;
+      const up = n => moveStack(last.weight, n, def);
+      const jumpWord = stack ? "עמדות בסטק" : "קפיצות";
+      // At the top of a fixed stack (lb machine / dumbbells 50): no weight jump — progress via reps + intensity.
+      const STACK_MAX_REPS = 25;
+      const stackMaxTips = "אין לאן להעלות משקל בסטק – מתקדמים בקושי: עוד חזרות (עד כ-20–25), אקסצנטרי איטי 3–4 שנ׳, עצירה בכיווץ מלא, או להחזיק פלטה/משקולת ליד לעומס נוסף.";
+      const capped = (wantedW, n) => {
+        if (stackMax != null && wantedW >= stackMax - 1e-9 && last.weight >= stackMax - 1e-9) {
+          const add = n >= 2 ? 2 : 1;
+          const base = Math.max(last.reps || 0, eff || 0);
+          let r = base + add;
+          let repPart;
+          if (base >= STACK_MAX_REPS) {
+            r = base;
+            repPart = ` ← היום: ${W(stackMax)} × ${r} + העלאת קושי (בלי עוד חזרות)`;
+          } else {
+            r = Math.min(STACK_MAX_REPS, r);
+            repPart = ` ← היום: אותו משקל, ${W(stackMax)} × ${r}`;
+          }
+          return { weight: stackMax, reps: r, kind: "stackmax", steps: 0, rule: stackMaxTips,
+            explain: `${head} (מעל/סוף הטווח ${range}${rirNote}, כבר במקסימום הסטק ${W(stackMax)})${repPart}. ${stackMaxTips}` };
+        }
+        return null;
+      };
       if (eff > hi) {
         const n = eff - hi >= 2 ? 2 : 1;
         const w = up(n);
+        const cap = capped(w, n);
+        if (cap) return cap;
         return { weight: w, reps: lo, kind: "over", steps: n, rule,
-          explain: `${head} (מעל הטווח ${range}${rirNote}) ← היום: ${W(w)} × ${lo}${n === 2 ? " (2 קפיצות)" : ""}` };
+          explain: `${head} (מעל הטווח ${range}${rirNote}) ← היום: ${W(w)} × ${lo}${n === 2 ? " (2 " + jumpWord + ")" : ""}` };
       }
       if (eff === hi) {
         const w = up(1);
+        const cap = capped(w, 1);
+        if (cap) return cap;
         return { weight: w, reps: lo, kind: "top", steps: 1, rule, explain: `${head} (סוף הטווח ${range}${rirNote}) ← היום: ${W(w)} × ${lo}` };
       }
       if (last.reps >= lo) {
@@ -3007,9 +3179,9 @@
       const short = lo - last.reps;
       const missedBefore = !!prev && prev.weight === last.weight && prev.reps != null && prev.reps < lo;
       if (short >= 2 || missedBefore) {
-        const w = Math.round((last.weight - inc) * 100) / 100;
+        const w = moveStack(last.weight, -1, def);
         if (w > 0) return { weight: w, reps: lo, kind: "down", rule,
-          explain: `${head} (מתחת לטווח ${range}${missedBefore && short < 2 ? ", פעם שנייה ברצף" : ""}${rirNote}) ← היום: ${W(w)} × ${lo} (קפיצה אחת למטה)` };
+          explain: `${head} (מתחת לטווח ${range}${missedBefore && short < 2 ? ", פעם שנייה ברצף" : ""}${rirNote}) ← היום: ${W(w)} × ${lo} (${stackWeights(def) ? "עמדה אחת למטה בסטק" : "קפיצה אחת למטה"})` };
       }
       return { weight: last.weight, reps: lo, kind: "short", rule,
         explain: `${head} (חסרה חזרה אחת לטווח ${range}${rirNote}) ← היום: אותו משקל, ${W(last.weight)} × ${lo}` };
@@ -3031,8 +3203,8 @@
         return;
       }
       const target = def.type === "max"
-        ? `${s.reps} חזרות${s.weight != null ? ` · ${fmtKg(s.weight)} ק״ג` : ""}`
-        : (s.weight != null ? `${fmtKg(s.weight)} ק״ג × ${s.reps}` : `${s.reps} חזרות`);
+        ? `${s.reps} חזרות${s.weight != null ? ` · ${wt(s.weight, def)}` : ""}`
+        : (s.weight != null ? `${wt(s.weight, def)} × ${s.reps}` : `${s.reps} חזרות`);
       const where = def.type === "normal" ? " (סט כבד)" : (def.type === "topback" ? " (טופ)" : (def.type === "max" ? " (הסט הטוב)" : ""));
       const canApply = def.type !== "max";
       box.innerHTML = `
@@ -3089,7 +3261,7 @@
         <div class="pe-row">
           <div class="pe-info" onclick="openExerciseEditor('${kind}', ${gi}, ${ei})">
             <div class="exercise-name">${esc(e.name)}</div>
-            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type === "normal" && e.drops != null ? ` (${e.drops} דרופים)` : ""}${e.type === "topback" ? ` (${backoffCount(e)} בק-אוף)` : ""}${(e.type === "simple" || e.type === "max") && e.setCount != null ? ` (${e.setCount} סטים)` : ""}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}${e.warmups != null ? ` · ${e.warmups ? e.warmups + " חימום" : "בלי חימום"}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}${e.equip ? ` · ${EQUIP[e.equip].label}` : ""}${e.notes ? " · 📝" : ""}</div>
+            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type === "normal" && e.drops != null ? ` (${e.drops} דרופים)` : ""}${e.type === "topback" ? ` (${backoffCount(e)} בק-אוף)` : ""}${(e.type === "simple" || e.type === "max") && e.setCount != null ? ` (${e.setCount} סטים)` : ""}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}${e.warmups != null ? ` · ${e.warmups ? e.warmups + " חימום" : "בלי חימום"}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}${e.equip ? ` · ${EQUIP[e.equip].label}${e.equip === "machine_lb" ? " · " + stackSummary(e) : ""}` : ""}${e.notes ? " · 📝" : ""}</div>
           </div>
           <div class="pe-btns">
             ${iconBtn("▲", `moveExercise('${kind}', ${gi}, ${ei}, -1)`, { disabled: ei === 0, title: "הזז למעלה" })}
@@ -3454,7 +3626,7 @@
     // Per-exercise overrides for today's session (structure, rep range, display label).
     // Own key, not in workoutData_v1 / backups, ignored from the next day.
     const SESSION_OVERRIDES_KEY = "workoutSessionOverrides_v1";
-    const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "rir", "notes", "equip"];
+    const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "rir", "notes", "equip", "unit", "stack", "stackStart", "stackPlates"];
     let sxTarget = null;
 
     function readSessionOverrides() {
@@ -3534,7 +3706,8 @@
       $("repmax").value = def.repMax;
       const inc = $("inc");
       const incVal = String(def.increment);
-      if (![...inc.options].some(o => o.value === incVal)) inc.add(new Option(`${incVal} ק״ג`, incVal));
+      const u = unitLabel(def);
+      if (![...inc.options].some(o => o.value === incVal)) inc.add(new Option(`${incVal} ${u}`, incVal));
       inc.value = incVal;
       $("setcount").value = def.setCount != null ? String(def.setCount) : "";
       $("drops").value = def.drops != null ? String(def.drops) : "";
@@ -3543,7 +3716,19 @@
       $("rir").value = def.rir || "";
       $("notes").value = def.notes || "";
       $("equip").value = def.equip || "";
+      const startEl = $("stack-start"), stepEl = $("stack-step"), platesEl = $("stack-plates"), listEl = $("stack-list");
+      if (startEl) {
+        const stack = stackWeights(def);
+        startEl.value = def.stackStart != null ? def.stackStart : (stack ? stack[0] : "");
+        stepEl.value = def.equip === "machine_lb" ? def.increment : "";
+        platesEl.value = def.stackPlates != null ? def.stackPlates : (stack ? stack.length - 1 : "");
+        // show custom list only when it is not a plain start+step*plates pattern
+        const built = buildStack(startEl.value, stepEl.value, platesEl.value);
+        const custom = stack && (!built || built.length !== stack.length || built.some((v, i) => Math.abs(v - stack[i]) > 1e-6));
+        listEl.value = custom ? stack.join(", ") : "";
+      }
       updateStructFields(prefix);
+      updateStackPreview(prefix);
     }
 
     function updateStructFields(prefix) {
@@ -3553,16 +3738,49 @@
       $("drops-field").classList.toggle("hidden", type !== "normal");
       $("backoffs-field").classList.toggle("hidden", type !== "topback");
       $("setcount-field").classList.toggle("hidden", type === "normal" || type === "topback");
+      const lb = $("equip").value === "machine_lb";
+      const sf = document.getElementById(prefix + "-stack-fields");
+      if (sf) sf.classList.toggle("hidden", !lb);
+      // for lb stacks the step lives in the stack fields; keep the increment select synced but less prominent
+      const incLab = $("inc") && $("inc").previousElementSibling;
+      if (incLab && incLab.tagName === "LABEL") incLab.style.display = lb ? "none" : "";
+      if ($("inc")) $("inc").style.display = lb ? "none" : "";
+    }
+
+    function updateStackPreview(prefix) {
+      const $ = id => document.getElementById(prefix + "-" + id);
+      const prev = document.getElementById(prefix + "-stack-preview");
+      if (!prev) return;
+      const custom = parseStackList($("stack-list") && $("stack-list").value);
+      const stack = custom || buildStack($("stack-start").value, $("stack-step").value, $("stack-plates").value);
+      if (!stack) { prev.textContent = "מלאו התחלה, קפיצה ומספר פלטות (או רשימה מותאמת)."; return; }
+      const step = Number($("stack-step").value);
+      if ($("inc") && step > 0) {
+        const v = String(step);
+        if (![...$("inc").options].some(o => o.value === v)) $("inc").add(new Option(`${v} lb`, v));
+        $("inc").value = v;
+      }
+      prev.textContent = `סטק: ${stack.slice(0, 4).join(", ")}${stack.length > 4 ? " … " + stack[stack.length - 1] : ""} · ${stack.length} עמדות · יחידה lb (ליברות)`;
     }
 
     // Picking equipment sets the weight step (still editable afterwards).
     function applyEquipStep(prefix) {
-      const eq = EQUIP[document.getElementById(prefix + "-equip").value];
-      if (!eq) return;
+      const key = document.getElementById(prefix + "-equip").value;
+      const eq = EQUIP[key];
+      if (!eq) { updateStructFields(prefix); return; }
       const inc = document.getElementById(prefix + "-inc");
       const v = String(eq.step);
-      if (![...inc.options].some(o => o.value === v)) inc.add(new Option(`${v} ק״ג`, v));
+      const u = eq.unit === "lb" ? "lb" : "ק״ג";
+      if (![...inc.options].some(o => o.value === v)) inc.add(new Option(`${v} ${u}`, v));
       inc.value = v;
+      if (key === "machine_lb") {
+        const $ = id => document.getElementById(prefix + "-" + id);
+        if (!$("stack-start").value) $("stack-start").value = "15";
+        if (!$("stack-step").value) $("stack-step").value = "15";
+        if (!$("stack-plates").value) $("stack-plates").value = "16";
+      }
+      updateStructFields(prefix);
+      updateStackPreview(prefix);
     }
 
     function readStructFields(prefix) {
@@ -3574,10 +3792,25 @@
         showToast("טווח חזרות לא תקין");
         return null;
       }
-      const n = normalizeExercise({ name: "_", type, repMin, repMax, increment: $("inc").value });
+      const equip = EQUIP[$("equip").value] ? $("equip").value : null;
+      let increment = $("inc").value;
+      let stack = null, stackStart = null, stackPlates = null, unit = null;
+      if (equip === "machine_lb") {
+        const custom = parseStackList($("stack-list").value);
+        const start = parseFloat($("stack-start").value);
+        const step = parseFloat($("stack-step").value);
+        const plates = parseInt($("stack-plates").value, 10);
+        stack = custom || buildStack(start, step, plates);
+        if (!stack) { showToast("סטק לירות לא תקין – מלאו התחלה/קפיצה/פלטות או רשימה"); return null; }
+        increment = step > 0 ? step : (stack[1] - stack[0]);
+        stackStart = start > 0 ? start : stack[0];
+        stackPlates = plates >= 0 ? plates : stack.length - 1;
+        unit = "lb";
+      }
+      const n = normalizeExercise({ name: "_", type, repMin, repMax, increment, equip, unit, stack, stackStart, stackPlates });
       const sc = $("setcount").value, dr = $("drops").value, wu = $("warmups").value, bo = $("backoffs").value;
       const rir = $("rir").value.trim().slice(0, 12), notes = $("notes").value.trim().slice(0, 600);
-      return {
+      const out = {
         type: n.type, repMin: n.repMin, repMax: n.repMax, increment: n.increment,
         setCount: (type === "simple" || type === "max") && sc !== "" ? parseInt(sc, 10) : null,
         drops: type === "normal" && dr !== "" ? parseInt(dr, 10) : null,
@@ -3585,15 +3818,20 @@
         backoffs: type === "topback" && bo !== "" ? parseInt(bo, 10) : null,
         rir: rir || null,
         notes: notes || null,
-        equip: EQUIP[$("equip").value] ? $("equip").value : null
+        equip,
+        unit: unit || null,
+        stack: stack || null,
+        stackStart: stackStart || null,
+        stackPlates: stackPlates != null ? stackPlates : null
       };
+      return out;
     }
 
     function configureExerciseEverywhere(prog, name, props) {
       prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => {
         if (x.name !== name) return;
         x.type = props.type; x.repMin = props.repMin; x.repMax = props.repMax; x.increment = props.increment;
-        ["setCount", "drops", "warmups", "backoffs", "rir", "notes", "equip"].forEach(f => {
+        ["setCount", "drops", "warmups", "backoffs", "rir", "notes", "equip", "unit", "stack", "stackStart", "stackPlates"].forEach(f => {
           if (props[f] == null) delete x[f]; else x[f] = props[f];
         });
       }));
@@ -3777,16 +4015,16 @@
               notes: "כתף אחורית. ידיות בגובה הכתפיים, בלי לסחוב עם הגב." },
             { name: "הרחקה לצדדים בכבל", equip: "cable", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 2.5,
               notes: "הכבל עובר מאחורי הגוף – עבודה במתיחה. בדרופ האחרון: חזרות חלקיות." },
-            { name: "כפיפה בפריצ'ר", equip: "barbell", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 2.5, origName: "כפיפה בפריצ'ר",
-              notes: "יורדים כמעט עד יישור מלא, לאט." },
+            { name: "כפיפה בפריצ'ר", equip: "machine_lb", unit: "lb", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 15, stackStart: 15, stackPlates: 16, origName: "כפיפה בפריצ'ר",
+              notes: "מכונת Paramount בליברות: סטק 15–255 (קפיצות של 15). יורדים כמעט עד יישור מלא, לאט." },
             { name: "פטישים", equip: "db", type: "normal", warmups: 0, drops: 2, repMin: 8, repMax: 12, increment: 2, origName: "פטישים",
               notes: "אחיזה ניטרלית, בלי נדנוד של הגוף." }
           ] }
       ],
       accessories: [
         { id: "abs", name: "בטן", desc: null, exercises: [
-          { name: "כפיפת בטן במכשיר", equip: "machine", type: "normal", warmups: 1, drops: 1, repMin: 10, repMax: 15, increment: 5, origName: "כפיפת בטן במכשיר",
-            notes: "כבד + דרופ אחד. מעגלים את הגב, נושפים בירידה." },
+          { name: "כפיפת בטן במכשיר", equip: "machine_lb", unit: "lb", type: "normal", warmups: 1, drops: 1, repMin: 10, repMax: 15, increment: 15, stackStart: 25, stackPlates: 11, origName: "כפיפת בטן במכשיר",
+            notes: "מכונת Paramount בליברות: סטק 25–190 (קפיצות של 15). כבד + דרופ אחד. מעגלים את הגב, נושפים בירידה." },
           { name: "הרמות רגליים במתח", equip: "bw", type: "max", setCount: 2, warmups: 0, repMin: 6, repMax: 15, increment: 2.5, origName: "הרמות רגליים במתח",
             notes: "עד כשל טכני, בלי נדנוד. מעל 15 חזרות – מוסיפים קושי." }
         ] },
@@ -3907,7 +4145,7 @@
     }
 
     let currentDef = null, currentPlan = null, currentRecs = {};
-    const kg = w => `${fmtKg(w)} ק״ג`;
+    const kg = w => wt(w, currentDef);
     // A value pre-filled from last session (and not changed since) is not "typed today".
     const isPrefill = el => el.dataset.prefill != null && el.dataset.prefill !== "" && el.value === el.dataset.prefill;
     const valOf = id => { const el = document.getElementById(id); return el && !isPrefill(el) ? numOrNull(el.value) : null; };
@@ -3918,14 +4156,14 @@
     function renderSetHints() {
       const def = currentDef, plan = currentPlan;
       if (!def || !plan) return;
-      const inc = def.increment || 2.5, cyc = plan.cyc;
+      const cyc = plan.cyc;
       currentRecs = {};
       const put = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
       if (def.type === "normal" || def.type === "topback") {
         const tb = def.type === "topback";
         const top = valOf("w3") != null ? valOf("w3") : plan.top;
         warmupScheme(warmCount(def)).forEach(([p, r], i) => {
-          const w = top ? roundStep(top * p, inc) : null;
+          const w = top ? roundWeight(top * p, def, "nearest") : null;
           if (w) currentRecs["w" + (i + 1)] = w;
           put("hint-" + (i + 1), `חימום: ${w ? "כ-" + kg(w) : `כ-${Math.round(p * 100)}%`} × ${r} · לא לכשל · מנוחה ${REST.warm}`);
         });
@@ -3936,11 +4174,11 @@
         for (let i = 4; i <= 6; i++) {
           let w = null;
           if (tb) {
-            w = top ? stepBelow(top * 0.875, top, inc) : null;
+            w = top ? stepBelowDef(top * 0.875, top, def) : null;
             const pct = w && top ? ` (‎-${Math.round((1 - w / top) * 100)}%)` : " (‎-10-15%)";
             put("hint-" + i, `בק-אוף: ${w ? "כ-" + kg(w) : "—"}${pct} × ${backoffReps(def)} · ${rirTxt(rirFor("backoff", def, cyc))} · מנוחה לפני: ${REST.backoff}`);
           } else {
-            w = prev ? stepBelow(prev * 0.75, prev, inc) : null;
+            w = prev ? stepBelowDef(prev * 0.75, prev, def) : null;
             put("hint-" + i, `דרופ: ${w ? "כ-" + kg(w) : "—"} (‎-20-30%) · ${rirTxt(rirFor("drop", def, cyc))} · מנוחה ${REST.drop}`);
             const typed = valOf("w" + i);
             prev = typed != null ? typed : w;
@@ -3977,12 +4215,11 @@
       const steps = [];
       const cyc = plan ? plan.cyc : null;
       const top = plan ? plan.top : null;
-      const inc = def.increment || 2.5;
       const wn = warmCount(def);
       const logged = def.type === "normal" || def.type === "topback";
       if (wn === 0) steps.push("בלי חימום – השריר כבר חם מהתרגילים הקודמים.");
       else {
-        const parts = warmupScheme(wn).map(([p, r]) => `${top ? "כ-" + kg(roundStep(top * p, inc)) : "כ-" + Math.round(p * 100) + "%"} × ${r}`);
+        const parts = warmupScheme(wn).map(([p, r]) => `${top ? "כ-" + kg(roundWeight(top * p, def, "nearest")) : "כ-" + Math.round(p * 100) + "%"} × ${r}`);
         steps.push(`${wn === 1 ? "סט חימום קל אחד" : wn + " סטי חימום קלים"} (${wn === 1 ? "כ-60%" : "כ-50% ואז כ-75%"} ממשקל העבודה): ${parts.join(" ← ")}. לא לכשל, מנוחה ${REST.warm}.${logged ? " (רישום החימום לא חובה)" : ""}`);
       }
       const tgt = top ? `${kg(top)} × ${plan.reps != null ? plan.reps : repRange(def)}` : `${repRange(def)} חזרות`;
@@ -3990,7 +4227,7 @@
         steps.push(`סט טופ אחד: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("top", def, cyc))}. מנוחה לפניו ${REST.top}.`);
         const b = backoffCount(def);
         if (b) {
-          const bw = top ? stepBelow(top * 0.875, top, inc) : null;
+          const bw = top ? stepBelowDef(top * 0.875, top, def) : null;
           steps.push(`${b === 1 ? "סט בק-אוף אחד" : b + " סטי בק-אוף"}: מורידים 10-15% ממשקל הטופ של היום${bw ? ` (כ-${kg(bw)})` : ""} × ${backoffReps(def)}, ${rirTxt(rirFor("backoff", def, cyc))}. מנוחה ${REST.backoff} בין הסטים.`);
         } else steps.push("בלי סטי בק-אוף.");
       } else if (def.type === "normal") {
@@ -4006,9 +4243,15 @@
       if (def.deload) steps.push("🧘 שבוע הורדה: כ-10% פחות משקל, חצי מהסטים, בלי דרופים, RIR 3-4. לא מתקדמים השבוע.");
       else {
         const s = plan && plan.s;
-        if (s && s.explain) steps.push(`התקדמות: ${s.explain}.`);
-        if (def.type !== "max") steps.push(`כלל ההתקדמות (קפיצה ${fmtKg(inc)} ק״ג${def.equip ? ", " + EQUIP[def.equip].label : ""}): מעל הטווח ← +קפיצה (2 קפיצות אם 2+ חזרות מעל) · סוף הטווח ← +קפיצה · בתוך הטווח ← +חזרה · מתחת לטווח ← קפיצה למטה (חסרה חזרה אחת פעם ראשונה – נשארים).`);
-        else steps.push(`כלל ההתקדמות: עוד חזרה בכל פעם. מעל ${def.repMax} חזרות ← מוסיפים משקל.`);
+        if (s && s.explain) steps.push(`התקדמות: ${s.explain}`);
+        if (s && s.kind === "stackmax") {
+          steps.push("במקסימום הסטק: לא קופצים משקל. מרחיבים חזרות עד כ-20–25, מאטים את ההורדה (3–4 שנ׳), עוצרים בכיווץ מלא, או מוסיפים פלטה/משקולת ביד.");
+        } else if (def.type !== "max") {
+          const stack = stackWeights(def);
+          const jump = stack ? `עמדה בסטק (${stackSummary(def)})` : `קפיצה ${fmtKg(def.increment || 2.5)} ${unitLabel(def)}`;
+          const maxNote = stack ? " · במקסימום הסטק ← עוד חזרות / אקסצנטרי איטי / עצירה בכיווץ / פלטה ביד (בלי קפיצת משקל)" : "";
+          steps.push(`כלל ההתקדמות (${jump}${def.equip ? ", " + EQUIP[def.equip].label : ""}): מעל הטווח ← +קפיצה (2 קפיצות אם 2+ חזרות מעל) · סוף הטווח ← +קפיצה · בתוך הטווח ← +חזרה · מתחת לטווח ← קפיצה למטה (חסרה חזרה אחת פעם ראשונה – נשארים)${maxNote}.`);
+        } else steps.push(`כלל ההתקדמות: עוד חזרה בכל פעם. מעל ${def.repMax} חזרות ← מוסיפים משקל.`);
       }
       return steps;
     }
@@ -4037,6 +4280,7 @@
       data.program = normalizeProgram(JSON.parse(JSON.stringify(RESEARCH_PROGRAM)));
       data.programSource = RESEARCH_PROGRAM_ID;
       data.cycle = { start: toDateKey(cycleStartSunday()), num: 1 };
+      data.equipV8 = true; data.latV9 = true; data.paramountLbV10 = true;
       saveData(data);
       showToast("התוכנית נטענה ✓ שבוע 1 מתוך 6");
       refreshAfterProgramChange();
@@ -4166,7 +4410,7 @@
         ["בתוך דרופים", REST.drop], ["בין תרגילים", "2 דק׳"]]) + `</div>`;
 
       const exCard = e => `<div class="g-ex"><div class="g-ex-name">${esc(e.name)}</div>
-        <div class="g-ex-plan">${esc(TYPE_LABELS[e.type] || "")} · ${esc(planText(e))}${e.equip ? ` · ${EQUIP[e.equip].label} (${fmtKg(e.increment)} ק״ג)` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}</div>
+        <div class="g-ex-plan">${esc(TYPE_LABELS[e.type] || "")} · ${esc(planText(e))}${e.equip ? ` · ${EQUIP[e.equip].label}${e.equip === "machine_lb" ? " · " + esc(stackSummary(e)) : ` (${fmtKg(e.increment)} ${unitLabel(e)})`}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}</div>
         ${e.notes ? `<div class="g-ex-notes">${esc(e.notes)}</div>` : ""}</div>`;
       const days = { A: "ראשון ורביעי", B: "שני וחמישי", C: "שלישי ושישי" };
       prog.workouts.forEach(w => {
@@ -4188,7 +4432,7 @@
         <li>בתוך הטווח ← אותו משקל, ומנסים עוד חזרה.</li>
         <li>מתחת לטווח ← מורידים קפיצה. אם חסרה רק חזרה אחת – בפעם הראשונה נשארים באותו משקל, ואם זה קורה פעמיים ברצף – מורידים.</li>
         <li>אם רושמים RIR בפועל: קל מהיעד נחשב כחזרות נוספות, קשה מהיעד – לא מוסיפים חזרה.</li>
-        <li>קפיצות משקל לפי ציוד: מכונה 5 ק״ג, כבל 2.5 ק״ג, משקולות יד 2 ק״ג, מוט 2.5 ק״ג. כל המשקלים המומלצים (חימום, בק-אוף, דרופים, הורדה) מעוגלים לקפיצה של התרגיל.</li>
+        <li>קפיצות משקל לפי ציוד: מכונה 5 ק״ג, כבל 2.5 ק״ג, משקולות יד 2 ק״ג, מוט 2.5 ק״ג, מכונה בליברות – לפי סטק הפלטות (במקסימום הסטק: עוד חזרות/טמפו/פלטה ביד), משקולות יד 4–50 ק״ג בקפיצות של 2. כל המשקלים המומלצים (חימום, בק-אוף, דרופים, הורדה) מעוגלים לקפיצה / לעמדה בסטק של התרגיל.</li>
         <li>בבק-אוף שומרים על 10-15% פחות מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
         <li>אימונים של שבוע ההורדה לא נחשבים בחישוב ההתקדמות.</li></ul></div>`;
 
@@ -4277,7 +4521,10 @@
         if (!prog) return;
         prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach(x => {
           const r = src[x.name];
-          if (r && r.equip && !x.equip) { x.equip = r.equip; x.increment = r.increment; }
+          if (r && r.equip && !x.equip) {
+            x.equip = r.equip; x.increment = r.increment;
+            ["unit", "stack", "stackStart", "stackPlates"].forEach(f => { if (r[f] != null) x[f] = r[f]; });
+          }
         }));
         data.program = prog;
         data.equipV8 = true;
@@ -4308,8 +4555,39 @@
       if (ev.target && ev.target.closest && ev.target.closest("#normal-sets, #dynamic-sets")) renderSetHints();
     });
     repairStoredData();
+
+    // v10: Paramount lb stacks – preacher (15..255 / +15) and ab crunch (25..190 / +15).
+    // Only rewrite when still at the old auto-assigned kg equipment (don't override manual edits).
+    function migrateParamountLbV10() {
+      try {
+        const data = getData();
+        if (data.programSource !== RESEARCH_PROGRAM_ID || data.paramountLbV10 || !data.program) return;
+        const prog = normalizeProgram(data.program);
+        if (!prog) return;
+        const src = {};
+        RESEARCH_PROGRAM.workouts.concat(RESEARCH_PROGRAM.accessories).forEach(g => g.exercises.forEach(e => { src[e.name] = e; }));
+        const apply = (x, expectEquip, expectInc) => {
+          const r = src[x.name] || src[x.origName];
+          if (!r || r.equip !== "machine_lb") return;
+          const stillOld = x.equip === expectEquip && Number(x.increment) === expectInc && !x.stack;
+          if (!stillOld) return;
+          x.equip = "machine_lb"; x.unit = "lb"; x.increment = r.increment;
+          x.stackStart = r.stackStart; x.stackPlates = r.stackPlates;
+          if (r.stack) x.stack = r.stack.slice();
+        };
+        prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach(x => {
+          if (x.name === "כפיפה בפריצ'ר" || x.origName === "כפיפה בפריצ'ר") apply(x, "barbell", 2.5);
+          if (x.name === "כפיפת בטן במכשיר" || x.origName === "כפיפת בטן במכשיר") apply(x, "machine", 5);
+        }));
+        data.program = prog;
+        data.paramountLbV10 = true;
+        saveData(data);
+      } catch (e) { console.warn("paramount lb migration failed", e); }
+    }
+
     migrateResearchEquipment();
     migrateLatPulldownV9();
+    migrateParamountLbV10();
     requestPersistentStorage();
     applySavedBackground();
     initHome();
