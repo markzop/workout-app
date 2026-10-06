@@ -1,4 +1,4 @@
-const CACHE = 'workout-pwa-v12';
+const CACHE = 'workout-pwa-v13';
 const ASSETS = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
+  './bg-pastel.webp',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
 ];
 

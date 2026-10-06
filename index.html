@@ -743,6 +743,88 @@
     .g-ex-name { font-weight: 700; }
     .g-ex-plan { font-size: 0.82rem; color: #93c5fd; margin-top: 2px; }
     .g-ex-notes { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+    /* ===== V13: profiles + pastel theme (her profile) ===== */
+    .profile-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: right; margin-top: 10px; border: 2px solid var(--border); }
+    .profile-choice .pc-name { font-size: 1.15rem; font-weight: 700; }
+    .profile-choice .pc-sub { font-size: 0.82rem; font-weight: 500; opacity: 0.85; }
+    .profile-choice.dark { background: linear-gradient(160deg, #1b1b1b, #0b0b0b); color: #f5f5f5; border-color: rgba(225, 29, 72, 0.6); }
+    .profile-choice.pastel { background: linear-gradient(160deg, #fbeff3, #e6e3f3 55%, #dfe6f1); color: #1e2a78; border-color: rgba(204, 61, 118, 0.55); }
+    .pf-check { display: flex; align-items: center; gap: 10px; margin: 14px 0 4px; font-size: 0.92rem; cursor: pointer; }
+    .pf-check input { width: 22px; height: 22px; accent-color: var(--primary); flex-shrink: 0; }
+    .next-card { border-radius: 16px; padding: 14px 16px; margin: 0 0 12px; background: rgba(225, 29, 72, 0.12); border: 1px solid rgba(225, 29, 72, 0.5); }
+    .next-card .nx-title { font-size: 1.3rem; font-weight: 800; }
+    .next-card .nx-sub { font-size: 0.88rem; color: var(--text-muted); margin: 2px 0 10px; }
+    .next-card .nx-warn { font-size: 0.88rem; border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.5); }
+    .next-card .btn + .btn { margin-top: 8px; }
+    .workout-btn.next { border-color: var(--primary); }
+    .next-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; color: #fff; background: var(--primary); border-radius: 10px; padding: 2px 8px; margin-right: 6px; vertical-align: middle; }
+    .cardio-extra input[type="number"] { width: 120px; padding: 8px 10px; font-size: 1rem; }
+
+    body.theme-pastel {
+      --bg: #cdd3e1; --card: #fbf7f2; --card2: rgba(255, 255, 255, 0.86); --primary: #cc3d76; --primary-dark: #a92f61;
+      --success: #1f9d55; --text: #1e2a5e; --text-muted: #4a5478; --border: rgba(30, 42, 94, 0.16);
+      --light-set: #5b6493; --heavy-set: #cc3d76; --drop-set: #b8601f; --max-set: #cc3d76;
+      --color-a: #d9467f; --color-b: #7c6cc4; --color-c: #3f9c8f;
+      background-image: none !important; background-color: #cdd3e1;
+    }
+    body.theme-pastel::before {
+      background: linear-gradient(rgba(255, 250, 246, 0.16), rgba(255, 250, 246, 0.16)), url("bg-pastel.webp") center top / cover no-repeat, #cdd3e1;
+    }
+    body.theme-pastel header { background: rgba(255, 251, 247, 0.80); border-radius: 18px; padding: 14px 12px; margin-bottom: 10px; box-shadow: 0 4px 18px rgba(30, 42, 94, 0.10); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    body.theme-pastel header h1, body.theme-pastel .workout-btn h2, body.theme-pastel .suggest-main b { color: #1e2a78; }
+    body.theme-pastel .card, body.theme-pastel .workout-btn, body.theme-pastel .stat-box, body.theme-pastel .day-info, body.theme-pastel .prev-info {
+      background: rgba(255, 251, 247, 0.84); border-color: rgba(30, 42, 94, 0.12); box-shadow: 0 4px 18px rgba(30, 42, 94, 0.08);
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    }
+    body.theme-pastel .workout-btn:active { background: rgba(255, 240, 246, 0.92); }
+    body.theme-pastel .workout-btn.next { border-color: rgba(204, 61, 118, 0.75); }
+    body.theme-pastel .section-title { display: inline-block; color: #2d3768; background: rgba(255, 251, 247, 0.80); border-radius: 10px; padding: 3px 10px; }
+    body.theme-pastel .back-btn { display: inline-flex; background: rgba(255, 251, 247, 0.82); border-radius: 12px; padding: 6px 12px; font-weight: 600; }
+    body.theme-pastel .btn-outline { background: rgba(255, 251, 247, 0.80); border-color: rgba(30, 42, 94, 0.20); color: #1e2a5e; }
+    body.theme-pastel .btn-success { background: #1f9d55; }
+    body.theme-pastel input[type="number"], body.theme-pastel .form-input, body.theme-pastel .paste-modal-box textarea { background: rgba(255, 255, 255, 0.92); color: #1e2a5e; border-color: rgba(30, 42, 94, 0.22); }
+    body.theme-pastel input::placeholder, body.theme-pastel textarea::placeholder { color: #8a90ab; }
+    body.theme-pastel .paste-modal { background: rgba(30, 42, 94, 0.38); }
+    body.theme-pastel .paste-modal-box { background: #fbf7f2; border-color: rgba(30, 42, 94, 0.14); box-shadow: 0 12px 40px rgba(30, 42, 94, 0.25); }
+    body.theme-pastel .exercise-item.done .exercise-name { color: #1f8a4c; }
+    body.theme-pastel .check-done, body.theme-pastel .cmp-up { color: #1f9d55; }
+    body.theme-pastel .cmp-down { color: #cc3d76; }
+    body.theme-pastel .cal-day { background: rgba(255, 255, 255, 0.55); border-color: rgba(30, 42, 94, 0.08); }
+    body.theme-pastel .cal-day.today { border-color: #1e2a78; }
+    body.theme-pastel .cal-day.workout-A { background: rgba(217, 70, 127, 0.22); }
+    body.theme-pastel .cal-day.workout-B { background: rgba(124, 108, 196, 0.22); }
+    body.theme-pastel .cal-day.workout-C { background: rgba(63, 156, 143, 0.22); }
+    body.theme-pastel .cal-day.rest-day { background: rgba(120, 124, 150, 0.22); }
+    body.theme-pastel .cal-day.rest-day .workout-letter { color: #4a5478; }
+    body.theme-pastel .cal-header button, body.theme-pastel .icon-btn { background: rgba(255, 255, 255, 0.88); }
+    body.theme-pastel .icon-btn.danger { color: #b42318; }
+    body.theme-pastel .detail-sets, body.theme-pastel .day-detail-card { background: rgba(255, 255, 255, 0.72); }
+    body.theme-pastel .backup-banner { background: rgba(255, 240, 246, 0.92); border-color: rgba(204, 61, 118, 0.5); }
+    body.theme-pastel .suggest-box { background: rgba(255, 240, 246, 0.90); border-color: rgba(204, 61, 118, 0.45); }
+    body.theme-pastel .suggest-explain { color: #8a4510; }
+    body.theme-pastel .howto-box { background: rgba(236, 248, 242, 0.90); border-color: rgba(47, 143, 91, 0.40); }
+    body.theme-pastel .howto-notes { color: #7a4310; border-top-color: rgba(30, 42, 94, 0.14); }
+    body.theme-pastel .cycle-card { background: rgba(238, 240, 255, 0.90); border-color: rgba(109, 95, 179, 0.45); }
+    body.theme-pastel .cycle-card.deload { background: rgba(243, 236, 255, 0.92); border-color: rgba(147, 112, 219, 0.55); }
+    body.theme-pastel .next-card { background: rgba(255, 245, 249, 0.90); border-color: rgba(204, 61, 118, 0.55); box-shadow: 0 6px 22px rgba(204, 61, 118, 0.14); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+    body.theme-pastel .next-card .nx-title { color: #1e2a78; }
+    body.theme-pastel .next-card .nx-warn { background: rgba(255, 244, 222, 0.95); border-color: rgba(224, 138, 60, 0.55); color: #6b3a0c; }
+    body.theme-pastel .g-ex-plan { color: #4b4fb0; }
+    body.theme-pastel .g-table tr.g-hi td { background: rgba(204, 61, 118, 0.14); }
+    body.theme-pastel .set-label.backoff { color: #5b6bd6; }
+    body.theme-pastel .reorder-toggle { background: rgba(255, 251, 247, 0.85); }
+    body.theme-pastel .reorder-toggle.active, body.theme-pastel .today-tag { color: #fff; background: rgba(204, 61, 118, 0.88); }
+    body.theme-pastel .stopwatch { background: linear-gradient(165deg, rgba(255, 252, 248, 0.97), rgba(244, 236, 246, 0.95)); border-color: rgba(204, 61, 118, 0.38); box-shadow: 0 8px 24px rgba(30, 42, 94, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+    body.theme-pastel .stopwatch.running { border-color: rgba(204, 61, 118, 0.75); animation-name: sw-pulse-pastel; }
+    @keyframes sw-pulse-pastel {
+      0%, 100% { box-shadow: 0 8px 24px rgba(30, 42, 94, 0.18), 0 0 10px rgba(217, 70, 127, 0.22); }
+      50% { box-shadow: 0 8px 24px rgba(30, 42, 94, 0.18), 0 0 24px rgba(217, 70, 127, 0.50); }
+    }
+    body.theme-pastel .stopwatch .sw-time { color: #d9467f; text-shadow: 0 0 12px rgba(217, 70, 127, 0.28); }
+    body.theme-pastel .stopwatch.running .sw-time { text-shadow: 0 0 16px rgba(217, 70, 127, 0.45); }
+    body.theme-pastel .stopwatch button { background: rgba(255, 255, 255, 0.92); border-color: rgba(30, 42, 94, 0.16); color: #1e2a5e; }
+    body.theme-pastel .stopwatch #sw-toggle { background: rgba(217, 70, 127, 0.14); border-color: rgba(217, 70, 127, 0.5); color: #a92f61; }
+    body.theme-pastel .stopwatch.running #sw-toggle { background: rgba(217, 70, 127, 0.24); border-color: rgba(217, 70, 127, 0.7); }
   </style>
 </head>
 <body>
@@ -750,13 +832,21 @@
     <!-- HOME SCREEN -->
     <div id="screen-home">
       <header>
-        <h1>💪 אימונים שלי</h1>
-        <p>מעקב פיתוח גוף</p>
+        <h1 id="home-title">💪 אימונים שלי</h1>
+        <p id="home-subtitle">מעקב פיתוח גוף</p>
       </header>
 
       <div class="day-info">
         <span id="today-text"></span>
         <span id="accessory-badge" class="badge"></span>
+      </div>
+
+      <div id="next-card" class="next-card hidden">
+        <div class="nx-title" id="next-title"></div>
+        <div class="nx-sub" id="next-sub"></div>
+        <div class="nx-warn hidden" id="next-warn"></div>
+        <button class="btn btn-primary" id="next-start-btn"></button>
+        <button class="btn btn-outline hidden" id="next-continue-btn"></button>
       </div>
 
       <div id="cycle-card" class="cycle-card hidden" onclick="openCycleModal()"></div>
@@ -769,7 +859,7 @@
         </div>
       </div>
 
-      <div class="section-title">בחר אימון</div>
+      <div class="section-title" id="pick-title">בחר אימון</div>
       <div class="workout-select" id="workout-select">
       </div>
 
@@ -778,6 +868,7 @@
         <button class="btn btn-outline" style="margin-top:8px;" onclick="showGuide()">📖 הדרכת התוכנית</button>
         <button class="btn btn-outline" style="margin-top:8px;" onclick="showProgramEditor()">✏️ עריכת תוכנית</button>
         <button class="btn btn-outline hidden" id="research-load-btn" style="margin-top:8px;" onclick="loadResearchProgram()">🔬 טען תוכנית מבוססת מחקר</button>
+        <button class="btn btn-outline" id="profile-btn" style="margin-top:8px;" onclick="openProfileModal()">👤 פרופיל</button>
       </div>
     </div>
 
@@ -871,7 +962,12 @@
         <p id="dynamic-hint" style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;text-align:center;"></p>
       </div>
 
-      <div class="rir-actual-row card" style="padding:10px 14px;">
+      <div class="rir-actual-row cardio-extra card hidden" id="cardio-extra" style="padding:10px 14px;">
+        <label for="cardio-hr">דופק ממוצע (לא חובה)</label>
+        <input type="number" id="cardio-hr" inputmode="numeric" placeholder="למשל 125" />
+      </div>
+
+      <div class="rir-actual-row card" id="rir-actual-row" style="padding:10px 14px;">
         <label for="rir-actual" id="rir-actual-label">RIR בפועל בסט הכבד (לא חובה)</label>
         <select id="rir-actual" class="form-input">
           <option value="">—</option><option value="0">0 (כשל)</option><option value="1">1</option><option value="2">2</option>
@@ -970,12 +1066,16 @@
       <h3 id="ex-modal-title">עריכת תרגיל</h3>
       <label class="form-label" for="ex-name">שם התרגיל</label>
       <input type="text" id="ex-name" class="form-input" autocomplete="off" />
+      <label class="pf-check hidden" id="ex-all-row"><input type="checkbox" id="ex-all" checked /> <span id="ex-all-text">החל גם בשאר האימונים</span></label>
       <label class="form-label" for="ex-type">סוג רישום</label>
       <select id="ex-type" class="form-input" onchange="updateStructFields('ex')">
         <option value="normal">2 קלים + כבד + דרופים</option>
         <option value="topback">טופ + בק-אוף (חימום, טופ, בק-אופים)</option>
         <option value="simple">סטים רגילים (אפשר להוסיף)</option>
         <option value="max">מקסימום חזרות / משקל גוף</option>
+        <option value="timed">זמן – שניות לסט (פלאנק, איזומטרי, מתיחה)</option>
+        <option value="distance">מרחק – מטרים לסט (הליכת חקלאי)</option>
+        <option value="cardio">קרדיו – דקות + רמה/שיפוע + דופק</option>
       </select>
       <div id="ex-warmups-field">
         <label class="form-label" for="ex-warmups">סטי חימום</label>
@@ -1076,6 +1176,9 @@
         <option value="topback">טופ + בק-אוף (חימום, טופ, בק-אופים)</option>
         <option value="simple">סטים רגילים (אפשר להוסיף)</option>
         <option value="max">מקסימום חזרות / משקל גוף</option>
+        <option value="timed">זמן – שניות לסט (פלאנק, איזומטרי, מתיחה)</option>
+        <option value="distance">מרחק – מטרים לסט (הליכת חקלאי)</option>
+        <option value="cardio">קרדיו – דקות + רמה/שיפוע + דופק</option>
       </select>
       <div id="sx-warmups-field">
         <label class="form-label" for="sx-warmups">סטי חימום</label>
@@ -1185,6 +1288,47 @@
     </div>
   </div>
 
+  <div class="paste-modal hidden" id="profile-chooser">
+    <div class="paste-modal-box">
+      <h3>👋 ברוכים הבאים! איזה פרופיל?</h3>
+      <p class="pe-note">לכל פרופיל תוכנית, היסטוריה, מחזור וגיבויים משלו. אפשר להחליף פרופיל בכל רגע מהמסך הראשי (כפתור "👤 פרופיל").</p>
+      <button class="btn profile-choice dark" id="choose-main" onclick="chooseProfile('main')">
+        <span class="pc-name" id="choose-main-name">הפרופיל הראשי</span>
+        <span class="pc-sub">תוכנית 6 ימים · עיצוב כהה</span>
+      </button>
+      <button class="btn profile-choice pastel" id="choose-p2" onclick="chooseProfile('p2')">
+        <span class="pc-name" id="choose-p2-name">הפרופיל שלה</span>
+        <span class="pc-sub">ישבן · ליבה · גמישות · כושר · סבב 4 אימונים · עיצוב פסטל</span>
+      </button>
+      <label class="form-label" for="chooser-p2-name">השם של הפרופיל שלה (אפשר לשנות)</label>
+      <input type="text" id="chooser-p2-name" class="form-input" maxlength="40" autocomplete="off" value="הפרופיל שלה" oninput="document.getElementById('choose-p2-name').textContent = this.value.trim() || 'הפרופיל שלה'" />
+    </div>
+  </div>
+
+  <div class="paste-modal hidden" id="profile-modal" onclick="if (event.target === this) closeProfileModal()">
+    <div class="paste-modal-box">
+      <h3>👤 פרופיל</h3>
+      <p class="pe-note" id="profile-active-note"></p>
+      <div id="profile-switch-list"></div>
+      <div class="section-title">הגדרות הפרופיל הזה</div>
+      <label class="form-label" for="pf-name">שם הפרופיל</label>
+      <input type="text" id="pf-name" class="form-input" maxlength="40" autocomplete="off" />
+      <label class="form-label" for="pf-title">כותרת במסך הראשי (ריק = ברירת מחדל)</label>
+      <input type="text" id="pf-title" class="form-input" maxlength="40" autocomplete="off" />
+      <label class="form-label" for="pf-theme">עיצוב</label>
+      <select id="pf-theme" class="form-input">
+        <option value="dark">כהה (שחור / אדום)</option>
+        <option value="pastel">פסטל (שמיים, ורוד וכחול)</option>
+      </select>
+      <label class="pf-check"><input type="checkbox" id="pf-rotation" /> <span>מצב סבב – בלי ימים קבועים: האימון הבא לפי הסדר, בלי מנוחה קבועה בשבת</span></label>
+      <div class="backup-row" style="margin-top:14px;">
+        <button class="btn btn-primary" onclick="saveProfileSettings()">שמור</button>
+        <button class="btn btn-outline" onclick="closeProfileModal()">סגור</button>
+      </div>
+      <p class="pe-note" style="margin-top:12px;margin-bottom:0;">ℹ️ האייקון במסך הבית משותף לכל הפרופילים באותו מכשיר. בטלפון נפרד: מוסיפים את האפליקציה למסך הבית ובוחרים פרופיל בפתיחה הראשונה.</p>
+    </div>
+  </div>
+
   <div class="paste-modal hidden" id="paste-modal" onclick="if (event.target === this) closePasteBackup()">
     <div class="paste-modal-box">
       <h3>📋 הדבקת גיבוי</h3>
@@ -1199,6 +1343,76 @@
   </div>
 
   <script>
+    // ========== V13: PROFILES ==========
+    // The main profile keeps every original storage key exactly as before (no prefix, no migration).
+    // Other profiles use the same keys with a prefix, e.g. "p2:workoutData_v1".
+    const PROFILES_KEY = "workoutProfiles_v1";
+    const ACTIVE_PROFILE_KEY = "workoutActiveProfile_v1";
+    const PROFILE_DEFAULTS = {
+      main: { id: "main", prefix: "", name: "הפרופיל הראשי", title: "", theme: "dark", rotation: false, feminine: false, kind: "default" },
+      p2: { id: "p2", prefix: "p2:", name: "הפרופיל שלה", title: "", theme: "pastel", rotation: true, feminine: true, kind: "partner" }
+    };
+    function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    let profilesCache = null;
+    function readProfiles() {
+      if (profilesCache) return profilesCache;
+      let saved = null;
+      try { saved = JSON.parse(lsGet(PROFILES_KEY) || "null"); } catch (e) {}
+      if (!saved || typeof saved !== "object") saved = {};
+      const out = {};
+      Object.keys(PROFILE_DEFAULTS).forEach(id => {
+        const d = PROFILE_DEFAULTS[id];
+        const s = saved[id] && typeof saved[id] === "object" ? saved[id] : {};
+        out[id] = Object.assign({}, d, {
+          name: typeof s.name === "string" && s.name.trim() ? s.name.trim().slice(0, 40) : d.name,
+          title: typeof s.title === "string" ? s.title.trim().slice(0, 40) : d.title,
+          theme: s.theme === "pastel" || s.theme === "dark" ? s.theme : d.theme,
+          rotation: typeof s.rotation === "boolean" ? s.rotation : d.rotation,
+          created: id === "main" || !!s.created || lsGet(d.prefix + "workoutData_v1") != null
+        });
+      });
+      profilesCache = out;
+      return out;
+    }
+    function writeProfiles(p) {
+      const o = {};
+      Object.keys(p).forEach(id => { const x = p[id]; o[id] = { name: x.name, title: x.title, theme: x.theme, rotation: x.rotation, created: !!x.created }; });
+      profilesCache = null;
+      try { localStorage.setItem(PROFILES_KEY, JSON.stringify(o)); } catch (e) {}
+    }
+    function readActiveProfileId() { const id = lsGet(ACTIVE_PROFILE_KEY); return Object.prototype.hasOwnProperty.call(PROFILE_DEFAULTS, id) ? id : null; }
+    const ACTIVE_PROFILE_ID = readActiveProfileId() || "main";
+    const PROFILE_PREFIX = PROFILE_DEFAULTS[ACTIVE_PROFILE_ID].prefix;
+    function K(key) { return PROFILE_PREFIX + key; }
+    function activeProfile() { return readProfiles()[ACTIVE_PROFILE_ID]; }
+    function isPartnerProfile() { return activeProfile().kind === "partner"; }
+    function isRotationProfile() { return !!activeProfile().rotation; }
+    function isFem() { return !!activeProfile().feminine; }
+    function T(m, f) { return isFem() ? f : m; }
+    function applyProfileTheme() {
+      const pastel = activeProfile().theme === "pastel";
+      document.body.classList.toggle("theme-pastel", pastel);
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute("content", pastel ? "#cdd3e1" : "#000000");
+    }
+    applyProfileTheme();
+
+    // Her program (approved: research_training/partner_program_app.json, with timed/distance/cardio types).
+    const PARTNER_PROGRAM_ID = "partner-glutes4-v1";
+    const PARTNER_PROGRAM = {"version":1,"workouts":[{"id":"A","name":"אימון 1 – גלוטס כבד + גב","desc":"היפ ת'ראסט (טופ+בק-אוף) • בעיטה אחורית בכבל • הרחקת ירכיים • כפיפת ברך בישיבה • פולי עליון • חתירה • דד באג • פאלוף","exercises":[{"name":"היפ ת'ראסט","type":"topback","warmups":2,"backoffs":2,"repMin":6,"repMax":10,"increment":2.5,"equip":"barbell","rir":"1-2","notes":"צלעות למטה, סנטר מורכן. למעלה: אגן מגולגל קדימה (posterior tilt) ועצירה כשהירך ישרה – לא מקשתים גב. 1 שנייה החזקה למעלה. בק-אוף: 10-15% פחות. כאב גב = עוצרים."},{"name":"בעיטה אחורית בכבל","type":"normal","warmups":0,"drops":1,"repMin":10,"repMax":15,"increment":2.5,"equip":"cable","rir":"0-1","notes":"לכל רגל. גוף נוטה קדימה (אחיזה במכונה), מתחילים מירך מכופפת – מתיחה בישבן. בועטים אחורה-החוצה עד ירך ישרה, בלי לקשת גב."},{"name":"הרחקת ירכיים במכונה","type":"normal","warmups":1,"drops":2,"repMin":12,"repMax":20,"increment":5,"equip":"machine","rir":"0-1","notes":"ישיבה זקופה, טווח מלא, 1 שנייה החזקה בפתיחה. דרופ אחרון: חצאי חזרות בטווח הפתוח."},{"name":"כפיפת ברך בישיבה","type":"normal","warmups":1,"drops":1,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"1","notes":"גוף נוטה מעט קדימה (מתיחה בירך האחורית). שליטה מלאה, בלי תנופה. אי נוחות בברך שמאל = להפחית משקל/טווח."},{"name":"פולי עליון","type":"simple","warmups":1,"setCount":3,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"אחיזה ניטרלית או רחבה. חזה מורם, בלי להישען אחורה ובלי לקשת."},{"name":"חתירה במכונה בישיבה","type":"simple","warmups":0,"setCount":2,"repMin":10,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"תמיכת חזה אם יש. גב ניטרלי, מושכים עם השכמות."},{"name":"דד באג","type":"simple","warmups":0,"setCount":3,"repMin":6,"repMax":10,"increment":2.5,"equip":"bw","rir":"2-3","notes":"חזרות לכל צד. גב תחתון צמוד לרצפה כל הזמן, נשיפה ארוכה בכל חזרה. מתקדמים בטווח/איטיות, לא בכשל."},{"name":"פאלוף פרס","type":"simple","warmups":0,"setCount":3,"repMin":10,"repMax":12,"increment":2.5,"equip":"cable","rir":"2","notes":"חזרות לכל צד, 2 שניות החזקה ביד ישרה. אגן וכתפיים לא מסתובבים."},{"name":"קרדיו זון 2","type":"cardio","warmups":0,"setCount":1,"repMin":15,"repMax":20,"increment":1,"notes":"היום 15-20 דק׳. אופניים / אליפטי / הליכה בשיפוע (6-12%, 4.5-5.5 קמ״ש). זון 2: אפשר לדבר במשפטים מלאים, מאמץ 3-4 מתוך 10. בלי ריצה וקפיצות (ברך). רושמים דקות + רמה/שיפוע, ודופק ממוצע אם יש. סה״כ היום עד 90 דק׳."}]},{"id":"B","name":"אימון 2 – פלג עליון + ליבה","desc":"לחיצת חזה • חתירה עם תמיכת חזה • לחיצת כתפיים • הרחקה לצדדים • יד אחורית/קדמית • הרחקת ירך בכבל • פלאנק צידי • בירד דוג • הליכת חקלאי","exercises":[{"name":"לחיצת חזה במכונה","type":"simple","warmups":1,"setCount":3,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"כתפיים למטה ואחורה, טווח נוח לכתף."},{"name":"חתירה עם תמיכת חזה","type":"simple","warmups":1,"setCount":3,"repMin":8,"repMax":12,"increment":2,"equip":"db","rir":"1-2","notes":"על ספסל משופע (או מכונה). הגב נתמך – בלי עומס על הגב התחתון."},{"name":"לחיצת כתפיים במכונה","type":"simple","warmups":0,"setCount":2,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"בישיבה עם גב נתמך, בלי לקשת את הגב."},{"name":"הרחקה לצדדים","type":"normal","warmups":0,"drops":2,"repMin":12,"repMax":20,"increment":2,"equip":"db","rir":"0-1","notes":"בלי תנופה. אפשר בישיבה."},{"name":"פשיטת מרפק בפולי","type":"simple","warmups":0,"setCount":2,"repMin":10,"repMax":15,"increment":2.5,"equip":"cable","rir":"1","notes":"סופרסט עם כפיפת מרפק בכבל."},{"name":"כפיפת מרפק בכבל","type":"simple","warmups":0,"setCount":2,"repMin":10,"repMax":15,"increment":2.5,"equip":"cable","rir":"1","notes":"סופרסט עם פשיטת מרפק בפולי."},{"name":"הרחקת ירך בכבל בעמידה","type":"simple","warmups":0,"setCount":2,"repMin":12,"repMax":20,"increment":2.5,"equip":"cable","rir":"1","notes":"לכל רגל. אחיזה במכונה, גוף זקוף, רגל עובדת מעט אחורה. בלי להטות את הגוף."},{"name":"פלאנק צידי","type":"timed","warmups":0,"setCount":3,"repMin":20,"repMax":40,"increment":2.5,"equip":"bw","rir":"2","notes":"שניות לכל צד – רושמים את הצד החלש. ירך-כתף-אוזן בקו אחד. אפשר להתחיל על הברכיים.","topTip":"מעל 40 שנ׳ מוסיפים סט ולא זמן. כשזה קל – עוברים מהברכיים לכפות הרגליים."},{"name":"בירד דוג","type":"simple","warmups":0,"setCount":3,"repMin":5,"repMax":8,"increment":2.5,"equip":"bw","rir":"3","notes":"חזרות לכל צד, 8-10 שניות החזקה בכל חזרה (מקגיל). גב שטוח, אגן לא מסתובב."},{"name":"הליכת חקלאי צד אחד","type":"distance","warmups":0,"setCount":3,"repMin":20,"repMax":40,"increment":2,"equip":"db","rir":"2","notes":"מטרים לכל צד, המשקל = המשקולת ביד. גוף זקוף, לא נוטים לצד. רק אם הגב מגיב טוב."},{"name":"קרדיו זון 2","type":"cardio","warmups":0,"setCount":1,"repMin":20,"repMax":30,"increment":1,"notes":"היום 20-30 דק׳. אופניים / אליפטי / הליכה בשיפוע (6-12%, 4.5-5.5 קמ״ש). זון 2: אפשר לדבר במשפטים מלאים, מאמץ 3-4 מתוך 10. בלי ריצה וקפיצות (ברך). רושמים דקות + רמה/שיפוע, ודופק ממוצע אם יש. סה״כ היום עד 90 דק׳."}]},{"id":"C","name":"אימון 3 – גלוטס במתיחה + חד-צדדי","desc":"לחיצת רגליים גבוה ורחב (טופ+בק-אוף) • עלייה לספסל נמוך • הרחקת ירכיים בהטיה קדימה • כפיפת ברך בישיבה • כרל-אפ מקגיל • פאלוף איזומטרי","exercises":[{"name":"לחיצת רגליים רגליים גבוה ורחב","type":"topback","warmups":2,"backoffs":2,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"כפות רגליים גבוה ורחב על הפלטה, אצבעות מעט החוצה. יורדים עד מתיחה בישבן ועוצרים לפני שהאגן מתגלגל/הגב התחתון מתרומם. ברך שמאל ביציבות מעל כף הרגל. דוחפים מהעקבים."},{"name":"עלייה לספסל נמוך","type":"simple","warmups":0,"setCount":2,"repMin":8,"repMax":12,"increment":2,"equip":"db","rir":"1-2","notes":"לכל רגל. תיבה 30-40 ס\"מ (ברך לא מתחת ל-90°). גוף נוטה קדימה, שוק כמעט אנכית, דוחפים מהעקב ולא קופצים מהרגל האחורית. כאב/חוסר יציבות בברך שמאל → להחליף להיפ ת'ראסט B-stance."},{"name":"הרחקת ירכיים במכונה בהטיה קדימה","type":"normal","warmups":0,"drops":2,"repMin":12,"repMax":20,"increment":5,"equip":"machine","rir":"0-1","notes":"אותה מכונה, אבל גוף נוטה קדימה (אמות על הידיות/ירכיים) – דגש על החלק העליון של הישבן. גב ניטרלי."},{"name":"כפיפת ברך בישיבה","type":"normal","warmups":1,"drops":1,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"1","notes":"גוף נוטה מעט קדימה (מתיחה בירך האחורית). שליטה מלאה, בלי תנופה. אי נוחות בברך שמאל = להפחית משקל/טווח."},{"name":"כרל-אפ מקגיל","type":"simple","warmups":0,"setCount":3,"repMin":5,"repMax":8,"increment":2.5,"equip":"bw","rir":"3","notes":"רגל אחת כפופה, ידיים מתחת לגב התחתון (שומרות על הקשת הטבעית). מרימים ראש+כתפיים מעט, 8-10 שניות החזקה. לא כפיפות בטן."},{"name":"פאלוף איזומטרי","type":"timed","warmups":0,"setCount":3,"repMin":20,"repMax":30,"increment":2.5,"equip":"cable","rir":"2","notes":"שניות לכל צד, ידיים ישרות קדימה. משקל הכבל – לא חובה לרשום. אפשר בעמידה צרה או בכריעה על ברך ימין (ריפוד מתחת לברך).","topTip":"ב-30 שנ׳ לכל צד – מעלים קפיצה בכבל (2.5 ק״ג) וחוזרים ל-20 שנ׳."},{"name":"קרדיו זון 2","type":"cardio","warmups":0,"setCount":1,"repMin":20,"repMax":25,"increment":1,"notes":"היום 20-25 דק׳, ואחריו 10 דק׳ מוביליטי. אופניים / אליפטי / הליכה בשיפוע (6-12%, 4.5-5.5 קמ״ש). זון 2: אפשר לדבר במשפטים מלאים, מאמץ 3-4 מתוך 10. בלי ריצה וקפיצות (ברך). רושמים דקות + רמה/שיפוע, ודופק ממוצע אם יש. סה״כ היום עד 90 דק׳."}]},{"id":"D","name":"אימון 4 – גלוטס נפח + פלג עליון","desc":"היפ ת'ראסט במכונה • היפ ת'ראסט רגל אחת • פולי עליון צר • לחיצה בשיפוע • הרחקה לצדדים בכבל • פלאנק צידי • דד באג","exercises":[{"name":"היפ ת'ראסט במכונה","type":"normal","warmups":1,"drops":2,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"0-1","notes":"אם אין מכונה: גשר ישבן במוט/סמית'. צלעות למטה, עצירה בירך ישרה. דרופים בלי לאבד טכניקה."},{"name":"היפ ת'ראסט רגל אחת","type":"simple","warmups":0,"setCount":2,"repMin":10,"repMax":15,"increment":2,"equip":"db","rir":"1","notes":"לכל רגל, גב עליון על ספסל, משקולת על הירך. אפשר B-stance (הרגל השנייה רק לאיזון)."},{"name":"פולי עליון אחיזה צרה","type":"simple","warmups":1,"setCount":2,"repMin":10,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"מושכים לחזה העליון, בלי להישען אחורה."},{"name":"לחיצה בשיפוע עם משקולות","type":"simple","warmups":1,"setCount":2,"repMin":8,"repMax":12,"increment":2,"equip":"db","rir":"1-2","notes":"שיפוע 30°, רגליים על הרצפה, בלי קשת מוגזמת."},{"name":"הרחקה לצדדים בכבל","type":"normal","warmups":0,"drops":1,"repMin":12,"repMax":20,"increment":2.5,"equip":"cable","rir":"0-1","notes":"כבל מאחורי הגוף, יד אחת בכל פעם."},{"name":"פלאנק צידי","type":"timed","warmups":0,"setCount":3,"repMin":20,"repMax":40,"increment":2.5,"equip":"bw","rir":"2","notes":"שניות לכל צד – רושמים את הצד החלש. ירך-כתף-אוזן בקו אחד. אפשר להתחיל על הברכיים.","topTip":"מעל 40 שנ׳ מוסיפים סט ולא זמן. כשזה קל – עוברים מהברכיים לכפות הרגליים."},{"name":"דד באג","type":"simple","warmups":0,"setCount":3,"repMin":6,"repMax":10,"increment":2.5,"equip":"bw","rir":"2-3","notes":"חזרות לכל צד. גב תחתון צמוד לרצפה כל הזמן, נשיפה ארוכה בכל חזרה. מתקדמים בטווח/איטיות, לא בכשל."},{"name":"קרדיו זון 2","type":"cardio","warmups":0,"setCount":1,"repMin":20,"repMax":25,"increment":1,"notes":"היום 20-25 דק׳, ואחריו מוביליטי ארוך 15-20 דק׳ (אם יוצא יותר מ-90 דק׳ – את המוביליטי עושים ביום מנוחה). אופניים / אליפטי / הליכה בשיפוע (6-12%, 4.5-5.5 קמ״ש). זון 2: אפשר לדבר במשפטים מלאים, מאמץ 3-4 מתוך 10. בלי ריצה וקפיצות (ברך). רושמים דקות + רמה/שיפוע, ודופק ממוצע אם יש. סה״כ היום עד 90 דק׳."}]}],"accessories":[{"id":"mobility","name":"מוביליטי יומי (10 דק')","desc":null,"exercises":[{"name":"חתול-גמל","type":"simple","warmups":0,"setCount":1,"repMin":6,"repMax":8,"increment":2.5,"equip":"bw","notes":"תנועה איטית בטווח נוח, לא לכפות קצוות."},{"name":"מתיחת כופפי ירך בכריעה","type":"timed","warmups":0,"setCount":2,"repMin":30,"repMax":45,"increment":2.5,"equip":"bw","notes":"שניות לכל צד. ריפוד מתחת לברך, אגן מגולגל אחורה + כיווץ ישבן. אם ברך שמאל לא נוחה בכריעה – מתיחה בעמידה.","topTip":"ב-45 שנ׳ נשארים על 45 – לא צריך יותר. העיקר קביעות, כמעט כל יום."},{"name":"90/90 לירך","type":"simple","warmups":0,"setCount":2,"repMin":6,"repMax":8,"increment":2.5,"equip":"bw","notes":"החלפות צד בישיבה, גו זקוף. ברך שמאל – טווח נוח בלבד."},{"name":"מתיחת ירך אחורית בשכיבה עם רצועה","type":"timed","warmups":0,"setCount":2,"repMin":30,"repMax":45,"increment":2.5,"equip":"bw","notes":"שניות לכל רגל. בשכיבה על הגב – הגב התחתון נתמך (במקום כפיפה קדימה בעמידה).","topTip":"ב-45 שנ׳ נשארים על 45 – לא צריך יותר. העיקר קביעות, כמעט כל יום."},{"name":"פתיחת חזה בשכיבה צידית","type":"simple","warmups":0,"setCount":1,"repMin":6,"repMax":8,"increment":2.5,"equip":"bw","notes":"Open book – לכל צד, סיבוב מהגב העליון, ברכיים צמודות."}]}],"accessoryByDay":[null,null,null,null,null,null,null]};
+
+    // V13: measured exercise types – the main value is stored in `reps` (seconds / meters / minutes).
+    // cardio sets: { weight: null, reps: minutes, level }, entry.hr = optional average heart rate.
+    const MEASURE_TYPES = {
+      timed: { unit: "שנ׳", word: "שניות", step: 5, label: "זמן – שניות לכל סט (אפשר להוסיף)" },
+      distance: { unit: "מ׳", word: "מטרים", step: 5, label: "מרחק – מטרים לכל סט (אפשר להוסיף)" },
+      cardio: { unit: "דק׳", word: "דקות", step: 5, label: "קרדיו – דקות + רמה/שיפוע (+ דופק)" }
+    };
+    function isMeasureType(t) { return Object.prototype.hasOwnProperty.call(MEASURE_TYPES, t); }
+    function isDynType(t) { return t === "max" || t === "simple" || isMeasureType(t); }
+    function measureUnit(t) { return isMeasureType(t) ? MEASURE_TYPES[t].unit : "חזרות"; }
+    function measureVal(v) { return v == null || v === "" ? "—" : String(Math.round(Number(v) * 10) / 10); }
+
     // ========== PROGRAM ==========
     // The workout program lives in workoutData_v1.program. When it is absent
     // (all data saved before v3) the original hardcoded program below is used,
@@ -1215,7 +1429,7 @@
       bw: { label: "משקל גוף", step: 2.5 },
       machine_lb: { label: "מכונה בליברות", step: 15, unit: "lb" }
     };
-    const TYPE_LABELS = { normal: "2 קלים + כבד + דרופים", topback: "טופ + בק-אוף", simple: "סטים רגילים", max: "מקס חזרות" };
+    const TYPE_LABELS = { normal: "2 קלים + כבד + דרופים", topback: "טופ + בק-אוף", simple: "סטים רגילים", max: "מקס חזרות", timed: "זמן (שנ׳)", distance: "מרחק (מ׳)", cardio: "קרדיו (דק׳)" };
 
     function defaultExercise(name) {
       const type = LEGACY_MAX_REPS.includes(name) ? "max" : (LEGACY_SIMPLE.includes(name) ? "simple" : "normal");
@@ -1248,11 +1462,12 @@
       const name = String(e.name == null ? "" : e.name).trim();
       if (!name) return null;
       const base = defaultExercise(name);
-      const type = ["normal", "max", "simple", "topback"].includes(e.type) ? e.type : base.type;
+      const type = ["normal", "max", "simple", "topback", "timed", "distance", "cardio"].includes(e.type) ? e.type : base.type;
+      const repCap = isMeasureType(type) ? 3600 : 100; // seconds / meters / minutes can exceed 100
       let repMin = parseInt(e.repMin, 10);
       let repMax = parseInt(e.repMax, 10);
-      if (!(repMin > 0 && repMin <= 100)) repMin = base.repMin;
-      if (!(repMax >= repMin && repMax <= 100)) repMax = Math.max(repMin, base.repMax);
+      if (!(repMin > 0 && repMin <= repCap)) repMin = base.repMin;
+      if (!(repMax >= repMin && repMax <= repCap)) repMax = Math.max(repMin, base.repMax);
       let increment = parseFloat(e.increment);
       if (!(increment > 0 && increment <= 100)) increment = base.increment;
       const out = { name, type, repMin, repMax, increment };
@@ -1270,6 +1485,7 @@
         if (r) out.rir = r;                        // absent = by cycle week
       }
       if (typeof e.notes === "string" && e.notes.trim()) out.notes = e.notes.trim().slice(0, 600);
+      if (typeof e.topTip === "string" && e.topTip.trim()) out.topTip = e.topTip.trim().slice(0, 300); // v13: tip at the top of a timed range
       if (EQUIP[e.equip]) out.equip = e.equip;     // label + default step; the step itself is `increment`
       if (out.equip === "machine_lb" || e.unit === "lb") out.unit = "lb";
       const stack = normalizeStack(e.stack);
@@ -1408,7 +1624,11 @@
 
     function getProgram(data) {
       data = data || getData();
-      return normalizeProgram(data.program) || buildDefaultProgram();
+      return normalizeProgram(data.program) || defaultProgramForProfile();
+    }
+
+    function defaultProgramForProfile() {
+      return isPartnerProfile() ? normalizeProgram(JSON.parse(JSON.stringify(PARTNER_PROGRAM))) : buildDefaultProgram();
     }
 
     function findWorkout(id, prog) {
@@ -1422,6 +1642,9 @@
 
     function findExerciseDef(name, prog) {
       prog = prog || getProgram();
+      const cw = currentWorkout ? prog.workouts.find(w => w.id === currentWorkout) : null; // v13: today's workout first
+      const own = cw && cw.exercises.find(x => x.name === name);
+      if (own) return own;
       for (const g of prog.workouts.concat(prog.accessories)) {
         const e = g.exercises.find(x => x.name === name);
         if (e) return e;
@@ -1445,6 +1668,10 @@
 
     const EXTRA_COLORS = ["#f59e0b", "#a855f7", "#06b6d4", "#ec4899", "#84cc16", "#f97316"];
     function workoutColor(id) {
+      if (document.body && document.body.classList.contains("theme-pastel")) {
+        const P = { A: "#d9467f", B: "#7c6cc4", C: "#3f9c8f", D: "#e08a3c" };
+        if (P[id]) return P[id];
+      }
       if (id === "A") return "#e11d48";
       if (id === "B") return "#3b82f6";
       if (id === "C") return "#22c55e";
@@ -1470,7 +1697,7 @@
     // Hebrew text that was saved as UTF-8 bytes read back as Windows-1252 / Latin-1
     // (e.g. "×¤×¨×¡" instead of "פרס"). Repair is strict and idempotent: a string is
     // only changed if its cp1252 bytes are valid UTF-8 containing Hebrew.
-    const DATA_RAW_BACKUP_KEY = "workoutData_v1_prefix_backup";
+    const DATA_RAW_BACKUP_KEY = K("workoutData_v1_prefix_backup");
     const CP1252_TO_BYTE = (() => {
       const m = new Map();
       const hi = [0x20AC, 0x81, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x8D, 0x017D, 0x8F,
@@ -1636,13 +1863,13 @@
     // One-time (idempotent) repair of stored data, keeping a raw copy of the original first.
     function repairStoredData() {
       let raw;
-      try { raw = localStorage.getItem("workoutData_v1"); } catch (e) { return; }
+      try { raw = localStorage.getItem(K("workoutData_v1")); } catch (e) { return; }
       if (!raw || !UTF8_LEAD_AS_LATIN1.test(raw)) return;
       try {
         const res = repairMojibakeData(JSON.parse(raw));
         if (!res.changed) return;
         if (localStorage.getItem(DATA_RAW_BACKUP_KEY) == null) localStorage.setItem(DATA_RAW_BACKUP_KEY, raw);
-        localStorage.setItem("workoutData_v1", JSON.stringify(res.data));
+        localStorage.setItem(K("workoutData_v1"), JSON.stringify(res.data));
         console.info(`workout data: repaired ${res.changed} garbled Hebrew strings (${res.merged} merged)`);
       } catch (e) {
         console.warn("workout data repair skipped", e); // e.g. storage full: data is left exactly as it was
@@ -1664,7 +1891,7 @@
 
     // ========== STORAGE ==========
     function getData() {
-      const raw = localStorage.getItem("workoutData_v1");
+      const raw = localStorage.getItem(K("workoutData_v1"));
       let data = raw ? JSON.parse(raw) : { logs: {}, sessions: [] };
       if (raw && UTF8_LEAD_AS_LATIN1.test(raw)) data = repairMojibakeData(data).data;
       if (!data.logs || typeof data.logs !== "object" || Array.isArray(data.logs)) data.logs = {};
@@ -1673,7 +1900,7 @@
     }
 
     function saveData(data) {
-      localStorage.setItem("workoutData_v1", JSON.stringify(data));
+      localStorage.setItem(K("workoutData_v1"), JSON.stringify(data));
     }
 
     function getLastPerformance(exerciseName) {
@@ -1691,6 +1918,10 @@
 
     function getMainValue(entry) {
       if (!entry) return null;
+      if (isMeasureType(entry.type)) {
+        const v = (entry.sets || []).filter(s => s && s.reps).map(s => Number(s.reps));
+        return v.length ? Math.max(...v) : null;
+      }
       if (entry.type === "max") {
         const reps = entry.sets.filter(s => s && s.reps).map(s => s.reps);
         return reps.length ? Math.max(...reps) : null;
@@ -1716,7 +1947,10 @@
       const done = sessionCompleted.has(name) || loggedToday(name);
       let meta = "עדיין אין נתונים";
       if (last) {
-        if (last.type === "max") {
+        if (isMeasureType(last.type)) {
+          const ss = (last.sets || []).filter(Boolean);
+          meta = `פעם קודמת: ${ss.map(s => measureVal(s.reps)).join(" / ")} ${measureUnit(last.type)}${last.type === "cardio" && ss[0] && ss[0].level != null ? ` · רמה ${fmtKg(ss[0].level)}` : ""}`;
+        } else if (last.type === "max") {
           meta = `פעם קודמת: ${last.sets.map(s => s?.reps || "—").join(" / ")} חזרות`;
         } else {
           const heavy = last.sets[2] || last.sets[0];
@@ -1789,8 +2023,8 @@
     }
 
     function getAccessoryForToday(date = new Date()) {
-      // Saturday = rest day, no automatic abs/calves
-      if (isSaturday(date)) return null;
+      // Saturday = rest day, no automatic abs/calves. Rotation profiles: accessories are not tied to days.
+      if (isRotationProfile() || isSaturday(date)) return null;
       const day = date.getDay(); // 0=Sun ... 5=Fri
       // Default: Sun/Tue/Thu = calves, Mon/Wed/Fri = abs (editable in the program)
       const prog = getProgram();
@@ -1834,7 +2068,7 @@
 
     // ========== HOME ==========
     function applySavedBackground() {
-      const bg = localStorage.getItem("workoutBg_v1");
+      const bg = localStorage.getItem(K("workoutBg_v1"));
       if (bg) document.body.style.backgroundImage = `url('${bg}')`;
     }
 
@@ -1854,7 +2088,7 @@
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           const data = canvas.toDataURL("image/jpeg", 0.72);
           try {
-            localStorage.setItem("workoutBg_v1", data);
+            localStorage.setItem(K("workoutBg_v1"), data);
             applySavedBackground();
             showToast("הרקע עודכן ✓");
           } catch (e) {
@@ -1872,7 +2106,7 @@
       const todayText = document.getElementById("today-text");
       const badge = document.getElementById("accessory-badge");
       badge.classList.remove("hidden");
-      if (isSaturday()) {
+      if (isFixedRestDay()) {
         todayText.textContent = "היום שבת – יום מנוחה";
         badge.textContent = "מנוחה";
         badge.style.background = "#525252";
@@ -1883,9 +2117,10 @@
         badge.style.background = "";
         if (!acc) badge.classList.add("hidden");
       }
+      const rot = isRotationProfile() ? rotationState(null, prog) : null;
       document.getElementById("workout-select").innerHTML = prog.workouts.map(w => `
-        <div class="workout-btn" onclick="startWorkout(${jsArg(w.id)})">
-          <h2>${esc(w.name)}</h2>
+        <div class="workout-btn${rot && rot.nextId === w.id ? " next" : ""}" onclick="startWorkout(${jsArg(w.id)})">
+          <h2>${esc(w.name)}${rot && rot.nextId === w.id ? `<span class="next-tag">הבא בתור</span>` : ""}</h2>
           <p>${esc(w.desc != null ? w.desc : (w.exercises.map(e => e.name).join(" • ") || "אין תרגילים עדיין"))}</p>
         </div>`).join("");
       const cyc = getCycleInfo();
@@ -1893,7 +2128,8 @@
       cc.classList.toggle("hidden", !cyc);
       cc.classList.toggle("deload", !!(cyc && cyc.deload));
       cc.innerHTML = cyc ? `<div class="cy-title">${esc(cycleTitleText(cyc))}</div><div class="cy-sub">${esc(cycleSummaryText(cyc))}</div>` : "";
-      document.getElementById("research-load-btn").classList.toggle("hidden", getData().programSource === RESEARCH_PROGRAM_ID);
+      document.getElementById("research-load-btn").classList.toggle("hidden", getData().programSource === RESEARCH_PROGRAM_ID || isPartnerProfile());
+      renderHomeProfile(prog, rot);
       renderBackupBanner();
     }
 
@@ -1919,13 +2155,13 @@
       if (!w) { goHome(); return; }
       currentWorkout = key;
       const accKey = getAccessoryForToday();
-      const isRestDay = isSaturday();
+      const isRestDay = isFixedRestDay();
       const plannedAcc = findAccessory(accKey, prog);
 
       document.getElementById("workout-title").textContent = w.name;
       document.getElementById("workout-subtitle").textContent = isRestDay
         ? "שבת – יום מנוחה (אימון ידני)"
-        : (plannedAcc ? `+ ${plannedAcc.name}` : "");
+        : (plannedAcc ? `+ ${plannedAcc.name}` : (isRotationProfile() ? `סבב: ${rotationLabel(w.id, prog)} מתוך ${prog.workouts.length}` : ""));
       const wc = getCycleInfo();
       document.getElementById("workout-cycle").textContent = wc ? `${cycleTitleText(wc)} · ${cycleSummaryText(wc)}` : "";
 
@@ -1947,7 +2183,7 @@
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             ${prog.accessories.map(a => `<button class="btn btn-sm btn-outline" style="flex:1;" onclick="pickAccessory(${jsArg(a.id)})">הוסף ${esc(a.name)}</button>`).join("")}
           </div>
-          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;text-align:center;">${isRestDay ? "שבת – יום מנוחה. אפשר להוסיף ידנית אם רוצים." : "אין תוספת מתוכננת להיום. אפשר להוסיף ידנית אם רוצים."}</p>`;
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;text-align:center;">${isRestDay ? "שבת – יום מנוחה. אפשר להוסיף ידנית אם רוצים." : (isRotationProfile() ? T("התוספת לא קשורה ליום – אפשר להוסיף כשמתאים.", "התוספת לא קשורה ליום – אפשר להוסיף כשמתאים לך.") : "אין תוספת מתוכננת להיום. אפשר להוסיף ידנית אם רוצים.")}</p>`;
       } else {
         const isManual = !!manualAcc && manualAccessory !== accKey;
         accTitle.textContent = chosen.name + (isManual ? " (נוסף ידנית)" : "");
@@ -1978,7 +2214,7 @@
         accessory: manualAccessory || getAccessoryForToday()
       });
       saveData(data);
-      showToast("האימון נשמר! כל הכבוד 💪");
+      showToast(T("האימון נשמר! כל הכבוד 💪", "האימון נשמר! כל הכבוד לך 💪🌸"));
       setTimeout(goHome, 1200);
     }
 
@@ -1986,16 +2222,16 @@
     function renderDynamicSets(count, prefill = []) {
       const container = document.getElementById("dynamic-sets-container");
       container.innerHTML = "";
-      const isMax = logMode === "max";
-      const labelClass = isMax ? "max" : "heavy";
-      const repsPlaceholder = isMax ? "מקס חזרות" : "חזרות";
+      const ph = dynPlaceholders();
+      const labelClass = ph.cls;
+      const repsPlaceholder = ph.r;
 
       for (let i = 1; i <= count; i++) {
         const prev = prefill[i - 1] || {};
         container.innerHTML += `
           <div class="set-row" id="dyn-row-${i}">
             <div class="set-label ${labelClass}">סט ${i}</div>
-            <input type="number" id="dw${i}" placeholder="${unitLabel(currentDef)}" inputmode="decimal" value="${prev.weight || ""}" />
+            <input type="number" id="dw${i}" placeholder="${ph.w}" inputmode="decimal" value="${(logMode === "cardio" ? prev.level : prev.weight) || ""}" />
             <input type="number" id="dr${i}" placeholder="${repsPlaceholder}" inputmode="numeric" value="${prev.reps || ""}" />
             <div class="set-hint" id="dhint-${i}"></div>
           </div>`;
@@ -2009,16 +2245,16 @@
         return;
       }
       dynamicSetCount++;
-      const isMax = logMode === "max";
-      const labelClass = isMax ? "max" : "heavy";
-      const repsPlaceholder = isMax ? "מקס חזרות" : "חזרות";
+      const ph = dynPlaceholders();
+      const labelClass = ph.cls;
+      const repsPlaceholder = ph.r;
       const back = removedDynStash[dynamicSetCount] || { w: "", r: "" };
       delete removedDynStash[dynamicSetCount];
       // insertAdjacentHTML (not innerHTML +=) so values already typed in other rows are kept
       document.getElementById("dynamic-sets-container").insertAdjacentHTML("beforeend", `
         <div class="set-row" id="dyn-row-${dynamicSetCount}">
           <div class="set-label ${labelClass}">סט ${dynamicSetCount}</div>
-          <input type="number" id="dw${dynamicSetCount}" placeholder="${unitLabel(currentDef)}" inputmode="decimal" value="${esc(back.w)}" />
+          <input type="number" id="dw${dynamicSetCount}" placeholder="${ph.w}" inputmode="decimal" value="${esc(back.w)}" />
           <input type="number" id="dr${dynamicSetCount}" placeholder="${repsPlaceholder}" inputmode="numeric" value="${esc(back.r)}" />
           <div class="set-hint" id="dhint-${dynamicSetCount}"></div>
         </div>`);
@@ -2089,7 +2325,7 @@
       currentExercise = exerciseName;
       const def = getEffectiveDef(exerciseName);
       logMode = def.type;
-      const isDyn = logMode === "max" || logMode === "simple";
+      const isDyn = isDynType(logMode);
       removedDynStash = {};
 
       document.getElementById("log-exercise-name").textContent = displayName(exerciseName);
@@ -2105,7 +2341,7 @@
       document.getElementById("dynamic-sets").classList.add("hidden");
 
       const last = getLastPerformance(exerciseName);
-      const lastDyn = !!last && (last.type === "max" || last.type === "simple");
+      const lastDyn = !!last && isDynType(last.type);
       currentDef = def;
       currentPlan = planFor(exerciseName, def);
       const ph = unitLabel(def);
@@ -2114,13 +2350,20 @@
       document.getElementById("rir-actual-label").textContent =
         `RIR בפועל ב${def.type === "topback" ? "טופ" : (def.type === "normal" ? "סט הכבד" : "סט הטוב")} (לא חובה)`;
       renderHowTo(def, currentPlan);
+      document.getElementById("rir-actual-row").classList.toggle("hidden", logMode === "cardio");
+      document.getElementById("cardio-extra").classList.toggle("hidden", logMode !== "cardio");
+      document.getElementById("cardio-hr").value = "";
+      document.getElementById("fill-rec-btn").classList.toggle("hidden", logMode === "cardio");
 
       if (isDyn) {
         document.getElementById("dynamic-sets").classList.remove("hidden");
-        document.getElementById("log-type-label").textContent =
-          logMode === "max" ? "סטים של מקסימום חזרות (אפשר להוסיף)" : "סטים רגילים (אפשר להוסיף)";
+        document.getElementById("log-type-label").textContent = isMeasureType(logMode) ? MEASURE_TYPES[logMode].label :
+          (logMode === "max" ? "סטים של מקסימום חזרות (אפשר להוסיף)" : "סטים רגילים (אפשר להוסיף)");
         document.getElementById("dynamic-hint").textContent =
-          logMode === "max" ? "* במקבילים ובהרמות רגליים אפשר להשאיר את המשקל ריק" : "";
+          logMode === "max" ? "* במקבילים ובהרמות רגליים אפשר להשאיר את המשקל ריק" :
+          (logMode === "timed" ? "משקל – רק אם יש (למשל משקל הכבל). העמודה השנייה = שניות." :
+          (logMode === "distance" ? "משקל = המשקולת ביד. העמודה השנייה = מטרים." :
+          (logMode === "cardio" ? "רמה/שיפוע = המספר במכשיר · דקות = הזמן בזון 2." : "")));
         const count = def.setCount != null ? def.setCount
           : (lastDyn ? Math.max(3, last.sets.filter(s => s).length) : 3);
         renderDynamicSets(count, lastDyn ? last.sets : []);
@@ -2153,7 +2396,9 @@
         const cmpHtml = beforeLast ? ` ${formatCmp(lastVal, beforeVal)}` : "";
 
         let html = `<strong>פעם קודמת (${formatDate(last.date)})${cmpHtml}</strong><br/>`;
-        if (lastDyn) {
+        if (lastDyn && isMeasureType(last.type)) {
+          html += measureEntryLines(last, def).join("<br/>");
+        } else if (lastDyn) {
           last.sets.forEach((s, i) => {
             if (s) {
               const w = s.weight ? wt(s.weight, def) + " × " : "";
@@ -2196,11 +2441,15 @@
 
     function saveSets() {
       let sets = [];
-      if (logMode === "max" || logMode === "simple") {
+      if (isDynType(logMode)) {
+        const meas = isMeasureType(logMode);
         for (let i = 1; i <= dynamicSetCount; i++) {
           const w = document.getElementById("dw" + i)?.value;
           const r = document.getElementById("dr" + i)?.value;
-          sets.push((w || r) ? { weight: w ? parseFloat(w) : null, reps: r ? parseInt(r) : null } : null);
+          if (!(w || r)) { sets.push(null); continue; }
+          const rv = r ? (meas ? Math.round(parseFloat(r) * 10) / 10 : parseInt(r)) : null;
+          if (logMode === "cardio") sets.push({ weight: null, reps: rv, level: w ? parseFloat(w) : null }); // first box = level / incline
+          else sets.push({ weight: w ? parseFloat(w) : null, reps: rv });
         }
       } else {
         for (let i = 1; i <= 3 + normalDrops; i++) {
@@ -2211,14 +2460,18 @@
         }
       }
 
-      if (!sets.some(s => s && (s.weight || s.reps))) {
+      if (!sets.some(s => s && (s.weight || s.reps || s.level))) {
         showToast("לא הוזנו נתונים");
         return;
       }
 
       const extra = {};
       if (currentDef && currentDef.deload) extra.deload = true;
-      const rirA = document.getElementById("rir-actual").value;
+      if (logMode === "cardio") {
+        const hr = parseInt(document.getElementById("cardio-hr").value, 10);
+        if (hr > 0 && hr < 260) extra.hr = hr;
+      }
+      const rirA = logMode === "cardio" ? "" : document.getElementById("rir-actual").value;
       if (rirA !== "") {
         extra.rir = parseInt(rirA, 10);
         const t = currentDef ? rirFor(mainRole(currentDef), currentDef, getCycleInfo()) : null;
@@ -2283,8 +2536,8 @@
 
       const legendIds = prog.workouts.map(w => w.id);
       document.getElementById("cal-legend").innerHTML =
-        legendIds.map(id => `<span><i style="background:${workoutColor(id)}"></i> ${esc(id)}</span>`).join("") +
-        `<span><i style="background:#525252"></i> מנוחה</span>`;
+        legendIds.map(id => `<span><i style="background:${workoutColor(id)}"></i> ${esc(isRotationProfile() ? rotationLabel(id, prog) : id)}</span>`).join("") +
+        (isRotationProfile() ? "" : `<span><i style="background:#525252"></i> מנוחה</span>`);
 
       const monthNames = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
       document.getElementById("cal-month-label").textContent = monthNames[calMonth] + " " + calYear;
@@ -2313,7 +2566,7 @@
         const date = new Date(calYear, calMonth, day);
         const key = toDateKey(date);
         const session = sessionMap[key];
-        const restDay = isSaturday(date);
+        const restDay = isFixedRestDay(date);
         let cls = "cal-day";
         let letter = "";
         let onclick = "";
@@ -2326,7 +2579,7 @@
 
         if (realWorkout) {
           cls += " has-workout workout-" + session.workout;
-          letter = session.workout;
+          letter = isRotationProfile() ? rotationNum(session.workout, prog) : session.workout;
           if (!["A", "B", "C"].includes(session.workout)) {
             const c = workoutColor(session.workout);
             style = `style="background:${hexToRgba(c, 0.25)}"`;
@@ -2578,7 +2831,7 @@
       const data = getData();
       const out = Object.assign({}, data);
       out.program = getProgram(data); // always include the program (default if never edited)
-      out.backupMeta = { app: "workout-pwa", format: 3, exportedAt: new Date().toISOString() };
+      out.backupMeta = { app: "workout-pwa", format: 3, exportedAt: new Date().toISOString(), profile: { id: ACTIVE_PROFILE_ID, name: activeProfile().name } };
       return out;
     }
 
@@ -2598,7 +2851,7 @@
 
     function exportBackup() {
       const json = JSON.stringify(buildBackupPayload(), null, 2);
-      const name = `workout-backup-${toDateKey(new Date())}.json`;
+      const name = `workout-backup-${ACTIVE_PROFILE_ID === "main" ? "" : ACTIVE_PROFILE_ID + "-"}${toDateKey(new Date())}.json`;
       // iOS: share sheet lets the user pick "Save to Files" / iCloud Drive.
       if (isIOSDevice() && navigator.share && navigator.canShare && typeof File === "function") {
         let file = null;
@@ -2629,9 +2882,14 @@
           return "invalid";
         }
         const program = normalizeProgram(parsed.program); // old backups have no program
-        if (!confirm(program
+        // v13: a backup always restores into the active profile only.
+        const bp = parsed.backupMeta && parsed.backupMeta.profile && typeof parsed.backupMeta.profile === "object" ? parsed.backupMeta.profile : null;
+        const bpId = bp && typeof bp.id === "string" ? bp.id : "main";
+        const pre = bpId !== ACTIVE_PROFILE_ID ? `⚠️ הגיבוי הזה נשמר בפרופיל "${bp && bp.name ? String(bp.name).slice(0, 40) : bpId}". הוא ישוחזר לפרופיל הפעיל "${activeProfile().name}".\n` : "";
+        const post = ACTIVE_PROFILE_ID !== "main" ? `\n(רק הפרופיל "${activeProfile().name}" מושפע.)` : "";
+        if (!confirm(pre + (program
           ? "לשחזר גיבוי? הנתונים הנוכחיים יוחלפו (כולל תוכנית האימונים)."
-          : "לשחזר גיבוי? הנתונים הנוכחיים יוחלפו.")) return "cancelled";
+          : "לשחזר גיבוי? הנתונים הנוכחיים יוחלפו.") + post)) return "cancelled";
         const current = getData();
         const next = {
           logs: parsed.logs || {},
@@ -2718,7 +2976,8 @@
 
       const empty = !data.sessions.length && Object.keys(data.logs || {}).length === 0;
       const week = buildWeeklySummary(data);
-      const weekClr = week.diff == null ? "" : (week.diff > 0 ? "color:#22c55e" : (week.diff < 0 ? "color:#e11d48" : ""));
+      const WC = chartColors();
+      const weekClr = week.diff == null ? "" : (week.diff > 0 ? "color:" + WC.up : (week.diff < 0 ? "color:" + WC.down : ""));
       const weekTxt = week.diff == null ? "אין שבוע קודם להשוואה" : (week.diff > 0 ? `+${week.diff}% מהשבוע שעבר` : `${week.diff}% מהשבוע שעבר`);
 
       let html = `
@@ -2739,7 +2998,8 @@
           if (!Array.isArray(logs) || !logs.length) return;
           const last = logs[logs.length - 1];
           const st = getExerciseStats(logs);
-          const pr = st.prHeavy != null ? `PR ${wt(st.prHeavy, findExerciseDef(ex))}` : (st.prReps != null ? `PR ${st.prReps} חזרות` : "");
+          const pr = isMeasureType(last.type) ? (st.prReps != null ? `שיא ${measureVal(st.prReps)} ${measureUnit(last.type)}` : "")
+            : (st.prHeavy != null ? `PR ${wt(st.prHeavy, findExerciseDef(ex))}` : (st.prReps != null ? `PR ${st.prReps} חזרות` : ""));
           const ch = st.change == null ? "" : (st.change > 0 ? ` · <span class="cmp-up">+${st.change}%</span>` : ` · <span class="cmp-down">${st.change}%</span>`);
           html += `<div class="history-item" onclick="showExerciseDetail(${jsArg(ex)})">
             <strong>${esc(ex)}</strong>
@@ -2771,6 +3031,11 @@
 
     // ========== EXERCISE DETAIL + CHART ==========
     function getSessionIntensity(entry) {
+      if (isMeasureType(entry.type)) { // total seconds / meters / minutes
+        const m = MEASURE_TYPES[entry.type];
+        const tot = (entry.sets || []).reduce((a, s) => a + (s && s.reps != null ? (Number(s.reps) || 0) : 0), 0);
+        return { value: tot > 0 ? Math.round(tot * 10) / 10 : null, label: `סך ${m.word}`, unit: m.unit, measure: true };
+      }
       const sets = entry.sets || [];
       let volume = 0;
       let totalReps = 0;
@@ -2804,6 +3069,11 @@
 
     function getHeavySet(entry) {
       if (!entry) return { weight: null, reps: null };
+      if (isMeasureType(entry.type)) {
+        const rs = (entry.sets || []).filter(s => s && s.reps != null).map(s => Number(s.reps));
+        const ws = (entry.sets || []).filter(s => s && s.weight != null).map(s => Number(s.weight));
+        return { weight: ws.length ? Math.max(...ws) : null, reps: rs.length ? Math.max(...rs) : null };
+      }
       if (entry.type === "max") {
         const reps = (entry.sets || []).filter(s => s && s.reps != null).map(s => Number(s.reps));
         return { weight: null, reps: reps.length ? Math.max(...reps) : null };
@@ -2859,7 +3129,7 @@
           if (!entry?.date) return;
           const k = weekStartKey(entry.date);
           const day = toDateKey(new Date(entry.date));
-          const v = getSessionIntensity(entry).value || 0;
+          const v = isMeasureType(entry.type) ? 0 : (getSessionIntensity(entry).value || 0); // seconds/minutes are not kg×reps
           if (k === thisKey) { thisVol += v; thisDays.add(day); }
           if (k === lastKey) { lastVol += v; lastDays.add(day); }
         });
@@ -2884,7 +3154,7 @@
       const lastVol = last ? getSessionIntensity(last).value : null;
       const prevVol = prev ? getSessionIntensity(prev).value : null;
       const lastHeavy = last ? getHeavySet(last) : { weight: null, reps: null };
-      const oneRm = estimate1RM(lastHeavy.weight, lastHeavy.reps);
+      const oneRm = last && isMeasureType(last.type) ? null : estimate1RM(lastHeavy.weight, lastHeavy.reps);
       return { prVol, prHeavy, prReps, lastVol, prevVol, lastHeavy, oneRm, change: pctChange(lastVol, prevVol) };
     }
 
@@ -2895,6 +3165,7 @@
         box.innerHTML = `<div class="empty-state" style="padding:20px;">אין מספרים לגרף</div>`;
         return;
       }
+      const C = chartColors();
       const W = 320, H = 210;
       const padL = 44, padR = 40, padT = 18, padB = 32;
       const n = volume.length;
@@ -2914,30 +3185,30 @@
       let grid = "";
       for (let i = 0; i < 4; i++) {
         const y = padT + (i / 3) * plotH;
-        grid += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(255,255,255,0.12)" />`;
+        grid += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="${C.grid}" />`;
       }
       const volPath = pathOf(volume, yVol);
       const last = volume.length - 1;
       const area = volPath + ` L${xAt(last).toFixed(1)},${(padT+plotH).toFixed(1)} L${xAt(0).toFixed(1)},${(padT+plotH).toFixed(1)} Z`;
       const dots = volume.map((v, i) =>
-        `<circle cx="${xAt(i)}" cy="${yVol(v)}" r="4.5" fill="#e11d48" /><circle cx="${xAt(i)}" cy="${yVol(v)}" r="2" fill="#fff" />`
+        `<circle cx="${xAt(i)}" cy="${yVol(v)}" r="4.5" fill="${C.main}" /><circle cx="${xAt(i)}" cy="${yVol(v)}" r="2" fill="#fff" />`
       ).join("");
       let heavyPath = "", heavyDots = "";
       if (heavyVals.length) {
         const hv = heavy.map(v => v == null ? hMin : v);
-        heavyPath = `<path d="${pathOf(hv, yH)}" fill="none" stroke="#d4d4d4" stroke-width="2" stroke-dasharray="5 4" />`;
+        heavyPath = `<path d="${pathOf(hv, yH)}" fill="none" stroke="${C.sec}" stroke-width="2" stroke-dasharray="5 4" />`;
         heavyDots = heavy.map((v, i) => v == null ? "" :
-          `<circle cx="${xAt(i)}" cy="${yH(v)}" r="3.5" fill="#d4d4d4" />`).join("");
+          `<circle cx="${xAt(i)}" cy="${yH(v)}" r="3.5" fill="${C.sec}" />`).join("");
       }
       const xlbl = labels.map((lb, i) =>
-        `<text x="${xAt(i)}" y="${H - 8}" text-anchor="middle" fill="#a3a3a3" font-size="10">${lb}</text>`
+        `<text x="${xAt(i)}" y="${H - 8}" text-anchor="middle" fill="${C.label}" font-size="10">${lb}</text>`
       ).join("");
       box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grid}
-        <path d="${area}" fill="rgba(225,29,72,0.14)" />
-        <path d="${volPath}" fill="none" stroke="#e11d48" stroke-width="3" stroke-linejoin="round" />
+        <path d="${area}" fill="${C.fill}" />
+        <path d="${volPath}" fill="none" stroke="${C.main}" stroke-width="3" stroke-linejoin="round" />
         ${heavyPath}${dots}${heavyDots}${xlbl}
-        <text x="${padL-4}" y="${padT+4}" text-anchor="end" fill="#e11d48" font-size="9">${Math.round(yMax)}</text>
-        <text x="${W-padR+4}" y="${padT+4}" text-anchor="start" fill="#d4d4d4" font-size="9">${heavyVals.length ? Math.round(hYMax) : ""}</text>
+        <text x="${padL-4}" y="${padT+4}" text-anchor="end" fill="${C.main}" font-size="9">${Math.round(yMax)}</text>
+        <text x="${W-padR+4}" y="${padT+4}" text-anchor="start" fill="${C.sec}" font-size="9">${heavyVals.length ? Math.round(hYMax) : ""}</text>
       </svg>`;
     }
 
@@ -2953,8 +3224,16 @@
       const st = getExerciseStats(logs);
       const avg3 = movingAvg(logs.map(e => getSessionIntensity(e).value)).slice(-1)[0];
       const changeTxt = st.change == null ? "—" : (st.change > 0 ? `+${st.change}%` : `${st.change}%`);
-      const changeClr = st.change == null ? "" : (st.change > 0 ? "color:#22c55e" : (st.change < 0 ? "color:#e11d48" : ""));
-      document.getElementById("detail-stats").innerHTML = `
+      const CC = chartColors();
+      const meas = isMeasureType((logs[logs.length - 1] || {}).type);
+      const mu = meas ? measureUnit(logs[logs.length - 1].type) : "";
+      const changeClr = st.change == null ? "" : (st.change > 0 ? "color:" + CC.up : (st.change < 0 ? "color:" + CC.down : ""));
+      document.getElementById("detail-stats").innerHTML = meas ? `
+        <div class="stat-box"><div class="lbl">שיא סך ${MEASURE_TYPES[logs[logs.length - 1].type].word} באימון</div><div class="val">${st.prVol != null ? measureVal(st.prVol) + " " + mu : "—"}</div></div>
+        <div class="stat-box"><div class="lbl">שינוי מול פעם שעברה</div><div class="val" style="${changeClr}">${changeTxt}</div></div>
+        <div class="stat-box"><div class="lbl">שיא בסט אחד</div><div class="val">${st.prReps != null ? measureVal(st.prReps) + " " + mu : "—"}</div></div>
+        <div class="stat-box"><div class="lbl">ממוצע 3 אחרונים (סך)</div><div class="val">${avg3 != null ? avg3 + " " + mu : "—"}</div></div>
+      ` : `
         <div class="stat-box"><div class="lbl">שיא עצימות (PR)</div><div class="val">${st.prVol ?? "—"}</div></div>
         <div class="stat-box"><div class="lbl">שינוי מול פעם שעברה</div><div class="val" style="${changeClr}">${changeTxt}</div></div>
         <div class="stat-box"><div class="lbl">שיא משקל כבד</div><div class="val">${st.prHeavy != null ? wt(st.prHeavy, def) : (st.prReps != null ? st.prReps + " חזרות" : "—")}</div></div>
@@ -2972,12 +3251,12 @@
         heavy.push(getHeavySet(entry).weight);
       });
 
-      document.getElementById("chart-note").textContent = volume.length
-        ? "אדום = עצימות כוללת · אפור = משקל בסט הכבד"
-        : "אין מספרים לגרף בתרגיל הזה";
-      document.getElementById("chart-legend").innerHTML = `
-        <span><i style="background:#e11d48"></i>עצימות</span>
-        <span><i style="background:#d4d4d4"></i>סט כבד</span>`;
+      document.getElementById("chart-note").textContent = !volume.length ? "אין מספרים לגרף בתרגיל הזה"
+        : (meas ? `קו = סך ${MEASURE_TYPES[logs[logs.length - 1].type].word} באימון` : (CC.main === "#e11d48" ? "אדום = עצימות כוללת · אפור = משקל בסט הכבד" : "ורוד = עצימות כוללת · כחול = משקל בסט הכבד"));
+      document.getElementById("chart-legend").innerHTML = meas ? `
+        <span><i style="background:${CC.main}"></i>סך ${mu}</span>` : `
+        <span><i style="background:${CC.main}"></i>עצימות</span>
+        <span><i style="background:${CC.sec}"></i>סט כבד</span>`;
 
       renderHtmlChart(labels, volume, heavy);
 
@@ -2985,7 +3264,9 @@
       let html = "";
       [...logs].reverse().forEach(entry => {
         let setsHtml = "";
-        if (entry.type === "max" || entry.type === "simple") {
+        if (isMeasureType(entry.type)) {
+          setsHtml = measureEntryLines(entry, def).map(x => esc(x) + "<br/>").join("");
+        } else if (entry.type === "max" || entry.type === "simple") {
           entry.sets.forEach((s, i) => {
             if (s) {
               const w = s.weight != null ? wt(s.weight, def) + " × " : "";
@@ -3004,7 +3285,7 @@
         }
         const inten = getSessionIntensity(entry);
         const intenLine = inten.value != null
-          ? `<div style="margin-top:6px;color:#e11d48;font-weight:700;">עצימות: ${inten.value} ${inten.unit}</div>`
+          ? `<div style="margin-top:6px;color:${CC.main};font-weight:700;">${inten.measure ? inten.label : "עצימות"}: ${inten.value} ${inten.unit}</div>`
           : "";
         html += `<div class="history-item" style="cursor:default;">
           <div class="date">${formatFullDate(entry.date)}${entry.deload ? " · שבוע הורדה" : ""}</div>
@@ -3017,9 +3298,9 @@
     }
 
     // ========== BACKUP REMINDER ==========
-    const LAST_BACKUP_KEY = "workoutLastBackup_v1";
-    const BACKUP_SNOOZE_KEY = "workoutBackupSnooze_v1";
-    const BACKUP_BASELINE_KEY = "workoutBackupBaseline_v1";
+    const LAST_BACKUP_KEY = K("workoutLastBackup_v1");
+    const BACKUP_SNOOZE_KEY = K("workoutBackupSnooze_v1");
+    const BACKUP_BASELINE_KEY = K("workoutBackupBaseline_v1");
     const DAY_MS = 24 * 60 * 60 * 1000;
 
     function hasAnyData(data) {
@@ -3091,7 +3372,7 @@
       const sets = entry.sets.filter(s => s && (numOrNull(s.weight) != null || numOrNull(s.reps) != null))
         .map(s => ({ weight: numOrNull(s.weight), reps: numOrNull(s.reps) }));
       if (!sets.length) return null;
-      if (entry.type === "max") {
+      if (entry.type === "max" || isMeasureType(entry.type)) {
         return sets.reduce((a, b) => ((b.reps || 0) > (a.reps || 0) ? b : a));
       }
       if (entry.type !== "simple") {
@@ -3121,6 +3402,7 @@
 
     // Double progression from last session's working set (deload sessions ignored).
     function computeSuggestion(logs, def, opts) {
+      if (isMeasureType(def.type)) return measureSuggestion(logs, def, opts);
       const all = (logs || []).filter(e => getWorkingSet(e));
       if (!all.length) return null;
       const normal = all.filter(e => !e.deload);
@@ -3235,7 +3517,10 @@
         box.innerHTML = "";
         return;
       }
-      const target = def.type === "max"
+      const target = isMeasureType(def.type)
+        ? (def.type === "cardio" ? `${measureVal(s.reps)} ${measureUnit(def.type)}${s.weight != null ? ` · רמה ${fmtKg(s.weight)}` : ""}`
+          : `${s.weight != null ? wt(s.weight, def) + " × " : ""}${measureVal(s.reps)} ${measureUnit(def.type)}`)
+        : def.type === "max"
         ? `${s.reps} חזרות${s.weight != null ? ` · ${wt(s.weight, def)}` : ""}`
         : (s.weight != null ? `${wt(s.weight, def)} × ${s.reps}` : `${s.reps} חזרות`);
       const where = def.type === "normal" ? " (סט כבד)" : (def.type === "topback" ? " (טופ)" : (def.type === "max" ? " (הסט הטוב)" : ""));
@@ -3294,7 +3579,7 @@
         <div class="pe-row">
           <div class="pe-info" onclick="openExerciseEditor('${kind}', ${gi}, ${ei})">
             <div class="exercise-name">${esc(e.name)}</div>
-            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type === "normal" && e.drops != null ? ` (${e.drops} דרופים)` : ""}${e.type === "topback" ? ` (${backoffCount(e)} בק-אוף)` : ""}${(e.type === "simple" || e.type === "max") && e.setCount != null ? ` (${e.setCount} סטים)` : ""}${e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : ""}${e.warmups != null ? ` · ${e.warmups ? e.warmups + " חימום" : "בלי חימום"}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}${e.equip ? ` · ${EQUIP[e.equip].label}${e.stack ? " · " + stackSummary(e) : ""}` : ""}${e.notes ? " · 📝" : ""}</div>
+            <div class="exercise-meta">${TYPE_LABELS[e.type]}${e.type === "normal" && e.drops != null ? ` (${e.drops} דרופים)` : ""}${e.type === "topback" ? ` (${backoffCount(e)} בק-אוף)` : ""}${(e.type === "simple" || e.type === "max" || isMeasureType(e.type)) && e.setCount != null ? ` (${e.setCount} סטים)` : ""}${isMeasureType(e.type) ? ` · ${e.repMin}-${e.repMax} ${measureUnit(e.type)}` : (e.type !== "max" ? ` · ${e.repMin}-${e.repMax} חזרות · קפיצה ${fmtKg(e.increment)} ק״ג` : "")}${e.warmups != null ? ` · ${e.warmups ? e.warmups + " חימום" : "בלי חימום"}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}${e.equip ? ` · ${EQUIP[e.equip].label}${e.stack ? " · " + stackSummary(e) : ""}` : ""}${e.notes ? " · 📝" : ""}</div>
           </div>
           <div class="pe-btns">
             ${iconBtn("▲", `moveExercise('${kind}', ${gi}, ${ei}, -1)`, { disabled: ei === 0, title: "הזז למעלה" })}
@@ -3332,6 +3617,9 @@
       html += `<button class="btn btn-outline" onclick="addGroup('a')">+ הוסף תוספת</button>`;
 
       const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי"];
+      if (isRotationProfile()) {
+        html += `<div class="section-title" style="margin-top:20px;">תוספות וימים</div><div class="card"><p class="pe-note" style="margin:0;">מצב סבב: אין ימים קבועים – התוספות (למשל מוביליטי) נוספות ידנית מתוך האימון. אפשר לכבות את מצב הסבב בכפתור "👤 פרופיל".</p></div>`;
+      } else {
       html += `<div class="section-title" style="margin-top:20px;">איזו תוספת בכל יום</div><div class="card">`;
       days.forEach((d, i) => {
         const cur = prog.accessoryByDay[i];
@@ -3342,10 +3630,18 @@
           </select></div>`;
       });
       html += `<div class="day-map-row"><span>שבת</span><span style="color:var(--text-muted);">מנוחה</span></div></div>`;
+      }
 
       const d0 = getData();
       const cyc0 = getCycleInfo(d0);
-      html += `<div class="section-title" style="margin-top:20px;">תוכנית מבוססת מחקר ומחזור</div>
+      if (isPartnerProfile()) html += `<div class="section-title" style="margin-top:20px;">התוכנית שלך ומחזור</div>
+        <div class="card">
+          <button class="btn btn-primary" onclick="loadPartnerProgram()">🌸 טעני מחדש את התוכנית שלך</button>
+          ${d0.programPrev ? `<button class="btn btn-outline" style="margin-top:8px;" id="restore-prev-btn" onclick="restorePreviousProgram()">↩ שחזור התוכנית הקודמת</button>` : ""}
+          <button class="btn btn-outline" style="margin-top:8px;" onclick="openCycleModal()">📅 מחזור: ${cyc0 ? esc(cycleTitleText(cyc0)) : "לא פעיל"}</button>
+          <p class="pe-note" style="margin-top:8px;margin-bottom:0;">ההיסטוריה נשמרת בכל מקרה.</p>
+        </div>`;
+      else html += `<div class="section-title" style="margin-top:20px;">תוכנית מבוססת מחקר ומחזור</div>
         <div class="card">
           <button class="btn btn-primary" onclick="loadResearchProgram()">🔬 ${d0.programSource === RESEARCH_PROGRAM_ID ? "טען מחדש תוכנית מבוססת מחקר" : "טען תוכנית מבוססת מחקר"}</button>
           ${d0.programPrev ? `<button class="btn btn-outline" style="margin-top:8px;" id="restore-prev-btn" onclick="restorePreviousProgram()">↩ שחזר את התוכנית הקודמת</button>` : ""}
@@ -3458,14 +3754,18 @@
       if (!confirm("לשחזר את תוכנית ברירת המחדל?\nכל השינויים בתוכנית יבוטלו. ההיסטוריה נשמרת.")) return;
       const data = getData();
       const prog = getProgram(data);
-      const defaults = buildDefaultProgram();
+      const partner = isPartnerProfile();
+      const defaults = defaultProgramForProfile();
       const defaultNames = new Set(defaults.workouts.concat(defaults.accessories).flatMap(g => g.exercises.map(e => e.name)));
       // Exercises renamed from a default one: move their history back to the default name.
       prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach(e => {
         if (e.origName && e.origName !== e.name && defaultNames.has(e.origName)) mergeLogs(data, e.name, e.origName);
       }));
-      delete data.program;
-      delete data.programSource;
+      if (partner) { data.program = defaults; data.programSource = PARTNER_PROGRAM_ID; } // her default = her program
+      else {
+        delete data.program;
+        delete data.programSource;
+      }
       saveData(data);
       renderProgramEditor();
       showToast("התוכנית שוחזרה לברירת המחדל ✓");
@@ -3479,6 +3779,10 @@
       editorTarget = { kind, gi, ei };
       document.getElementById("ex-modal-title").textContent = ei == null ? `תרגיל חדש – ${g.name}` : "עריכת תרגיל";
       document.getElementById("ex-name").value = ei == null ? "" : e.name;
+      const slots = ei == null ? [] : sameNameSlots(getProgram(), e.name);
+      document.getElementById("ex-all-row").classList.toggle("hidden", slots.length < 2);
+      document.getElementById("ex-all").checked = !(slots.length > 1 && sameNameDiffers(getProgram(), e.name));
+      document.getElementById("ex-all-text").textContent = `להחיל גם על "${e.name}" ב-${Math.max(0, slots.length - 1)} מקומות נוספים בתוכנית (כבוי = רק כאן)`;
       fillStructFields("ex", e);
       document.getElementById("ex-modal").classList.remove("hidden");
       if (ei == null) setTimeout(() => document.getElementById("ex-name").focus(), 50);
@@ -3497,6 +3801,7 @@
       if (!name) { showToast("צריך שם לתרגיל"); return; }
       const props = readStructFields("ex");
       if (!props) return;
+      const onlyHere = t.ei != null && !document.getElementById("ex-all-row").classList.contains("hidden") && !document.getElementById("ex-all").checked;
       let renamedFrom = null;
       const ok = mutateProgram((prog, data) => {
         const g = groupsOf(prog, t.kind)[t.gi];
@@ -3516,7 +3821,8 @@
           if (!renameExerciseEverywhere(prog, data, oldName, name)) return false;
           renamedFrom = oldName;
         }
-        configureExerciseEverywhere(prog, name, props);
+        if (onlyHere) applyExerciseProps(g.exercises[t.ei], props); // v13: per-workout sets/range for a same-named exercise
+        else configureExerciseEverywhere(prog, name, props);
       });
       if (ok) {
         if (renamedFrom) renameInSessionState(renamedFrom, name); // keeps today's position / edits
@@ -3528,7 +3834,7 @@
 
     // ========== SESSION EXERCISE ORDER ==========
     // Today's order lives in its own key (not in workoutData_v1 / backups) and expires at midnight.
-    const SESSION_ORDER_KEY = "workoutSessionOrder_v1";
+    const SESSION_ORDER_KEY = K("workoutSessionOrder_v1");
     let reorderMode = false;
 
     function readSessionOrders() {
@@ -3658,7 +3964,7 @@
     // ========== TODAY-ONLY EXERCISE EDITS ==========
     // Per-exercise overrides for today's session (structure, rep range, display label).
     // Own key, not in workoutData_v1 / backups, ignored from the next day.
-    const SESSION_OVERRIDES_KEY = "workoutSessionOverrides_v1";
+    const SESSION_OVERRIDES_KEY = K("workoutSessionOverrides_v1");
     const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "rir", "notes", "equip", "unit", "stack", "stackStart", "stackPlates"];
     let sxTarget = null;
 
@@ -3771,13 +4077,19 @@
       $("drops-field").classList.toggle("hidden", type !== "normal");
       $("backoffs-field").classList.toggle("hidden", type !== "topback");
       $("setcount-field").classList.toggle("hidden", type === "normal" || type === "topback");
+      const rangeLab = $("prog-fields").querySelector("label");
+      if (rangeLab) {
+        if (!rangeLab.dataset.orig) rangeLab.dataset.orig = rangeLab.textContent;
+        rangeLab.textContent = isMeasureType(type) ? `טווח ${MEASURE_TYPES[type].word} ליעד (לפיו מחושב היעד היומי)` : rangeLab.dataset.orig;
+      }
       const lb = $("equip").value === "machine_lb";
       const sf = document.getElementById(prefix + "-stack-fields");
       if (sf) sf.classList.toggle("hidden", !(lb || $("equip").value === "machine"));
       // for lb stacks the step lives in the stack fields; keep the increment select synced but less prominent
       const incLab = $("inc") && $("inc").previousElementSibling;
-      if (incLab && incLab.tagName === "LABEL") incLab.style.display = lb ? "none" : "";
-      if ($("inc")) $("inc").style.display = lb ? "none" : "";
+      const hideInc = lb || type === "cardio";
+      if (incLab && incLab.tagName === "LABEL") incLab.style.display = hideInc ? "none" : "";
+      if ($("inc")) $("inc").style.display = hideInc ? "none" : "";
     }
 
     function updateStackPreview(prefix) {
@@ -3861,7 +4173,7 @@
       const rir = $("rir").value.trim().slice(0, 12), notes = $("notes").value.trim().slice(0, 600);
       const out = {
         type: n.type, repMin: n.repMin, repMax: n.repMax, increment: n.increment,
-        setCount: (type === "simple" || type === "max") && sc !== "" ? parseInt(sc, 10) : null,
+        setCount: (type === "simple" || type === "max" || isMeasureType(type)) && sc !== "" ? parseInt(sc, 10) : null,
         drops: type === "normal" && dr !== "" ? parseInt(dr, 10) : null,
         warmups: wu !== "" ? parseInt(wu, 10) : null,
         backoffs: type === "topback" && bo !== "" ? parseInt(bo, 10) : null,
@@ -3878,12 +4190,16 @@
 
     function configureExerciseEverywhere(prog, name, props) {
       prog.workouts.concat(prog.accessories).forEach(gr => gr.exercises.forEach(x => {
-        if (x.name !== name) return;
+        if (x.name === name) applyExerciseProps(x, props);
+      }));
+    }
+    function applyExerciseProps(x, props) {
+      {
         x.type = props.type; x.repMin = props.repMin; x.repMax = props.repMax; x.increment = props.increment;
         ["setCount", "drops", "warmups", "backoffs", "rir", "notes", "equip", "unit", "stack", "stackStart", "stackPlates"].forEach(f => {
           if (props[f] == null) delete x[f]; else x[f] = props[f];
         });
-      }));
+      }
     }
 
     // History follows the new name (merge prompt if the new name already has history);
@@ -3907,7 +4223,7 @@
 
     function captureTyped() {
       const vals = [];
-      const dyn = logMode === "max" || logMode === "simple";
+      const dyn = isDynType(logMode);
       const n = dyn ? dynamicSetCount : 3 + normalDrops;
       for (let i = 1; i <= n; i++) {
         const w = document.getElementById((dyn ? "dw" : "w") + i), r = document.getElementById((dyn ? "dr" : "r") + i);
@@ -3923,7 +4239,7 @@
       if (!vals || !vals.length) return;
       let lastFilled = -1;
       vals.forEach((v, i) => { if (v.w !== "" || v.r !== "") lastFilled = i; });
-      const dyn = logMode === "max" || logMode === "simple";
+      const dyn = isDynType(logMode);
       if (dyn) {
         while (dynamicSetCount < Math.min(8, lastFilled + 1)) addDynamicSet();
         vals.slice(0, dynamicSetCount).forEach((v, i) => {
@@ -3991,7 +4307,10 @@
           }
           if (!renameExerciseEverywhere(prog, data, name, newName)) return false;
         }
-        configureExerciseEverywhere(prog, newName, props);
+        const cw = currentWorkout ? prog.workouts.find(w => w.id === currentWorkout) : null;
+        const slot = cw && cw.exercises.find(x => x.name === newName);
+        if (slot && sameNameDiffers(prog, newName)) applyExerciseProps(slot, props); // per-workout config stays per workout
+        else configureExerciseEverywhere(prog, newName, props);
       });
       if (!ok) return;
       renameInSessionState(name, newName);
@@ -4087,7 +4406,7 @@
       accessoryByDay: ["calves", "abs", "calves", "abs", "calves", "abs", null]
     };
     const CYCLE_WEEKS = 6; // + week 7 = deload
-    const REST = { warm: "כדקה", top: "2.5-3 דק׳", backoff: "2 דק׳", heavy: "1.5-2 דק׳", drop: "0-10 שנ׳", set: "2 דק׳" };
+    const REST = { warm: "כדקה", top: "2.5-3 דק׳", backoff: "2 דק׳", heavy: "1.5-2 דק׳", drop: "0-10 שנ׳", set: "2 דק׳", core: "30-60 שנ׳" };
 
     function parseDateKey(k) {
       const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(k || "");
@@ -4121,7 +4440,8 @@
       const has = f => o && o[f] != null;
       if (d.type === "normal" && !has("drops")) d.drops = 0;
       if (d.type === "topback" && !has("backoffs")) d.backoffs = 1;
-      if ((d.type === "simple" || d.type === "max") && !has("setCount")) d.setCount = Math.max(1, Math.ceil((d.setCount || 3) / 2));
+      const keepFull = d.type === "cardio" || (d.type === "timed" && isAccessoryOnlyExercise(d.name)); // cardio + mobility as normal
+      if ((d.type === "simple" || d.type === "max" || d.type === "timed" || d.type === "distance") && !keepFull && !has("setCount")) d.setCount = Math.max(1, Math.ceil((d.setCount || 3) / 2));
       d.deload = true;
       return d;
     }
@@ -4131,7 +4451,9 @@
       if (cyc && cyc.deload) return "3-4";
       if (def && def.rir && role !== "backoff" && role !== "drop") return def.rir;
       const early = !!(cyc && cyc.early);
-      const t = { top: ["2", "0-1"], backoff: ["2-3", "1-2"], heavy: ["1", "0"], drop: ["1", "0"], simple: ["2", "1-2"], max: ["1", "0"] }[role];
+      const t = (isPartnerProfile() // her program: top 2 → 1-2, isolation 1 → 0-1
+        ? { top: ["2", "1-2"], backoff: ["2-3", "2"], heavy: ["1", "0-1"], drop: ["1", "0-1"], simple: ["2", "1-2"], max: ["2", "1"] }
+        : { top: ["2", "0-1"], backoff: ["2-3", "1-2"], heavy: ["1", "0"], drop: ["1", "0"], simple: ["2", "1-2"], max: ["1", "0"] })[role];
       return t ? t[early ? 0 : 1] : null;
     }
     const dash = s => String(s); // keep "-" : an en dash between digits flips to "3–2" in RTL text
@@ -4139,7 +4461,8 @@
 
     function cycleSummaryText(c) {
       if (!c) return "";
-      if (c.deload) return "שבוע הורדה: חצי מהסטים, בלי דרופים, ‎-10% משקל, RIR 3-4";
+      if (c.deload) return "שבוע הורדה: חצי מהסטים, בלי דרופים, ‎-10% משקל, RIR 3-4" + (isPartnerProfile() ? " · קרדיו ומוביליטי כרגיל" : "");
+      if (isPartnerProfile()) return c.early ? "יעד RIR: טופ 2 · בידוד 1 · ליבה בקלות (שבועות 1-2)" : "יעד RIR: טופ 1-2 (היפ ת'ראסט / לחיצת רגליים לא פחות מ-1) · בידוד 0-1";
       return c.early
         ? "יעד RIR: טופ 2 · בק-אוף 2-3 · בידוד 1 (שבועות לימוד)"
         : `יעד RIR: טופ 0-1 · בק-אוף 1-2 · בידוד 0 (כשל)${c.week === 5 ? " · אפשר להוסיף סט לשריר שמפגר" : ""}`;
@@ -4181,6 +4504,8 @@
         const d = dropCount(def);
         return `${wt}כבד ${repRange(def)}${d ? ` + ${d === 1 ? "דרופ" : d + " דרופים"}` : " (בלי דרופים)"}`;
       }
+      if (def.type === "cardio") return `${repRange(def)} דק׳ · זון 2`;
+      if (isMeasureType(def.type)) return `${setCountOf(def)} × ${repRange(def)} ${measureUnit(def.type)}`;
       if (def.type === "max") return `${w ? wt : ""}${setCountOf(def)} × מקס חזרות (כשל טכני)`;
       return `${w ? wt : ""}${setCountOf(def)} × ${repRange(def)}`;
     }
@@ -4237,6 +4562,14 @@
       } else {
         for (let i = 1; i <= dynamicSetCount; i++) {
           const w = plan.top;
+          if (isMeasureType(def.type)) {
+            const tgt = `${plan.reps != null ? measureVal(plan.reps) : repRange(def)} ${measureUnit(def.type)}`;
+            if (w && def.type !== "cardio") currentRecs["dw" + i] = w;
+            put("dhint-" + i, def.type === "cardio"
+              ? `🎯 ${tgt}${w != null ? ` · רמה ${fmtKg(w)}` : ""} · זון 2 – אפשר לדבר במשפטים מלאים`
+              : `🎯 ${w ? kg(w) + " × " : ""}${tgt} · ${rirTxt(rirFor("simple", def, cyc))} · מנוחה ${REST.core}`);
+            continue;
+          }
           if (w) currentRecs["dw" + i] = w;
           const what = def.type === "max"
             ? `עד כשל טכני${w ? ` · ${kg(w)}` : ""}${plan.reps ? ` · יעד ${plan.reps} חזרות` : ""}`
@@ -4261,6 +4594,7 @@
 
     // Step-by-step "how to perform" box, generated from the exercise config (stays correct after edits).
     function howToSteps(def, plan) {
+      if (isMeasureType(def.type)) return measureHowTo(def, plan);
       const steps = [];
       const cyc = plan ? plan.cyc : null;
       const top = plan ? plan.top : null;
@@ -4415,6 +4749,7 @@
     function renderGuide() {
       const box = document.getElementById("guide-content");
       if (!box) return;
+      if (isPartnerProfile() || getData().programSource === PARTNER_PROGRAM_ID) { renderPartnerGuide(box); return; } // v13: her guide
       const data = getData();
       const loaded = data.programSource === RESEARCH_PROGRAM_ID;
       const prog = loaded ? getProgram(data) : normalizeProgram(JSON.parse(JSON.stringify(RESEARCH_PROGRAM)));
@@ -4513,7 +4848,7 @@
 
 
     // ========== V8/V11: STOPWATCH (count-up; rAF live digits; survives screens/background/reloads) ==========
-    const STOPWATCH_KEY = "workoutStopwatch_v1"; // { start: ms timestamp | null, acc: ms }
+    const STOPWATCH_KEY = K("workoutStopwatch_v1"); // v13: per profile // { start: ms timestamp | null, acc: ms }
     let swRaf = null;
     function readStopwatch() {
       try {
@@ -4644,6 +4979,441 @@
       } catch (e) { console.warn("cable row migration failed", e); }
     }
 
+    // ========== V13: MEASURED TYPES (timed / distance / cardio) ==========
+    function fmtMeasureSet(s, type, def) {
+      if (!s) return "";
+      const v = s.reps != null ? `${measureVal(s.reps)} ${measureUnit(type)}` : "—";
+      if (type === "cardio") return v + (s.level != null ? ` · רמה ${fmtKg(s.level)}` : "");
+      return (s.weight != null ? `${wt(s.weight, def)} × ` : "") + v;
+    }
+    function measureEntryLines(entry, def) {
+      const out = [];
+      (entry.sets || []).forEach((s, i) => { if (s) out.push(`סט ${i + 1}: ${fmtMeasureSet(s, entry.type, def)}`); });
+      if (entry.hr != null) out.push(`דופק ממוצע: ${entry.hr}`);
+      return out;
+    }
+    function dynPlaceholders() {
+      if (logMode === "cardio") return { w: "רמה", r: "דקות", cls: "max" };
+      if (isMeasureType(logMode)) return { w: `${unitLabel(currentDef)} (רשות)`, r: MEASURE_TYPES[logMode].word, cls: "heavy" };
+      const isMax = logMode === "max";
+      return { w: unitLabel(currentDef), r: isMax ? "מקס חזרות" : "חזרות", cls: isMax ? "max" : "heavy" };
+    }
+
+    // timed: +5 s up to the top of the range, then a harder variation / load / extra set.
+    // distance: +5 m up to the top, then one weight step and back to the bottom.
+    // cardio: +5 min up to the target; at the target only a small level/incline nudge (still zone 2).
+    function measureSuggestion(logs, def, opts) {
+      const t = def.type, m = MEASURE_TYPES[t], u = m.unit;
+      const valid = (logs || []).filter(e => e && Array.isArray(e.sets) && e.sets.some(s => s && numOrNull(s.reps) != null));
+      if (!valid.length) return null;
+      const normal = valid.filter(e => !e.deload);
+      const pool = normal.length ? normal : valid;
+      const lastE = pool[pool.length - 1];
+      const sets = lastE.sets.filter(s => s && numOrNull(s.reps) != null);
+      const val = Math.min(...sets.map(s => Number(s.reps))); // the weakest set decides: every set should reach the target
+      const ws = sets.map(s => numOrNull(s.weight)).filter(v => v != null);
+      const lastW = ws.length ? Math.max(...ws) : null;
+      const lv = sets.map(s => numOrNull(s.level)).filter(v => v != null);
+      const extra = t === "cardio" ? (lv.length ? Math.max(...lv) : null) : lastW;
+      const lo = def.repMin, hi = def.repMax, step = m.step;
+      const show = (x, v) => t === "cardio"
+        ? `${measureVal(v)} ${u}${x != null ? ` · רמה ${fmtKg(x)}` : ""}`
+        : `${x != null ? wt(x, def) + " × " : ""}${measureVal(v)} ${u}`;
+      const head = `בפעם הקודמת: ${show(extra, val)}${sets.length > 1 ? " (הסט החלש)" : ""}`;
+      const range = `${lo}-${hi} ${u}`;
+      if (opts && opts.deload) {
+        const v = Math.min(val, hi);
+        return { weight: extra, reps: v, kind: "deload",
+          rule: t === "cardio" ? "שבוע הורדה: הקרדיו כרגיל." : "שבוע הורדה: חצי מהסטים, אותו זמן/מרחק. לא מתקדמים השבוע.",
+          explain: `${head} ← השבוע (הורדה): ${show(extra, v)}` };
+      }
+      if (t === "cardio") {
+        const rule = `שיטה: מוסיפים 5 דק׳ בכל פעם עד היעד (${range}). ביעד נשארים, ואפשר להעלות מעט רמה/שיפוע – כל עוד אפשר לדבר במשפטים מלאים (זון 2).`;
+        if (val < lo) return { weight: extra, reps: lo, kind: "rep", rule, explain: `${head} (מתחת ל-${lo} ${u}) ← היום: ${show(extra, lo)}` };
+        if (val < hi) {
+          const v = Math.min(hi, val + step);
+          return { weight: extra, reps: v, kind: "rep", rule, explain: `${head} ← היום: ${show(extra, v)} (+${measureVal(v - val)} ${u})` };
+        }
+        return { weight: extra, reps: hi, kind: "top", rule,
+          explain: `${head} – ${T("הגעת ליעד", "הגעת ליעד")} (${range}) ← היום: ${show(extra, hi)}. אפשר רמה/שיפוע קצת יותר גבוהים, עדיין בזון 2.` };
+      }
+      if (t === "timed") {
+        const tip = def.topTip || "בסוף הטווח: גרסה קשה יותר, משקל או סט נוסף – ולא עוד זמן.";
+        const rule = `שיטה: +5 שנ׳ בכל פעם (לפי הסט החלש) עד ${hi} שנ׳. ${tip}`;
+        if (val < lo) return { weight: extra, reps: lo, kind: "rep", rule, explain: `${head} (מתחת לטווח ${range}) ← היום: ${show(extra, lo)}` };
+        if (val < hi) {
+          const v = Math.min(hi, val + step);
+          return { weight: extra, reps: v, kind: "rep", rule, explain: `${head} (בתוך הטווח ${range}) ← היום: ${show(extra, v)}` };
+        }
+        return { weight: extra, reps: hi, kind: "maxed", rule, explain: `${head} (סוף הטווח ${range}) ← היום: ${show(extra, hi)}. ${tip}` };
+      }
+      const rule = `שיטה: +5 מ׳ בכל פעם עד ${hi} מ׳. בסוף הטווח – משקולת כבדה יותר (קפיצה אחת) וחוזרים ל-${lo} מ׳.`;
+      if (val < lo) return { weight: extra, reps: lo, kind: "rep", rule, explain: `${head} (מתחת לטווח ${range}) ← היום: ${show(extra, lo)}` };
+      if (val < hi) {
+        const v = Math.min(hi, val + step);
+        return { weight: extra, reps: v, kind: "rep", rule, explain: `${head} (בתוך הטווח ${range}) ← היום: ${show(extra, v)}` };
+      }
+      if (lastW != null) {
+        const nw = moveStack(lastW, 1, def);
+        if (nw > lastW + 1e-9) return { weight: nw, reps: lo, kind: "top", steps: 1, rule, explain: `${head} (סוף הטווח ${range}) ← היום: ${show(nw, lo)}` };
+        return { weight: lastW, reps: hi, kind: "stackmax", rule, explain: `${head} – כבר במשקולת הכבדה ביותר ← היום: ${show(lastW, hi)}, צעדים איטיים ושליטה מלאה.` };
+      }
+      return { weight: null, reps: hi, kind: "maxed", rule, explain: `${head} (סוף הטווח ${range}) ← היום: מוסיפים משקולת ביד.` };
+    }
+
+    function measureHowTo(def, plan) {
+      const t = def.type, u = measureUnit(t), steps = [];
+      const s = plan && plan.s, cyc = plan ? plan.cyc : null;
+      const tgt = `${plan && plan.reps != null ? measureVal(plan.reps) : repRange(def)} ${u}`;
+      if (t === "cardio") {
+        steps.push(`${tgt} בזון 2${plan && plan.reps != null ? ` (יעד ${repRange(def)} ${u})` : ""}: אפשר לדבר במשפטים מלאים, מאמץ 3-4 מתוך 10.`);
+        steps.push("רושמים: דקות, רמה/שיפוע (המספר במכשיר) ודופק ממוצע אם יש.");
+        if (def.deload) steps.push("🧘 שבוע הורדה – הקרדיו כרגיל.");
+        else if (s && s.explain) steps.push(`התקדמות: ${s.explain}`);
+        steps.push(`כלל ההתקדמות: +5 דק׳ בכל פעם עד ${def.repMax} דק׳. ביעד – אותו זמן, ואפשר להעלות מעט רמה/שיפוע.`);
+        return steps;
+      }
+      steps.push(`${setCountOf(def)} סטים × ${tgt}${plan && plan.top ? ` (${kg(plan.top)})` : ""} – טווח ${repRange(def)} ${u}, ${rirTxt(rirFor("simple", def, cyc))}. מנוחה ${REST.core} בין הסטים.`);
+      steps.push(t === "timed" ? "איכות לפני זמן: עוצרים כשהטכניקה נשברת, לא עד כשל. נושמים לאורך כל ההחזקה." : "גוף זקוף, צעדים רגועים, לא נוטים לצד.");
+      if (def.deload) steps.push("🧘 שבוע הורדה: חצי מהסטים, אותו זמן/מרחק. לא מתקדמים השבוע.");
+      else {
+        if (s && s.explain) steps.push(`התקדמות: ${s.explain}`);
+        steps.push(t === "timed"
+          ? `כלל ההתקדמות: +5 שנ׳ בכל פעם (לפי הסט החלש) עד ${def.repMax} שנ׳. ${def.topTip || "בסוף הטווח: גרסה קשה יותר, משקל או סט נוסף – לא עוד זמן."}`
+          : `כלל ההתקדמות: +5 מ׳ בכל פעם עד ${def.repMax} מ׳, ואז משקולת כבדה יותר (${fmtKg(def.increment || 2)} ${unitLabel(def)}) וחוזרים ל-${def.repMin} מ׳.`);
+      }
+      return steps;
+    }
+
+    // Mobility stretches keep their full dose in a deload week (her program: "cardio and mobility as normal").
+    function isAccessoryOnlyExercise(name) {
+      const p = getProgram();
+      return !p.workouts.some(w => w.exercises.some(e => e.name === name)) && p.accessories.some(a => a.exercises.some(e => e.name === name));
+    }
+
+    function chartColors() {
+      return document.body.classList.contains("theme-pastel")
+        ? { main: "#cc3d76", fill: "rgba(204,61,118,0.14)", sec: "#5b6493", grid: "rgba(30,42,94,0.12)", label: "#4a5478", up: "#1f9d55", down: "#cc3d76" }
+        : { main: "#e11d48", fill: "rgba(225,29,72,0.14)", sec: "#d4d4d4", grid: "rgba(255,255,255,0.12)", label: "#a3a3a3", up: "#22c55e", down: "#e11d48" };
+    }
+
+    // ---- per-workout config for same-named exercises ----
+    const SLOT_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "equip", "rir", "notes"];
+    function sameNameSlots(prog, name) {
+      const out = [];
+      prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach(x => { if (x.name === name) out.push(x); }));
+      return out;
+    }
+    function sameNameDiffers(prog, name) {
+      const sig = x => JSON.stringify(SLOT_FIELDS.map(f => x[f] == null ? null : x[f]));
+      const slots = sameNameSlots(prog, name);
+      return slots.length > 1 && slots.some(x => sig(x) !== sig(slots[0]));
+    }
+
+    // ========== V13: ROTATION MODE ==========
+    function bestWorkoutForNames(names, prog) {
+      let best = null, bn = 0;
+      prog.workouts.forEach(w => { const n = w.exercises.filter(e => names.has(e.name)).length; if (n > bn) { bn = n; best = w.id; } });
+      return best;
+    }
+    function trainingDayMap(data, prog) {
+      const hidden = new Set(data.hiddenDays || []);
+      const map = {};
+      (data.sessions || []).forEach(s => {
+        if (!s || !s.date) return;
+        const k = toDateKey(new Date(s.date));
+        if (!hidden.has(k) && findWorkout(s.workout, prog)) map[k] = s.workout;
+      });
+      const dayEx = {};
+      Object.keys(data.logs || {}).forEach(n => (data.logs[n] || []).forEach(e => {
+        if (!e || !e.date) return;
+        const k = toDateKey(new Date(e.date));
+        if (hidden.has(k) || map[k]) return;
+        (dayEx[k] = dayEx[k] || new Set()).add(n);
+      }));
+      Object.keys(dayEx).forEach(k => { const g = bestWorkoutForNames(dayEx[k], prog); if (g) map[k] = g; });
+      return map;
+    }
+    function rotationState(data, prog) {
+      data = data || getData();
+      prog = prog || getProgram(data);
+      const ids = prog.workouts.map(w => w.id);
+      const map = trainingDayMap(data, prog);
+      const keys = Object.keys(map).sort();
+      const lastKey = keys.length ? keys[keys.length - 1] : null;
+      const lastId = lastKey ? map[lastKey] : null;
+      const i = ids.indexOf(lastId);
+      const nextId = ids.length ? ids[i >= 0 ? (i + 1) % ids.length : 0] : null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayKey = toDateKey(today);
+      const trainedToday = !!map[todayKey];
+      let streakBefore = 0; // consecutive training days ending yesterday
+      const d = new Date(today);
+      while (streakBefore < 60) { d.setDate(d.getDate() - 1); if (map[toDateKey(d)]) streakBefore++; else break; }
+      const y = new Date(today); y.setDate(y.getDate() - 1);
+      return { ids, map, lastKey, lastId, nextId, trainedToday, streakBefore, todayKey, yesterdayKey: toDateKey(y) };
+    }
+    function rotationLabel(id, prog) {
+      const i = (prog || getProgram()).workouts.findIndex(w => w.id === id);
+      return i >= 0 ? `אימון ${i + 1}` : String(id);
+    }
+    function rotationNum(id, prog) {
+      const i = (prog || getProgram()).workouts.findIndex(w => w.id === id);
+      return i >= 0 ? String(i + 1) : String(id);
+    }
+    function workoutFocus(w) {
+      const m = /^\s*אימון\s*\d+\s*[–—-]\s*(.+)$/.exec(w.name || "");
+      return m ? m[1] : (w.name || "");
+    }
+    function relDayText(key, todayKey) {
+      const a = parseDateKey(key), b = parseDateKey(todayKey);
+      if (!a || !b) return "";
+      const n = Math.round((b - a) / DAY_MS);
+      return n <= 0 ? "היום" : (n === 1 ? "אתמול" : `לפני ${n} ימים`);
+    }
+    function isFixedRestDay(date = new Date()) {
+      return !isRotationProfile() && isSaturday(date);
+    }
+    function rotationWarning(rot) {
+      if (!rot) return "";
+      if (!rot.trainedToday && rot.streakBefore >= 2)
+        return `🌿 ${rot.streakBefore} ימי אימון ברצף – ${T("מומלץ לנוח היום", "מומלץ לך לנוח היום")} (לא יותר מ-2 ימים ברצף). אם בכל זאת – אימון קל.`;
+      if (rot.trainedToday && rot.streakBefore >= 1)
+        return `🌿 ${rot.streakBefore + 1} ימי אימון ברצף – מחר יום מנוחה.`;
+      const ids = rot.ids;
+      if (!rot.trainedToday && ids.length > 1 && rot.nextId === ids[0] && rot.lastId === ids[ids.length - 1] && rot.lastKey === rot.yesterdayKey)
+        return "💡 בין אימון 4 לאימון 1 עדיף יום מנוחה (שניהם עובדים על הישבן). אם אין ברירה – אפשר, אימון 4 קל יותר.";
+      return "";
+    }
+    function renderNextCard(prog, rot) {
+      const card = document.getElementById("next-card");
+      if (!card) return;
+      if (!rot || !rot.nextId) { card.classList.add("hidden"); return; }
+      const w = findWorkout(rot.nextId, prog);
+      const lastW = rot.lastId ? findWorkout(rot.lastId, prog) : null;
+      document.getElementById("next-title").textContent = `האימון הבא: ${rotationLabel(w.id, prog)}`;
+      let sub = workoutFocus(w);
+      if (lastW) sub += ` · ${rot.trainedToday ? "היום" : "האחרון"}: ${rotationLabel(lastW.id, prog)}${rot.trainedToday ? " ✓" : ` (${relDayText(rot.lastKey, rot.todayKey)})`}`;
+      else sub += " · מתחילים מאימון 1";
+      document.getElementById("next-sub").textContent = sub;
+      const warn = rotationWarning(rot);
+      const wEl = document.getElementById("next-warn");
+      wEl.textContent = warn;
+      wEl.classList.toggle("hidden", !warn);
+      const b = document.getElementById("next-start-btn");
+      b.textContent = `▶ ${T("התחל", "התחילי")} את ${rotationLabel(w.id, prog)}`;
+      b.onclick = () => startWorkout(w.id);
+      const c = document.getElementById("next-continue-btn");
+      c.classList.toggle("hidden", !(rot.trainedToday && lastW));
+      if (rot.trainedToday && lastW) {
+        c.textContent = `↩ ${T("המשך", "המשיכי")} את האימון של היום (${rotationLabel(lastW.id, prog)})`;
+        c.onclick = () => startWorkout(lastW.id);
+      }
+      card.classList.remove("hidden");
+    }
+
+    function renderHomeProfile(prog, rot) {
+      const p = activeProfile();
+      const h1 = document.getElementById("home-title"), sub = document.getElementById("home-subtitle");
+      if (p.kind === "partner") {
+        h1.textContent = p.title || "🌸 האימונים שלי";
+        sub.textContent = "ישבן · ליבה · גמישות · כושר";
+      } else {
+        h1.textContent = p.title || "💪 אימונים שלי";
+        sub.textContent = "מעקב פיתוח גוף";
+      }
+      document.getElementById("pick-title").textContent = rot ? T("או בחר אימון אחר", "או בחרי אימון אחר") : T("בחר אימון", "בחרי אימון");
+      document.getElementById("profile-btn").textContent = `👤 פרופיל: ${p.name}`;
+      renderNextCard(prog, rot);
+    }
+
+    // ========== V13: PROFILE CHOOSER / SWITCHER ==========
+    function needsProfileChoice() {
+      return !readActiveProfileId() && lsGet("workoutData_v1") == null;
+    }
+    function initProfiles() {
+      if (readActiveProfileId()) return;
+      if (needsProfileChoice()) { openProfileChooser(); return; }
+      try { localStorage.setItem(ACTIVE_PROFILE_KEY, "main"); } catch (e) {} // existing install: silently the main profile
+    }
+    function openProfileChooser() {
+      const pr = readProfiles();
+      document.getElementById("choose-main-name").textContent = pr.main.name;
+      document.getElementById("choose-p2-name").textContent = pr.p2.name;
+      document.getElementById("chooser-p2-name").value = pr.p2.name;
+      document.getElementById("profile-chooser").classList.remove("hidden");
+    }
+    function closeProfileChooser() { document.getElementById("profile-chooser").classList.add("hidden"); }
+    function chooseProfile(id) {
+      if (id === "p2") createPartnerProfile((document.getElementById("chooser-p2-name").value || "").trim());
+      switchProfile(id);
+    }
+    // A new partner profile starts with her program and a fresh 6+1 week cycle (nothing to confirm: it is empty).
+    function createPartnerProfile(name) {
+      const profiles = readProfiles();
+      if (name) profiles.p2.name = name.slice(0, 40);
+      profiles.p2.created = true;
+      writeProfiles(profiles);
+      const key = PROFILE_DEFAULTS.p2.prefix + "workoutData_v1";
+      if (lsGet(key) == null) {
+        const data = { logs: {}, sessions: [], program: normalizeProgram(JSON.parse(JSON.stringify(PARTNER_PROGRAM))),
+          programSource: PARTNER_PROGRAM_ID, cycle: { start: toDateKey(cycleStartSunday()), num: 1 } };
+        try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) { showToast("אין מקום באחסון"); }
+      }
+    }
+    function switchProfile(id) {
+      if (!PROFILE_DEFAULTS[id]) return;
+      try { localStorage.setItem(ACTIVE_PROFILE_KEY, id); } catch (e) {}
+      if (id === ACTIVE_PROFILE_ID) { closeProfileChooser(); closeProfileModal(); goHome(); return; }
+      location.reload();
+    }
+    function openProfileModal() {
+      const pr = readProfiles(), p = pr[ACTIVE_PROFILE_ID];
+      document.getElementById("profile-active-note").textContent = `פרופיל פעיל: ${p.name}. לכל פרופיל תוכנית, היסטוריה, מחזור, סטופר וגיבויים משלו.`;
+      document.getElementById("profile-switch-list").innerHTML = Object.keys(pr).filter(id => id !== ACTIVE_PROFILE_ID).map(id => pr[id].created
+        ? `<button class="btn btn-outline" style="margin-top:8px;" onclick="switchProfile('${id}')">⇄ מעבר ל: ${esc(pr[id].name)}</button>`
+        : `<button class="btn btn-outline" style="margin-top:8px;" onclick="createPartnerProfile(''); switchProfile('${id}')">🌸 יצירת פרופיל חדש: ${esc(pr[id].name)}</button>`).join("");
+      document.getElementById("pf-name").value = p.name;
+      document.getElementById("pf-title").value = p.title || "";
+      document.getElementById("pf-theme").value = p.theme;
+      document.getElementById("pf-rotation").checked = !!p.rotation;
+      document.getElementById("profile-modal").classList.remove("hidden");
+    }
+    function closeProfileModal() { const m = document.getElementById("profile-modal"); if (m) m.classList.add("hidden"); }
+    function saveProfileSettings() {
+      const pr = readProfiles();
+      const p = Object.assign({}, pr[ACTIVE_PROFILE_ID]);
+      p.name = document.getElementById("pf-name").value.trim().slice(0, 40) || PROFILE_DEFAULTS[ACTIVE_PROFILE_ID].name;
+      p.title = document.getElementById("pf-title").value.trim().slice(0, 40);
+      p.theme = document.getElementById("pf-theme").value === "pastel" ? "pastel" : "dark";
+      p.rotation = document.getElementById("pf-rotation").checked;
+      pr[ACTIVE_PROFILE_ID] = p;
+      writeProfiles(pr);
+      applyProfileTheme();
+      closeProfileModal();
+      showToast("נשמר ✓");
+      goHome();
+    }
+
+    function loadPartnerProgram() {
+      if (!confirm(T("לטעון מחדש את התוכנית? שינויים שעשית בה יוחלפו.", "לטעון מחדש את התוכנית שלך? שינויים שעשית בה יוחלפו.") + "\nההיסטוריה נשמרת, והתוכנית הנוכחית נשמרת לשחזור.")) return false;
+      const data = getData();
+      data.programPrev = { savedAt: new Date().toISOString(), program: data.program ? getProgram(data) : null, cycle: data.cycle || null, source: data.programSource || null };
+      data.program = normalizeProgram(JSON.parse(JSON.stringify(PARTNER_PROGRAM)));
+      data.programSource = PARTNER_PROGRAM_ID;
+      if (!data.cycle) data.cycle = { start: toDateKey(cycleStartSunday()), num: 1 };
+      saveData(data);
+      showToast("התוכנית נטענה ✓");
+      refreshAfterProgramChange();
+      return true;
+    }
+
+    // ========== V13: HER GUIDE (partner_program_he.md) ==========
+    function renderPartnerGuide(box) {
+      const data = getData();
+      const prog = getProgram(data);
+      const c = getCycleInfo(data);
+      const rot = rotationState(data, prog);
+      const ul = items => `<ul>${items.map(x => `<li>${x}</li>`).join("")}</ul>`;
+      let h = `<div class="card">
+        <p>תוכנית ל-4 אימונים בשבוע בימים לא קבועים: <b>שיפור ושימור הישבן</b> (המטרה הראשית), ליבה ומייצבים בסגנון McGill, גמישות וכושר אירובי. ארבע-ראשי ופלג גוף עליון – שימור.</p>
+        <p class="g-muted">עד כ-60 דק׳ משקולות באימון; כל היום ביחד (חימום, קרדיו ומוביליטי) לא יותר מ-90 דק׳.</p>
+        ${c ? `<p style="margin-top:8px;"><b>${esc(cycleTitleText(c))}</b><br/><span class="g-muted">${esc(cycleSummaryText(c))}</span></p>` : ""}
+        ${rot.nextId ? `<p style="margin-top:8px;">האימון הבא בתור: <b>${esc(rotationLabel(rot.nextId, prog))}</b></p>` : ""}
+        <p class="g-muted" style="margin-top:8px;">⚠️ כאב שמחמיר, חוסר יציבות או נפיחות בברך – בדיקה אצל פיזיותרפיסט או אורתופד. זה תכנון אימונים, לא אבחון.</p>
+      </div>`;
+
+      h += `<div class="section-title">הסבב (בלי ימים קבועים)</div><div class="card g-text">
+        <p>הסדר תמיד <b>1 ← 2 ← 3 ← 4 ← 1</b>. בכל פעם ${T("שבאים", "שאת באה")} להתאמן – האימון הבא בתור, בלי קשר ליום בשבוע. האפליקציה מציגה אותו במסך הראשי.</p>
+        ${guideTable(["אימון", "מוקד", "משך משוער"], [
+          ["<b>1</b>", "ישבן כבד (היפ ת'ראסט) וגב", "כ-85 דק׳"], ["<b>2</b>", "פלג גוף עליון, ליבה והרחקה בכבל", "כ-85-90 דק׳"],
+          ["<b>3</b>", "ישבן במתיחה וחד-צדדי", "כ-85 דק׳"], ["<b>4</b>", "נפח לישבן ופלג גוף עליון", "כ-85-90 דק׳"]
+        ], rot.nextId ? prog.workouts.findIndex(w => w.id === rot.nextId) : null)}
+        <h4>כללי ריווח</h4>${ul([
+          "<b>לא יותר מ-2 ימי אימון ברצף</b> – אחרי יומיים, יום מנוחה. האפליקציה מזכירה.",
+          "בין אימון 1 לאימון 3 (שני הכבדים לישבן) לפחות 48 שעות – כשהולכים לפי הסדר זה קורה מעצמו.",
+          "עדיף יום מנוחה בין אימון 4 לאימון 1. אם אין ברירה – אפשר ברצף, אימון 4 קל יותר.",
+          "דוגמאות: א׳ 1, ב׳ 2, ד׳ 3, ה׳ 4 · ב׳ 1, ג׳ 2, ה׳ 3, ש׳ 4 · כל יומיים.",
+          `${T("פספסת", "פספסת")}? ממשיכים מהאימון הבא בתור – לא מדלגים ולא משלימים. אחרי יותר משבוע הפסקה – באימון הראשון חזרה אחת יותר לפני כשל.`])}
+      </div>`;
+
+      h += `<div class="section-title">מושגים וחימום</div><div class="card g-text">${ul([
+        "<b>RIR</b> = כמה חזרות נשארו לפני כשל. RIR 0 = כשל, RIR 2 = עוד שתיים היו אפשריות.",
+        "<b>טופ + בק-אוף:</b> 2 סטי חימום, סט כבד אחד, ואז 2 סטים קלים ב-10-15%.",
+        "<b>כבד + דרופים:</b> סט כבד, ומיד מורידים 20-30% וממשיכים בלי מנוחה.",
+        "<b>מנוחה:</b> לפני טופ 2-3 דק׳ · סטים רגילים 1.5-2 דק׳ · בידוד 1-1.5 דק׳ · בתוך דרופים 0-10 שנ׳ · ליבה 30-60 שנ׳.",
+        "<b>קצב:</b> הורדה מבוקרת 2-3 שנ׳ · בהיפ ת'ראסט שנייה החזקה למעלה · בתרגילים במתיחה לא קופצים מהתחתית."])}
+        <h4>חימום לפני כל אימון (5-6 דק׳)</h4>${ul(["3 דק׳ אופניים קלים", "חתול-גמל × 6", "גשר ישבן × 10", "בירד דוג × 4 לכל צד", "הרחקת ירך עם גומייה × 10 (ביום של הרחקות)"])}
+      </div>`;
+
+      const exCard = e => `<div class="g-ex"><div class="g-ex-name">${esc(e.name)}</div>
+        <div class="g-ex-plan">${esc(TYPE_LABELS[e.type] || "")} · ${esc(planText(e))}${e.equip ? ` · ${EQUIP[e.equip].label}${e.type !== "cardio" ? ` (${fmtKg(e.increment)} ${unitLabel(e)})` : ""}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}</div>
+        ${e.notes ? `<div class="g-ex-notes">${esc(e.notes)}</div>` : ""}</div>`;
+      prog.workouts.forEach(w => {
+        h += `<div class="section-title">${esc(w.name)}${w.id === rot.nextId ? " · הבא בתור" : ""}</div><div class="card">${w.exercises.map(exCard).join("") || `<div class="g-muted">אין תרגילים</div>`}</div>`;
+      });
+
+      h += `<div class="section-title">ליבה ומייצבים – העקרונות</div><div class="card g-text">${ul([
+        "<b>סיבולת ושליטה, לא כשל.</b> החזקות קצרות של 8-10 שנ׳ (McGill), ומעלים חזרות. אפשר בפירמידה יורדת, למשל 6, 4, 2.",
+        "סדר ההתקדמות: קודם טכניקה מושלמת ← אחר כך עוד חזרות / זמן ← רק בסוף התקדמות מכנית (פלאנק צידי על הרגליים, משקל כבד יותר בהליכה).",
+        "<b>בלי סיט-אפים, כפיפות בטן מלאות או הרמות רגליים במתח</b> – לא מתאימים כשיש כאבי גב.",
+        "נושמים בשליטה, לא עוצרים נשימה – \"חגורה\" קלה בבטן.",
+        "באפליקציה: פלאנק צידי ופאלוף איזומטרי נרשמים <b>בשניות</b>, הליכת חקלאי <b>במטרים</b> (+ משקל המשקולת). +5 שנ׳/מ׳ בכל פעם עד סוף הטווח."])}</div>`;
+
+      h += `<div class="section-title">מוביליטי וגמישות</div><div class="card g-text">
+        <h4>שגרה יומית – 10 דק׳ (כמעט כל יום, אחרי אימון או בבית)</h4>${ul([
+          "חתול-גמל × 6-8, לאט.",
+          "מתיחת כופפי ירך בכריעה 2 × 30-45 שנ׳ לכל צד – ריפוד מתחת לברך, אגן מגולגל אחורה, ישבן מכווץ. לא נוח לברך שמאל? בעמידה.",
+          "90/90 לירך 2 × 6-8 החלפות, בטווח שנוח לברך.",
+          "מתיחת ירך אחורית בשכיבה עם רצועה 2 × 30-45 שנ׳ לכל רגל – בשכיבה, לא בכפיפה קדימה בעמידה.",
+          "פתיחת חזה בשכיבה על הצד (open book) × 6-8 לכל צד."])}
+        <h4>סשן ארוך – פעם בשבוע (20-25 דק׳, אחרי אימון 4 או ביום מנוחה)</h4>${ul([
+          "כל השגרה היומית, 3 סטים בכל תרגיל.", "מתיחת ישבן בשכיבה (figure-4) 3 × 45 שנ׳.", "מתיחת מקרבים בישיבה (פרפר) 3 × 45 שנ׳.",
+          "הארכת גב עליון על פומפייה 2 דק׳.", "2 דק׳ נשימות סרעפתיות."])}
+        <p class="g-muted">מתיחות משפרות טווח תנועה מכ-5 דק׳ בשבוע לשריר, עדיף 5 ימים בשבוע (Thomas 2018). גם אימון כוח בטווח מלא משפר גמישות (Afonso 2021). באפליקציה: "מוביליטי יומי" נוסף ידנית מתוך האימון – לא קשור ליום.</p>
+      </div>`;
+
+      h += `<div class="section-title">קרדיו</div><div class="card g-text">${ul([
+        "<b>אופניים, אליפטי או הליכה בשיפוע</b> (6-12%, 4.5-5.5 קמ״ש). <b>בלי ריצה וקפיצות</b> בגלל הברך.",
+        "<b>זון 2:</b> אפשר לדבר במשפטים מלאים, מאמץ 3-4 מתוך 10 (בערך 60-70% מהדופק המקסימלי – הערכה גסה, מבחן הדיבור עדיף).",
+        "אחרי המשקולות. לפי היום: אימון 1 – 15-20 דק׳, אימון 2 – 20-30, אימונים 3-4 – 20-25.",
+        "באופניים: אוכף בגובה שהברך כמעט ישרה למטה, התנגדות נמוכה בהתחלה.",
+        "התקדמות: +5 דק׳ כל שבועיים (או שיפוע), עד 150 דק׳ בשבוע. בימי מנוחה – 1-2 הליכות מהירות של 30 דק׳.",
+        "באפליקציה: רושמים דקות, רמה/שיפוע ודופק ממוצע (לא חובה)."])}</div>`;
+
+      h += `<div class="section-title">התקדמות ודילואד</div><div class="card g-text">${ul([
+        "<b>פרוגרסיה כפולה:</b> בסוף טווח החזרות מוסיפים משקל וחוזרים לתחתית הטווח. האפליקציה מחשבת את היעד בכל תרגיל.",
+        "קפיצות: מכונות Technogym 5 ק״ג · כבלים 2.5 · משקולות 2 (4-50) · מוט 2.5."])}
+        ${guideTable(["שבועות", "RIR בטופ", "RIR בבידוד", "הערות"], [
+          ["1-2", "2", "1", "ליבה בקלות"], ["3-6", "1-2 (בהיפ ת'ראסט ובלחיצת רגליים לא פחות מ-1)", "0-1", "–"],
+          ["7 – דילואד", "3-4", "3-4", "חצי מהסטים, בלי דרופים, 10% פחות משקל. קרדיו ומוביליטי כרגיל"]
+        ], c ? (c.deload ? 2 : (c.week <= 2 ? 0 : 1)) : null)}
+        <p class="g-muted">התקדמות נעצרה 3 אימונים ברצף בתרגיל מרכזי, או שהגב/הברך מגיבים? דילואד מוקדם (בכרטיס המחזור במסך הראשי). פחות נפח עם טכניקה טובה עדיף על לדחוף.</p>
+      </div>`;
+
+      h += `<div class="section-title">בטיחות – גב תחתון</div><div class="card g-text">${ul([
+        "❌ לא: דדליפט רומני, דדליפט, גוד מורנינג, בק אקסטנשן/היפר, סקוואט כבד עם מוט על הגב.",
+        "✅ היפ ת'ראסט וגשר: צלעות למטה, סנטר מורכן, עוצרים כשהירך ישרה – לא מקשתים. העומס מהישבן, לא מהגב.",
+        "✅ לחיצת רגליים: העומק לפי האגן – עוצרים לפני שהאגן מתגלגל והגב התחתון מתרומם.",
+        "✅ חתירות: עם תמיכת חזה או במכונה, בלי חתירה בהטיה.",
+        "כאב קל (עד 2-3 מתוך 10) שעובר תוך 24 שעות – אפשר להמשיך. כאב חד, מקרין לרגל או מחמיר למחרת – מפסיקים ומתייעצים עם פיזיותרפיסט."])}</div>`;
+
+      h += `<div class="section-title">בטיחות – ברך שמאל</div><div class="card g-text">${ul([
+        "❌ לא: לאנג'ים עם תנועה גדולה של הברך קדימה, סקוואט עמוק וכבד, האק סקוואט, קפיצות וריצה.",
+        "❌ פשיטת ברך במכונה לא בתוכנית (עומס על ה-ACL בטווח 10-30°; וארבע-ראשי לא צריך עוד נפח).",
+        "✅ עלייה לספסל ולחיצת רגליים: ברך מעל כף הרגל ולא קורסת פנימה, שוק כמעט אנכית, לא מתחת לכ-90°, רגליים גבוה על הפלטה.",
+        "תחושת חוסר יציבות או \"בריחה\" בברך – עוצרים מיד והולכים לבדיקה."])}</div>`;
+
+      h += `<div class="section-title">על מה להתמקד</div><div class="card g-text">${ul([
+        "כמעט כל הנפח של פלג הגוף התחתון הולך <b>לישבן</b> – פשיטת ירך והרחקה. ארבע-ראשי – שימור בלבד.",
+        "הרחקות ירכיים, בייחוד בהטיה קדימה, מכוונות לחלק העליון והצדדי של הישבן – שם שיפור יבלוט יותר.",
+        "כתפיים וידיים כבר טובות – מספיק לשמור.",
+        "מעקב: פעם ב-4 שבועות תמונות (אותה תאורה, שעה ותנוחה), היקף ישבן בנקודה הרחבה, והמשקלים בהיפ ת'ראסט ובהרחקה.",
+        "תזונה בקצרה: חלבון סביב 1.6 גרם לק״ג גוף ביום (Morton 2018). לבדוק עם דיאטנית אם רלוונטי."])}</div>`;
+      box.innerHTML = h;
+    }
+
     // ========== INIT ==========
     document.addEventListener("input", ev => {
       if (ev.target && ev.target.closest && ev.target.closest("#normal-sets, #dynamic-sets")) renderSetHints();
@@ -4686,6 +5456,7 @@
     requestPersistentStorage();
     applySavedBackground();
     initHome();
+    initProfiles();
     startStopwatchTicker();
   </script>
   <script>
