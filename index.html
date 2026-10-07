@@ -1574,6 +1574,19 @@
       if (mode === "up") return snapUp(x, stack);
       return snapNearest(x, stack);
     }
+    // v14: e1RM = average of Epley and Brzycki; reps used are capped (≤15 as is, 16-20 → up to 16, >20 → 16)
+    // for reliability. Target = weight for (rangeMin + 1) reps × 0.95, snapped down to the step/stack.
+    function e1rmTarget(weight, reps, repMin, def) {
+      const r = reps <= 15 ? reps : (reps <= 20 ? 15 + (reps - 15) * 0.2 : 16);
+      const e1rm = (weight * (1 + r / 30) + weight * 36 / (37 - r)) / 2;
+      const t = repMin + 1;
+      const factor = ((1 + t / 30) + 36 / (37 - t)) / 2;
+      const x = e1rm / factor * 0.95;
+      const stack = stackWeights(def);
+      const inc = (def && def.increment) || 2.5;
+      const snapped = stack ? snapDown(x, stack) : Math.floor(x / inc + 1e-9) * inc;
+      return { weight: Math.round(snapped * 100) / 100, e1rm: Math.round(e1rm * 10) / 10 };
+    }
     function moveStack(weight, n, def) {
       const stack = stackWeights(def);
       if (!stack) return Math.round((weight + n * ((def && def.increment) || 2.5)) * 100) / 100;
@@ -3473,7 +3486,16 @@
       };
       if (eff > hi) {
         const n = eff - hi >= 2 ? 2 : 1;
-        const w = up(n);
+        let w = up(n);
+        // v14: far above the range (3+ reps) → jump by estimated strength, never less than the +2-steps rule
+        const big = eff - hi >= 3 && last.weight > 0 ? e1rmTarget(last.weight, eff, lo, def) : null;
+        if (big && big.weight > w + 1e-9) {
+          w = big.weight;
+          const capB = capped(w, n);
+          if (capB) return capB;
+          return { weight: w, reps: lo, kind: "e1rm", steps: n, rule,
+            explain: `${head} (מעל הטווח ${range}${rirNote}) – עשית הרבה מעל הטווח → חישוב לפי כוח משוער (1RM משוער כ-${W(big.e1rm)}) ← היום: ${W(w)} × ${lo}-${lo + 1}` };
+        }
         const cap = capped(w, n);
         if (cap) return cap;
         return { weight: w, reps: lo, kind: "over", steps: n, rule,
@@ -4804,6 +4826,7 @@
       h += `<div class="section-title">תוספות</div><div class="card">${prog.accessories.map(a =>
         `<h4 class="g-acc">${esc(a.name)} (${a.id === "calves" ? "ראשון, שלישי, חמישי" : (a.id === "abs" ? "שני, רביעי, שישי" : "")})</h4>${a.exercises.map(exCard).join("")}`).join("")}</div>`;
 
+      h += `<div class="card g-text"><p>📈 חזרות הרבה מעל הטווח (3+ מעל הסוף) → המשקל הבא מחושב לפי כוח משוער (1RM: ממוצע אפלי וברז׳יצקי, ב-95%), ולא רק +2 קפיצות.</p></div>`;
       const week = c ? c.week : null;
       h += `<div class="section-title">מאמץ (RIR = חזרות לפני כשל)</div><div class="card">` + guideTable(["סוג תרגיל", "שבועות 1-2", "שבועות 3-6"], [
         ["טופ בתרגיל מורכב (לחיצת רגליים, באנץ', טי-בר, דדליפט רומני)", "2", "0-1 (בדדליפט רומני לא פחות מ-1)"],
@@ -5384,6 +5407,7 @@
 
       h += `<div class="section-title">התקדמות ודילואד</div><div class="card g-text">${ul([
         "<b>פרוגרסיה כפולה:</b> בסוף טווח החזרות מוסיפים משקל וחוזרים לתחתית הטווח. האפליקציה מחשבת את היעד בכל תרגיל.",
+        "חזרות הרבה מעל הטווח (3+ מעל הסוף) → המשקל הבא מחושב לפי כוח משוער (1RM: ממוצע אפלי וברז׳יצקי, ב-95%), ולא רק +2 קפיצות.",
         "קפיצות: מכונות Technogym 5 ק״ג · כבלים 2.5 · משקולות 2 (4-50) · מוט 2.5."])}
         ${guideTable(["שבועות", "RIR בטופ", "RIR בבידוד", "הערות"], [
           ["1-2", "2", "1", "ליבה בקלות"], ["3-6", "1-2 (בהיפ ת'ראסט ובלחיצת רגליים לא פחות מ-1)", "0-1", "–"],
