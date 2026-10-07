@@ -4532,12 +4532,45 @@
       return `${w ? wt : ""}${setCountOf(def)} × ${repRange(def)}`;
     }
 
+    // v15: adaptive back-off drop per exercise, derived from history (no stored state).
+    // Base = the drop actually used last (non-deload) session (rounded to 2.5%), default 12.5%.
+    // Worst back-off set below the range → +2.5% (+5% if 2+ reps short); all above the range → −2.5%. Clamp 7.5–25%.
+    const BACKOFF_DEFAULT = 12.5, BACKOFF_MIN = 7.5, BACKOFF_MAX = 25;
+    function backoffDropInfo(name, def) {
+      const clamp = x => Math.min(BACKOFF_MAX, Math.max(BACKOFF_MIN, x));
+      const logs = ((getData().logs || {})[name] || []).filter(e => e && !e.deload && e.type === "topback" && Array.isArray(e.sets));
+      const lo = def.repMin + 2, hi = def.repMax + 2;
+      for (let k = logs.length - 1; k >= 0; k--) {
+        const e = logs[k];
+        const top = numOrNull(e.sets[2] && e.sets[2].weight);
+        const bos = e.sets.slice(3).filter(x => x && numOrNull(x.reps) != null);
+        if (!bos.length) continue;
+        const withW = bos.filter(x => numOrNull(x.weight) != null);
+        let base = BACKOFF_DEFAULT;
+        if (top && withW.length) {
+          const avg = withW.reduce((a, x) => a + Number(x.weight), 0) / withW.length;
+          base = clamp(Math.round((1 - avg / top) * 100 / 2.5) * 2.5);
+        }
+        const worst = bos.reduce((a, b) => (Number(b.reps) < Number(a.reps) ? b : a));
+        const wr = Number(worst.reps);
+        let pct = base, status;
+        if (wr < lo) { pct = base + (lo - wr >= 2 ? 5 : 2.5); status = "מתחת לטווח"; }
+        else if (wr > hi) { pct = base - 2.5; status = "מעל הטווח"; }
+        else status = "בתוך הטווח";
+        pct = clamp(pct);
+        const shown = `${worst.weight != null ? fmtKg(worst.weight) + "×" : ""}${wr}`;
+        return { pct, base, status, note: `בפעם קודמת בבק-אוף: ${shown} (${status}) → הפעם ${fmtKg(pct)}% פחות מהטופ` };
+      }
+      return { pct: BACKOFF_DEFAULT, base: BACKOFF_DEFAULT, status: null, note: null };
+    }
+
     // Reference weight for today's top / heavy set (progression or deload).
     function planFor(name, def) {
       const cyc = getCycleInfo();
       const logs = getData().logs[name] || [];
       const s = computeSuggestion(logs, def, { deload: !!def.deload });
-      return { cyc, s, top: s && s.weight != null ? s.weight : null, reps: s && s.reps != null ? s.reps : null };
+      const bo = def.type === "topback" ? backoffDropInfo(name, def) : null;
+      return { cyc, s, bo, top: s && s.weight != null ? s.weight : null, reps: s && s.reps != null ? s.reps : null };
     }
 
     let currentDef = null, currentPlan = null, currentRecs = {};
@@ -4570,9 +4603,10 @@
         for (let i = 4; i <= 6; i++) {
           let w = null;
           if (tb) {
-            w = top ? stepBelowDef(top * 0.875, top, def) : null;
-            const pct = w && top ? ` (‎-${Math.round((1 - w / top) * 100)}%)` : " (‎-10-15%)";
-            put("hint-" + i, `בק-אוף: ${w ? "כ-" + kg(w) : "—"}${pct} × ${backoffReps(def)} · ${rirTxt(rirFor("backoff", def, cyc))} · מנוחה לפני: ${REST.backoff}`);
+            const bo = plan.bo || { pct: BACKOFF_DEFAULT, note: null };
+            w = top ? stepBelowDef(top * (1 - bo.pct / 100), top, def) : null;
+            const pct = w && top ? ` (‎-${Math.round((1 - w / top) * 100)}%)` : ` (‎-${fmtKg(bo.pct)}%)`;
+            put("hint-" + i, `בק-אוף: ${w ? "כ-" + kg(w) : "—"}${pct} × ${backoffReps(def)} · ${rirTxt(rirFor("backoff", def, cyc))} · מנוחה לפני: ${REST.backoff}${bo.note ? `<br/>📉 ${esc(bo.note)}` : ""}`);
           } else {
             w = prev ? stepBelowDef(prev * 0.75, prev, def) : null;
             put("hint-" + i, `דרופ: ${w ? "כ-" + kg(w) : "—"} (‎-20-30%) · ${rirTxt(rirFor("drop", def, cyc))} · מנוחה ${REST.drop}`);
@@ -4632,8 +4666,9 @@
         steps.push(`סט טופ אחד: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("top", def, cyc))}. מנוחה לפניו ${REST.top}.`);
         const b = backoffCount(def);
         if (b) {
-          const bw = top ? stepBelowDef(top * 0.875, top, def) : null;
-          steps.push(`${b === 1 ? "סט בק-אוף אחד" : b + " סטי בק-אוף"}: מורידים 10-15% ממשקל הטופ של היום${bw ? ` (כ-${kg(bw)})` : ""} × ${backoffReps(def)}, ${rirTxt(rirFor("backoff", def, cyc))}. מנוחה ${REST.backoff} בין הסטים.`);
+          const bo = (plan && plan.bo) || { pct: BACKOFF_DEFAULT, note: null };
+          const bw = top ? stepBelowDef(top * (1 - bo.pct / 100), top, def) : null;
+          steps.push(`${b === 1 ? "סט בק-אוף אחד" : b + " סטי בק-אוף"}: מורידים ${fmtKg(bo.pct)}% ממשקל הטופ של היום (בסיס 10-15%, מותאם לפי הפעם הקודמת${bo.note ? ": " + bo.note : ""})${bw ? ` (כ-${kg(bw)})` : ""} × ${backoffReps(def)}, ${rirTxt(rirFor("backoff", def, cyc))}. מנוחה ${REST.backoff} בין הסטים.`);
         } else steps.push("בלי סטי בק-אוף.");
       } else if (def.type === "normal") {
         steps.push(`סט כבד: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("heavy", def, cyc))}. מנוחה לפניו ${REST.heavy}.`);
@@ -4840,7 +4875,8 @@
         <li>מתחת לטווח ← מורידים קפיצה. אם חסרה רק חזרה אחת – בפעם הראשונה נשארים באותו משקל, ואם זה קורה פעמיים ברצף – מורידים.</li>
         <li>אם רושמים RIR בפועל: קל מהיעד נחשב כחזרות נוספות, קשה מהיעד – לא מוסיפים חזרה.</li>
         <li>קפיצות משקל לפי ציוד: מכונה 5 ק״ג, כבל 2.5 ק״ג, משקולות יד 2 ק״ג, מוט 2.5 ק״ג, מכונה בליברות – לפי סטק הפלטות (במקסימום הסטק: עוד חזרות/טמפו/פלטה ביד), משקולות יד 4–50 ק״ג בקפיצות של 2. כל המשקלים המומלצים (חימום, בק-אוף, דרופים, הורדה) מעוגלים לקפיצה / לעמדה בסטק של התרגיל.</li>
-        <li>בבק-אוף שומרים על 10-15% פחות מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
+        <li>בבק-אוף מורידים 10-15% מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
+        <li>📉 אחוז הבק-אוף מותאם לכל תרגיל (12.5% בהתחלה, בין 7.5% ל-25%): אם בפעם הקודמת יצא מתחת לטווח – מורידים יותר (+2.5%, או +5% אם חסרו 2+ חזרות); מעל הטווח – מורידים פחות (‎-2.5%).</li>
         <li>אימונים של שבוע ההורדה לא נחשבים בחישוב ההתקדמות.</li></ul></div>`;
 
       h += `<div class="section-title">מחזור של 7 שבועות</div><div class="card">` + guideTable(["שבועות", "מה עושים"], [
@@ -5363,7 +5399,7 @@
 
       h += `<div class="section-title">מושגים וחימום</div><div class="card g-text">${ul([
         "<b>RIR</b> = כמה חזרות נשארו לפני כשל. RIR 0 = כשל, RIR 2 = עוד שתיים היו אפשריות.",
-        "<b>טופ + בק-אוף:</b> 2 סטי חימום, סט כבד אחד, ואז 2 סטים קלים ב-10-15%.",
+        "<b>טופ + בק-אוף:</b> 2 סטי חימום, סט כבד אחד, ואז 2 סטים קלים ב-10-15%. האחוז מותאם לכל תרגיל לפי הפעם הקודמת: מתחת לטווח → מורידים יותר, מעל הטווח → פחות (7.5%-25%).",
         "<b>כבד + דרופים:</b> סט כבד, ומיד מורידים 20-30% וממשיכים בלי מנוחה.",
         "<b>מנוחה:</b> לפני טופ 2-3 דק׳ · סטים רגילים 1.5-2 דק׳ · בידוד 1-1.5 דק׳ · בתוך דרופים 0-10 שנ׳ · ליבה 30-60 שנ׳.",
         "<b>קצב:</b> הורדה מבוקרת 2-3 שנ׳ · בהיפ ת'ראסט שנייה החזקה למעלה · בתרגילים במתיחה לא קופצים מהתחתית."])}
