@@ -22,7 +22,7 @@ with sync_playwright() as p:
     ev = pg.evaluate
     pg.goto(BASE, wait_until='load')
     ev("s => { localStorage.clear(); localStorage.setItem('workoutData_v1', s); localStorage.setItem('workoutActiveProfile_v1', 'main'); }", SEED); pg.reload(wait_until='load')
-    ok('workout-pwa-v16' in pg.request.get(BASE + 'sw.js').text(), 'SW cache v16')
+    ok('workout-pwa-v17' in pg.request.get(BASE + 'sw.js').text(), 'SW cache v17')
     ev("loadResearchProgram()"); pg.wait_for_timeout(300)
     def setLogs(name, logs): ev("([n, l]) => { const d = getData(); d.logs[n] = l; saveData(d); }", [name, logs])
     def strip(x): return x.replace('\u2066', '').replace('\u2069', '')
@@ -50,10 +50,10 @@ with sync_playwright() as p:
     T = lambda sel: pg.inner_text(sel).replace('\u2066', '').replace('\u2069', '')
     ok('טמפו 1-2-3' in T('#lbl-3') and T('#lbl-4') == 'רסט-פאוז 1/2' and T('#lbl-5') == 'רסט-פאוז 2/2', f"row labels: {T('#lbl-3')} | {T('#lbl-4')} | {T('#lbl-5')}")
     ok(ev("document.getElementById('drop-row-3').classList.contains('hidden')"), 'only 2 rest-pause rows')
-    ok('1 שנ׳ עולים לכיווץ' in T('#hint-3') and '2 שנ׳ החזקה' in T('#hint-3') and '3 שנ׳ חזרה איטית' in T('#hint-3') and 'בלי שהסטק נוגע' in T('#hint-3') and '190 lb × 11' in T('#hint-3'), f"heavy hint: tempo + target: {T('#hint-3')[:80]}")
+    ok('1 שנ׳ למטה לכיווץ' in T('#hint-3') and 'חזה לכיוון הירכיים' in T('#hint-3') and '2 שנ׳ החזקה' in T('#hint-3') and '3 שנ׳ חזרה איטית למעלה למתיחה מלאה' in T('#hint-3') and 'עולים לכיווץ' not in T('#log-howto') and 'בלי שהסטק נוגע' in T('#hint-3') and '190 lb × 11' in T('#hint-3'), f"heavy hint: tempo + target: {T('#hint-3')[:80]}")
     ok('עד כשל' in T('#hint-4') and '15 שנ׳' in T('#hint-4') and '190 lb' in T('#hint-4'), f"rest-pause hint: {T('#hint-4')}")
     how = T('#log-howto')
-    for k in ['טמפו 1-2-3', 'נועל את האגן', 'מעגל את עמוד השדרה', 'הצלעות לאגן', 'לא מושך עם הידיים', 'מכופפי הירך', 'נושף את כל האוויר', 'חצאי חזרות', 'רסט-פאוז במקום דרופים', '1-2-5', '1-3-5', 'אתה עכשיו בשלב 1']:
+    for k in ['טמפו 1-2-3', 'האגן נעול במקום', 'הישבן דבוק למושב', 'דוחף את הכריות למטה עם החזה', 'חוליה אחר חוליה', 'החזרה האיטית למעלה', 'מגלגל את עמוד השדרה למטה', 'הצלעות לאגן', 'לא מושך עם הידיים', 'מכופפי הירך', 'נושף את כל האוויר', 'חצאי חזרות', 'רסט-פאוז במקום דרופים', '1-2-5', '1-3-5', 'אתה עכשיו בשלב 1']:
         ok(k in how, f'how-to contains "{k}"')
     ok('דרופ' not in T('#log-type-label') and 'רסט-פאוז' in T('#log-type-label'), f"type label: {T('#log-type-label')}")
     ok('טמפו 1-2-3' in T('#prev-info') and 'רסט-פאוז 1' in T('#prev-info'), 'prev info: tempo + rest-pause labels')
@@ -78,7 +78,7 @@ with sync_playwright() as p:
     s = sug(); ok(s['reps'] == 8 and '1-2-5' in s['explain'] and 'עלית לשלב 2' in s['explain'], f"stage 2: reset to 8 @1-2-5: {s['explain'][:70]}")
     pg.reload(wait_until='load'); ok(stage() == 1, 'stage persists after reload')
     ev("n => openLog(n)", AB); pg.wait_for_timeout(200)
-    ok('1-2-5' in T('#lbl-3') and '5 שנ׳ חזרה איטית' in T('#hint-3') and 'שלב 2/3' in T('#tempo-banner'), f"UI follows stage 2: {T('#lbl-3')} / {T('#tempo-banner')[:40]}")
+    ok('1-2-5' in T('#lbl-3') and '5 שנ׳ חזרה איטית למעלה' in T('#hint-3') and 'שלב 2/3' in T('#tempo-banner'), f"UI follows stage 2: {T('#lbl-3')} / {T('#tempo-banner')[:40]}")
     # no advance cases
     ev("([n, sets]) => { currentDef = getEffectiveDef(n); return maybeAdvanceAbStage(sets, currentDef); }", [AB, [None, None, {'weight': 190, 'reps': 11}]]); ok(stage() == 1, '11 reps → no stage change')
     ev("([n, sets]) => maybeAdvanceAbStage(sets, getEffectiveDef(n))", [AB, [None, None, {'weight': 175, 'reps': 12}]]); ok(stage() == 1, '12 reps below stack max → no stage change')
@@ -94,7 +94,7 @@ with sync_playwright() as p:
     # preacher UI still drops
     ev("n => openLog(n)", PR); pg.wait_for_timeout(200)
     ok(T('#lbl-4') == 'דרופ 1' and T('#lbl-3') == 'סט 3 (כבד)' and 'דרופ' in T('#hint-4') and not ev("!!document.getElementById('tempo-banner')"), 'preacher log screen unchanged (drops)')
-    ev("showGuide()"); ok('1-2-3 ← 1-2-5 ← 1-3-5' in T('#guide-content'), 'his guide line')
+    ev("showGuide()"); ok('1-2-3 ← 1-2-5 ← 1-3-5' in T('#guide-content') and 'למטה לכיווץ' in T('#guide-content') and 'חוליה אחר חוליה' in T('#guide-content'), 'his guide line')
     # partner profile untouched
     ev("() => localStorage.setItem('workoutActiveProfile_v1', 'p2')"); ev("createPartnerProfile('')"); pg.reload(wait_until='load')
     ok(not ev("n => isAbTempoExercise(Object.assign({}, findExerciseDef(n, RESEARCH_PROGRAM) || {name: n, type:'normal', equip:'machine_lb', stackStart:25, increment:15, stackPlates:11}))", AB), 'partner profile: never tempo mode')
