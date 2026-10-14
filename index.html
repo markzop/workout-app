@@ -724,11 +724,6 @@
     .howto-steps li { margin-bottom: 3px; }
     .tempo-banner { margin: 0 0 8px; padding: 8px 10px; border-radius: 10px; background: rgba(225, 29, 72, 0.14); border: 1px solid rgba(225, 29, 72, 0.5); font-weight: 700; font-size: 0.95rem; }
     .tempo-banner small { display: block; font-weight: 500; font-size: 0.8rem; opacity: 0.9; margin-top: 2px; }
-    .tempo-stage-btns { display: flex; gap: 6px; margin-top: 6px; }
-    .tempo-stage-btns button { flex: 1; font-size: 0.78rem; padding: 4px 6px; }
-    .rest-btn { margin-inline-start: 6px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--primary); background: transparent; color: inherit; font-size: 0.8rem; cursor: pointer; }
-    .rest-countdown { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); left: 50%; transform: translateX(-50%); z-index: 950; background: rgba(20, 20, 28, 0.95); color: #fff; border: 2px solid var(--heavy-set); border-radius: 999px; padding: 10px 22px; font-size: 1.3rem; font-weight: 800; display: flex; gap: 10px; align-items: center; }
-    .rest-countdown button { background: transparent; border: none; color: inherit; font-size: 1rem; cursor: pointer; }
     .howto-notes { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.12); color: #fde68a; }
     .cycle-card { background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.45); border-radius: 12px; padding: 10px 14px; margin: -6px 0 12px; cursor: pointer; }
     .cycle-card.deload { background: rgba(168, 85, 247, 0.14); border-color: rgba(168, 85, 247, 0.5); }
@@ -962,6 +957,20 @@
       </div>
 
       <div class="card hidden" id="dynamic-sets">
+        <div id="ab-warm" class="hidden">
+          <div class="set-row" id="ab-warm-row-1">
+            <div class="set-label light">חימום 1</div>
+            <input type="number" id="aw1" placeholder="lb" inputmode="decimal" />
+            <input type="number" id="ar1" placeholder="חזרות" inputmode="numeric" />
+            <div class="set-hint" id="awhint-1"></div>
+          </div>
+          <div class="set-row" id="ab-warm-row-2">
+            <div class="set-label light">חימום 2</div>
+            <input type="number" id="aw2" placeholder="lb" inputmode="decimal" />
+            <input type="number" id="ar2" placeholder="חזרות" inputmode="numeric" />
+            <div class="set-hint" id="awhint-2"></div>
+          </div>
+        </div>
         <div id="dynamic-sets-container"></div>
         <div class="add-set-btn">
           <button class="btn btn-sm btn-outline" id="add-set-btn" onclick="addDynamicSet()">+ הוסף סט</button>
@@ -1062,7 +1071,6 @@
 
   <div class="toast" id="toast">נשמר בהצלחה ✓</div>
 
-  <div class="rest-countdown hidden" id="rest-countdown" role="timer" aria-label="מנוחה"><span id="rest-cd-time">15</span><button onclick="stopRestCountdown()" aria-label="עצור">✕</button></div>
   <div class="stopwatch hidden" id="stopwatch" role="timer" aria-label="סטופר">
     <button id="sw-toggle" onclick="stopwatchToggle()" title="התחל" aria-label="התחל">▶</button>
     <span class="sw-time" id="sw-time">00:00</span>
@@ -1979,7 +1987,7 @@
           meta = `פעם קודמת: ${heavy?.weight != null ? wt(heavy.weight, getEffectiveDef(name)) : "—"}`;
         }
       }
-      if (!isPartnerProfile()) { const ed = getEffectiveDef(name); if (ed && ed.abTempo) meta += ` · ⏱ טמפו ${abStageInfo().t} + רסט-פאוז`; }
+      if (!isPartnerProfile()) { const ed = getEffectiveDef(name); if (ed && ed.abStraight) meta += ` · ${setCountOf(ed)}×${repRange(ed)} עד כשל · ⏱ ${AB_TEMPO}`; }
       const check = done ? `<span class="check-done">✓</span>` : `<span class="arrow">‹</span>`;
       const shown = displayName(name);
       const tag = getSessionOverride(name) ? `<span class="today-tag">שונה להיום</span>` : "";
@@ -2302,7 +2310,6 @@
       for (let i = 1; i <= 3; i++) document.getElementById("drop-row-" + i).classList.toggle("hidden", i > normalDrops);
       document.getElementById("add-drop-btn").classList.toggle("hidden", normalDrops >= 3);
       document.getElementById("remove-drop-btn").classList.toggle("hidden", normalDrops <= 0);
-      applyAbLabels();
       renderSetHints();
     }
 
@@ -2322,7 +2329,6 @@
 
     function typeLabelFor(def) {
       const w = warmCount(def);
-      if (def.abTempo) { const d = dropCount(def); return `${w ? "חימום + " : ""}כבד בטמפו ${abStageInfo().t}${d ? ` + ${d} רסט-פאוז (${AB_RP_REST} שנ׳)` : ""}`; }
       if (def.type === "topback") {
         const b = backoffCount(def);
         return `${w ? (w === 1 ? "חימום + " : w + " חימום + ") : ""}טופ${b ? ` + ${b} בק-אוף` : ""}`;
@@ -2364,6 +2370,12 @@
 
       document.getElementById("normal-sets").classList.add("hidden");
       document.getElementById("dynamic-sets").classList.add("hidden");
+      const abW = !!(def.abStraight && warmCount(def) > 0);
+      document.getElementById("ab-warm").classList.toggle("hidden", !abW);
+      for (let i = 1; i <= 2; i++) {
+        ["aw", "ar"].forEach(k => { const el = document.getElementById(k + i); el.value = ""; el.dataset.prefill = ""; });
+        document.getElementById("ab-warm-row-" + i).classList.toggle("hidden", !abW || i > warmCount(def));
+      }
 
       const last = getLastPerformance(exerciseName);
       const lastDyn = !!last && isDynType(last.type);
@@ -2402,7 +2414,7 @@
         setWarmupsVisible(warmCount(def));
         for (let i = 0; i < 6; i++) {
           // rows 1-3 share meaning between "normal" and "top+back-off"; drops vs back-offs do not
-          if (s[i] && (i < 3 || sameKind) && !(i < 2 && i >= warmVisible) && !(def.abTempo && i >= 3 && !last.rp)) {
+          if (s[i] && (i < 3 || sameKind) && !(i < 2 && i >= warmVisible)) {
             document.getElementById("w" + (i + 1)).value = s[i].weight || "";
             document.getElementById("r" + (i + 1)).value = s[i].reps || "";
           }
@@ -2441,11 +2453,9 @@
           if (s[0]) html += `סט 1: ${wxr(s[0])} · `;
           if (s[1]) html += `סט 2: ${wxr(s[1])}<br/>`;
           if (s[2]) html += `סט 3 (כבד): ${wxr(s[2])}<br/>`;
-          const dl = last.rp ? "רסט-פאוז" : "דרופ";
-          if (last.tempo != null && AB_TEMPO_STAGES[last.tempo]) html += `טמפו ${AB_TEMPO_STAGES[last.tempo].t}<br/>`;
-          if (s[3]) html += `${dl} 1: ${wxr(s[3])} · `;
-          if (s[4]) html += `${dl} 2: ${wxr(s[4])}`;
-          if (s[5]) html += `<br/>${dl} 3: ${wxr(s[5])}`;
+          if (s[3]) html += `דרופ 1: ${wxr(s[3])} · `;
+          if (s[4]) html += `דרופ 2: ${wxr(s[4])}`;
+          if (s[5]) html += `<br/>דרופ 3: ${wxr(s[5])}`;
         }
         if (beforeLast) {
           html += `<div style="margin-top:8px;font-size:0.85rem;">לעומת הפעם שלפניה (${formatDate(beforeLast.date)}): ${formatCmp(lastVal, beforeVal) || "—"}</div>`;
@@ -2494,7 +2504,13 @@
 
       const extra = {};
       if (currentDef && currentDef.deload) extra.deload = true;
-      if (currentDef && currentDef.abTempo) { extra.tempo = readAbStage(); extra.rp = true; }
+      if (currentDef && currentDef.abStraight && isDynType(logMode)) {
+        const wu = [1, 2].map(i => {
+          const w = document.getElementById("aw" + i).value, r = document.getElementById("ar" + i).value;
+          return (w || r) && !document.getElementById("ab-warm-row-" + i).classList.contains("hidden") ? { weight: w ? parseFloat(w) : null, reps: r ? parseInt(r) : null } : null;
+        });
+        if (wu.some(Boolean)) extra.warm = wu;
+      }
       if (logMode === "cardio") {
         const hr = parseInt(document.getElementById("cardio-hr").value, 10);
         if (hr > 0 && hr < 260) extra.hr = hr;
@@ -2507,8 +2523,7 @@
       }
       savePerformance(currentExercise, sets, Object.keys(extra).length ? extra : null);
       sessionCompleted.add(currentExercise);
-      const adv = logMode === "normal" ? maybeAdvanceAbStage(sets, currentDef) : null;
-      showToast(adv != null ? `נשמר ✓ 🔥 12 נקיות! הפעם הבאה: טמפו ${AB_TEMPO_STAGES[adv].t}` : "נשמר ✓");
+      showToast("נשמר ✓");
       setTimeout(() => backToWorkout(), 800);
     }
 
@@ -3432,7 +3447,7 @@
     // Double progression from last session's working set (deload sessions ignored).
     function computeSuggestion(logs, def, opts) {
       if (isMeasureType(def.type)) return measureSuggestion(logs, def, opts);
-      if (def.abTempo && !(opts && opts.deload)) return abTempoSuggestion(logs, def);
+      if (def.abStraight && !(opts && opts.deload)) return abStraightSuggestion(logs, def);
       const all = (logs || []).filter(e => getWorkingSet(e));
       if (!all.length) return null;
       const normal = all.filter(e => !e.deload);
@@ -4043,7 +4058,7 @@
         });
         def = normalizeExercise(merged) || base;
       }
-      def = abTempoDef(def, o);
+      def = abStraightDef(def, o);
       if (!(opts && opts.noDeload) && isDeloadWeek()) def = deloadDef(def, o);
       return def;
     }
@@ -4540,7 +4555,6 @@
       const w = warmCount(def);
       const wt = w ? `${w === 1 ? "חימום אחד" : w + " חימום"} · ` : "בלי חימום · ";
       if (def.type === "topback") return `${wt}טופ ${repRange(def)} · ${backoffCount(def)} בק-אוף ${backoffReps(def)}`;
-      if (def.abTempo) { const d = dropCount(def); return `${wt}כבד ${repRange(def)} בטמפו ${abStageInfo().t}${d ? ` + ${d} רסט-פאוז` : ""}`; }
       if (def.type === "normal") {
         const d = dropCount(def);
         return `${wt}כבד ${repRange(def)}${d ? ` + ${d === 1 ? "דרופ" : d + " דרופים"}` : " (בלי דרופים)"}`;
@@ -4583,116 +4597,73 @@
       return { pct: BACKOFF_DEFAULT, base: BACKOFF_DEFAULT, status: null, note: null };
     }
 
-    // v16: Paramount ab crunch maxed at 190 lb (main profile only) → tempo stages + rest-pause instead of drops.
-    const AB_TEMPO_NAME = "כפיפת בטן במכשיר";
-    const AB_TEMPO_KEY = "abTempoStage_v1"; // per profile via K()
-    const AB_TEMPO_STAGES = [
-      { t: "\u20661-2-3\u2069", up: 1, hold: 2, down: 3 },
-      { t: "\u20661-2-5\u2069", up: 1, hold: 2, down: 5 },
-      { t: "\u20661-3-5\u2069", up: 1, hold: 3, down: 5 }
-    ];
-    const AB_RP_REST = 15;
-    function isAbTempoExercise(def) {
-      return !!def && !isPartnerProfile() && def.type === "normal" && (def.name === AB_TEMPO_NAME || def.origName === AB_TEMPO_NAME) && !!stackWeights(def);
+    // v18: Paramount ab crunch (main profile only) → 3 hard straight sets of 12-20 @ RIR 0-1,
+    // last set to failure + 5-8 stretched half-reps; controlled tempo; double progression (+1 plate when all sets hit 20).
+    const AB_NAME = "כפיפת בטן במכשיר";
+    const AB_TEMPO = "\u20661-1-2/3\u2069";
+    const AB_TEMPO_WORDS = "1 שנ׳ למטה לכיווץ (חזה לכיוון הירכיים) · 1 שנ׳ סחיטה בכיווץ · 2-3 שנ׳ חזרה מבוקרת למעלה למתיחה מלאה, בלי שהסטק נוגע";
+    function isAbStraightExercise(def) {
+      return !!def && !isPartnerProfile() && (def.type === "normal" || def.type === "simple") && (def.name === AB_NAME || def.origName === AB_NAME) && !!stackWeights(def);
     }
-    function readAbStage() {
-      try { const o = JSON.parse(localStorage.getItem(K(AB_TEMPO_KEY)) || "null"); const n = o && Number(o.stage); return n >= 0 && n < AB_TEMPO_STAGES.length ? Math.floor(n) : 0; } catch (e) { return 0; }
-    }
-    function writeAbStage(n, why) {
-      n = Math.max(0, Math.min(AB_TEMPO_STAGES.length - 1, n));
-      try { localStorage.setItem(K(AB_TEMPO_KEY), JSON.stringify({ stage: n, at: new Date().toISOString(), why: why || "" })); } catch (e) {}
-      return n;
-    }
-    const abStageInfo = (n = readAbStage()) => AB_TEMPO_STAGES[n];
-    const tempoWords = st => `${st.up} שנ׳ למטה לכיווץ (חזה לכיוון הירכיים) · ${st.hold} שנ׳ החזקה בכיווץ מלא · ${st.down} שנ׳ חזרה איטית למעלה למתיחה מלאה`;
-    function abTempoDef(def, o) {
-      if (!isAbTempoExercise(def)) return def;
-      const d = Object.assign({}, def, { abTempo: true });
-      if (!(o && o.repMin != null)) d.repMin = 8;
-      if (!(o && o.repMax != null)) d.repMax = 12;
-      if (!(o && o.drops != null)) d.drops = 2;
-      if (!(o && o.notes != null)) d.notes = null; // tempo tip replaces the old "heavy + 1 drop" note
+    function abStraightDef(def, o) {
+      if (!isAbStraightExercise(def) || (o && o.type != null && o.type !== "simple")) return def;
+      const d = Object.assign({}, def, { abStraight: true, type: "simple" });
+      delete d.drops; delete d.backoffs;
+      if (!(o && o.setCount != null)) d.setCount = 3;
+      if (!(o && o.warmups != null)) d.warmups = 2;
+      if (!(o && o.repMin != null)) d.repMin = 12;
+      if (!(o && o.repMax != null)) d.repMax = 20;
+      if (!(o && o.rir != null)) d.rir = "0-1";
+      if (!(o && o.notes != null)) d.notes = null; // replaced by the technique/tempo steps
       return d;
     }
+    // Explicit warm-up rows: ~50% × 12 and ~75% × 6-8, snapped to the stack (min 25).
+    const AB_WARM = [[0.5, "12"], [0.75, "6-8"]];
+    function abWarmWeight(top, p, def) {
+      if (!top) return null;
+      const st = stackWeights(def), min = st ? st[0] : 25;
+      return Math.max(min, roundWeight(top * p, def, "nearest"));
+    }
     function abStackMax(def) { const st = stackWeights(def); return st ? st[st.length - 1] : null; }
-    // Heavy-set target in tempo mode: weight stays at the stack max; reps climb 8 → 12, then the stage advances.
-    function abTempoSuggestion(logs, def) {
-      const stage = readAbStage(), st = abStageInfo(stage), max = abStackMax(def);
-      const last = AB_TEMPO_STAGES.length - 1 === stage;
-      const W = w => wt(w, def);
-      const rule = `שיטה (במקסימום הסטק): המשקל נשאר ${W(max)}. בכל פעם עוד חזרה בטמפו ${st.t}; ב-12 חזרות נקיות – עוברים לשלב הטמפו הבא ומתחילים שוב מ-8.`;
-      const entries = (logs || []).filter(e => e && !e.deload && e.sets && e.sets[2] && e.sets[2].reps != null);
-      const lastE = entries[entries.length - 1];
-      const sameStage = lastE && lastE.tempo === stage;
-      if (!sameStage) {
-        const why = lastE && lastE.tempo != null && lastE.tempo < stage ? `עלית לשלב ${stage + 1} (טמפו ${st.t})` : `שלב ${stage + 1} – טמפו ${st.t}`;
-        return { weight: max, reps: 8, kind: "tempo", stage, rule, explain: `${why} ← היום: ${W(max)} × 8 (טווח 8-12). ${tempoWords(st)}.` };
+    // Starting weight from older (heavy+drop / slow-tempo) history: weight for ~15 reps (Epley) × 0.85, snapped to the stack.
+    function abStartWeight(w, r, def) {
+      const e1 = w * (1 + Math.min(r, 20) / 30);
+      return roundWeight(Math.min(w, e1 / 1.5 * 0.85), def, "nearest");
+    }
+    function abStraightSuggestion(logs, def) {
+      const W = w => wt(w, def), max = abStackMax(def), lo = def.repMin, hi = def.repMax;
+      const rule = `שיטה: ${setCountOf(def)} סטים ישרים של ${lo}-${hi} חזרות, RIR 0-1. כשכל הסטים מגיעים ל-${hi} – מוסיפים פלטה אחת (${fmtKg(def.increment || 15)} lb). המקסימום: ${W(max)}.`;
+      const all = (logs || []).filter(e => e && !e.deload && Array.isArray(e.sets) && e.sets.some(x => x && x.reps != null));
+      const lastE = all[all.length - 1];
+      if (!lastE) return { weight: null, reps: 15, kind: "start", rule, explain: `אין היסטוריה – בחר משקל שבו 15 חזרות הן כמעט כשל (RIR 0-1).` };
+      if (lastE.type !== "simple") {
+        const h = getWorkingSet(lastE);
+        if (!h || h.weight == null || h.reps == null) return { weight: null, reps: 15, kind: "start", rule, explain: "שיטה חדשה – בחר משקל שבו 15 חזרות הן כמעט כשל." };
+        const w = abStartWeight(h.weight, h.reps, def);
+        return { weight: w, reps: 15, kind: "start", rule,
+          explain: `שיטה חדשה: בפעם הקודמת ${W(h.weight)} × ${h.reps} (בשיטה הישנה) ← מתחילים נמוך יותר, במשקל שבו כ-15 חזרות הן כמעט כשל: ${W(w)} × 15 בכל סט.` };
       }
-      const r = Number(lastE.sets[2].reps);
-      if (r >= 12 && last) {
-        return { weight: max, reps: 12, kind: "tempo", stage, rule,
-          explain: `בפעם הקודמת: ${W(max)} × ${r} בטמפו ${st.t} – זה השלב האחרון. ממשיכים 12 נקיות, ואחרי הכשל בסט האחרון מוסיפים חצאי חזרות בחצי העליון (המתוח).` };
-      }
-      const t = Math.max(8, Math.min(12, r + 1));
-      return { weight: max, reps: t, kind: "tempo", stage, rule,
-        explain: `בפעם הקודמת: ${W(max)} × ${r} בטמפו ${st.t} ← היום: ${W(max)} × ${t}${t === 12 ? " (12 נקיות = עולים שלב)" : ""}.` };
-    }
-    function abTempoTip(stage = readAbStage()) {
-      const list = AB_TEMPO_STAGES.map((x, i) => `${i === stage ? "◀ " : ""}שלב ${i + 1}: ${x.t}`).join(" · ");
-      return `שלבי טמפו (המשקל נשאר 190 – הקושי עולה דרך הזמן תחת עומס): ${list}. כשאתה מגיע ל-12 חזרות נקיות בסט הכבד – עוברים לשלב הבא ומתחילים שוב מ-8: קודם מאריכים את החזרה האיטית למעלה ל-5 שנ׳ (1-2-5), ואחר כך את ההחזקה בכיווץ ל-3 שנ׳ (1-3-5). אתה עכשיו בשלב ${stage + 1}.`;
-    }
-    // Called after saving: 12+ clean reps at the stack max in the current stage → next stage.
-    function maybeAdvanceAbStage(sets, def) {
-      if (!def || !def.abTempo || def.deload) return null;
-      const h = sets && sets[2];
-      const max = abStackMax(def);
-      if (!h || h.reps == null || h.reps < 12) return null;
-      if (h.weight != null && max != null && h.weight < max - 1e-9) return null;
-      const cur = readAbStage();
-      if (cur >= AB_TEMPO_STAGES.length - 1) return null;
-      return writeAbStage(cur + 1, "12 reps");
-    }
-    function changeAbStage(delta) {
-      writeAbStage(readAbStage() + delta, "manual");
-      if (currentExercise) { const typed = captureTyped(); openLog(currentExercise, typed); }
-    }
-    let restCdTimer = null, restCdEnd = 0;
-    function startRestCountdown(sec) {
-      stopRestCountdown();
-      restCdEnd = Date.now() + sec * 1000;
-      const el = document.getElementById("rest-countdown");
-      el.classList.remove("hidden");
-      const tick = () => {
-        const left = Math.max(0, Math.ceil((restCdEnd - Date.now()) / 1000));
-        document.getElementById("rest-cd-time").textContent = left ? `⏱ ${left} שנ׳` : "יאללה! 💥";
-        if (!left) {
-          clearInterval(restCdTimer); restCdTimer = null;
-          try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {}
-          setTimeout(() => { if (!restCdTimer) el.classList.add("hidden"); }, 2500);
+      const sets = lastE.sets.filter(x => x && x.reps != null);
+      const w = Math.max(...sets.map(x => numOrNull(x.weight) || 0)) || null;
+      const atW = sets.filter(x => (numOrNull(x.weight) || 0) === (w || 0));
+      const minR = Math.min(...atW.map(x => Number(x.reps)));
+      const head = `בפעם הקודמת: ${w != null ? W(w) + " × " : ""}${atW.map(x => x.reps).join(" / ")}`;
+      if (w == null) return { weight: null, reps: Math.min(hi, minR + 1), kind: "reps", rule, explain: `${head} ← היום: עוד חזרה.` };
+      if (atW.length >= setCountOf(def) && minR >= hi) {
+        if (max != null && w >= max - 1e-9) {
+          const r = Math.min(25, minR + 1);
+          return { weight: max, reps: r, kind: "stackmax", rule,
+            explain: `${head} – כבר במשקולת הכבדה ביותר ← היום: ${W(max)} × ${r}. אין לאן להעלות משקל בסטק – מתקדמים בקושי: עוד חזרות (עד כ-20–25), אקסצנטרי איטי 3–4 שנ׳, עצירה בכיווץ מלא, או להחזיק פלטה/משקולת ליד לעומס נוסף.` };
         }
-      };
-      tick();
-      restCdTimer = setInterval(tick, 250);
-    }
-    function stopRestCountdown() {
-      if (restCdTimer) clearInterval(restCdTimer);
-      restCdTimer = null;
-      const el = document.getElementById("rest-countdown");
-      if (el) el.classList.add("hidden");
-    }
-    function applyAbLabels() {
-      const def = currentDef;
-      if (!def || !def.abTempo) return;
-      const st = abStageInfo();
-      const l3 = document.getElementById("lbl-3");
-      l3.textContent = `סט כבד · טמפו ${st.t}`;
-      for (let i = 1; i <= 3; i++) {
-        const el = document.getElementById("lbl-" + (i + 3));
-        el.className = "set-label drop";
-        el.textContent = `רסט-פאוז ${i}/${Math.max(normalDrops, i)}`;
+        const nw = moveStack(w, 1, def);
+        return { weight: nw, reps: lo, kind: "up", rule, explain: `${head} – כל הסטים הגיעו ל-${hi} ← היום: +פלטה, ${W(nw)} × ${lo}+` };
       }
-      document.getElementById("add-drop-btn").textContent = "+ הוסף רסט-פאוז";
-      document.getElementById("remove-drop-btn").textContent = "− הסר רסט-פאוז";
+      if (minR < lo) {
+        const dw = moveStack(w, -1, def);
+        return { weight: dw, reps: lo, kind: "down", rule, explain: `${head} – מתחת ל-${lo} ← היום: פלטה למטה, ${W(dw)} × ${lo}+` };
+      }
+      const t = Math.min(hi, minR + 1);
+      return { weight: w, reps: t, kind: "reps", rule, explain: `${head} ← היום: אותו משקל, לפחות ${t} חזרות בכל סט (עד ${hi} – ואז פלטה).` };
     }
 
     // Reference weight for today's top / heavy set (progression or deload).
@@ -4729,7 +4700,7 @@
         });
         if (plan.top) currentRecs.w3 = plan.top;
         const tgt = plan.top ? `${kg(plan.top)} × ${plan.reps != null ? plan.reps : repRange(def)}` : `${repRange(def)} חזרות`;
-        put("hint-3", `🎯 ${tgt} · ${rirTxt(rirFor(tb ? "top" : "heavy", def, cyc))} · מנוחה לפני: ${tb ? REST.top : REST.heavy}${def.abTempo ? `<br/>⏱ <b>טמפו ${abStageInfo().t}</b>: ${tempoWords(abStageInfo())} · בלי שהסטק נוגע למעלה` : ""}`);
+        put("hint-3", `🎯 ${tgt} · ${rirTxt(rirFor(tb ? "top" : "heavy", def, cyc))} · מנוחה לפני: ${tb ? REST.top : REST.heavy}`);
         let prev = valOf("w3") != null ? valOf("w3") : plan.top;
         for (let i = 4; i <= 6; i++) {
           let w = null;
@@ -4738,9 +4709,6 @@
             w = top ? stepBelowDef(top * (1 - bo.pct / 100), top, def) : null;
             const pct = w && top ? ` (‎-${Math.round((1 - w / top) * 100)}%)` : ` (‎-${fmtKg(bo.pct)}%)`;
             put("hint-" + i, `בק-אוף: ${w ? "כ-" + kg(w) : "—"}${pct} × ${backoffReps(def)} · ${rirTxt(rirFor("backoff", def, cyc))} · מנוחה לפני: ${REST.backoff}${bo.note ? `<br/>📉 ${esc(bo.note)}` : ""}`);
-          } else if (def.abTempo) {
-            w = top || null; // rest-pause: same weight
-            put("hint-" + i, `רסט-פאוז ${i - 3}/${normalDrops}: ${w ? kg(w) : "אותו משקל"} · עד כשל · מנוחה ${AB_RP_REST} שנ׳ לפני<button type="button" class="rest-btn" onclick="startRestCountdown(${AB_RP_REST})">⏱ ${AB_RP_REST} שנ׳</button>`);
           } else {
             w = prev ? stepBelowDef(prev * 0.75, prev, def) : null;
             put("hint-" + i, `דרופ: ${w ? "כ-" + kg(w) : "—"} (‎-20-30%) · ${rirTxt(rirFor("drop", def, cyc))} · מנוחה ${REST.drop}`);
@@ -4764,7 +4732,19 @@
           const what = def.type === "max"
             ? `עד כשל טכני${w ? ` · ${kg(w)}` : ""}${plan.reps ? ` · יעד ${plan.reps} חזרות` : ""}`
             : `${w ? kg(w) + " × " : ""}${plan.reps != null ? plan.reps : repRange(def)}`;
-          put("dhint-" + i, `${what} · ${rirTxt(rirFor(def.type === "max" ? "max" : "simple", def, cyc))} · מנוחה ${REST.set}`);
+          let extra = "";
+          if (def.abStraight && i === 1) {
+            AB_WARM.slice(0, warmCount(def)).forEach(([p, r], k) => {
+              const ww = abWarmWeight(plan.top, p, def);
+              if (ww) currentRecs["aw" + (k + 1)] = ww;
+              put("awhint-" + (k + 1), `חימום: ${ww ? "כ-" + kg(ww) : `כ-${p * 100}% ממשקל העבודה`} × ${r} · לאט ובשליטה, רחוק מכשל · ${k === 0 ? "מחמם את הבטן ואת הגב ולומד את התנועה" : "מכין את הגוף למשקל העבודה בלי לעייף"} · מנוחה ${REST.warm}`);
+            });
+          }
+          if (def.abStraight) {
+            if (i === 1) extra += `<br/>⏱ <b>טמפו ${AB_TEMPO}</b>: ${AB_TEMPO_WORDS}`;
+            if (i === dynamicSetCount) extra += "<br/>🔥 סט אחרון: עד כשל מלא + 5-8 חצאי חזרות בחצי העליון (המתוח)";
+          }
+          put("dhint-" + i, `${what} · ${rirTxt(rirFor(def.type === "max" ? "max" : "simple", def, cyc))} · מנוחה ${REST.set}${extra}`);
         }
       }
     }
@@ -4791,7 +4771,10 @@
       const wn = warmCount(def);
       const logged = def.type === "normal" || def.type === "topback";
       if (wn === 0) steps.push("בלי חימום – השריר כבר חם מהתרגילים הקודמים.");
-      else {
+      else if (def.abStraight) {
+        const parts = AB_WARM.slice(0, wn).map(([p, r]) => { const w = abWarmWeight(top, p, def); return `${w ? "כ-" + kg(w) : "כ-" + p * 100 + "%"} × ${r}`; });
+        steps.push(`${wn} סטי חימום (כ-50% ואז כ-75% ממשקל העבודה): ${parts.join(" ← ")}. לאט ובשליטה, רחוק מכשל – רק לחמם ולהרגיש את התנועה. מנוחה ${REST.warm}. (רישום החימום לא חובה)`);
+      } else {
         const parts = warmupScheme(wn).map(([p, r]) => `${top ? "כ-" + kg(roundWeight(top * p, def, "nearest")) : "כ-" + Math.round(p * 100) + "%"} × ${r}`);
         steps.push(`${wn === 1 ? "סט חימום קל אחד" : wn + " סטי חימום קלים"} (${wn === 1 ? "כ-60%" : "כ-50% ואז כ-75%"} ממשקל העבודה): ${parts.join(" ← ")}. לא לכשל, מנוחה ${REST.warm}.${logged ? " (רישום החימום לא חובה)" : ""}`);
       }
@@ -4804,14 +4787,6 @@
           const bw = top ? stepBelowDef(top * (1 - bo.pct / 100), top, def) : null;
           steps.push(`${b === 1 ? "סט בק-אוף אחד" : b + " סטי בק-אוף"}: מורידים ${fmtKg(bo.pct)}% ממשקל הטופ של היום (בסיס 10-15%, מותאם לפי הפעם הקודמת${bo.note ? ": " + bo.note : ""})${bw ? ` (כ-${kg(bw)})` : ""} × ${backoffReps(def)}, ${rirTxt(rirFor("backoff", def, cyc))}. מנוחה ${REST.backoff} בין הסטים.`);
         } else steps.push("בלי סטי בק-אוף.");
-      } else if (def.abTempo) {
-        const st = abStageInfo();
-        steps.push(`סט כבד: ${tgt} (טווח ${repRange(def)}) בטמפו ${st.t} – ${tempoWords(st)}. בחזרה למעלה מגיעים למתיחה מלאה בלי שהסטק נוגע. ${rirTxt(rirFor("heavy", def, cyc))}. מנוחה לפניו ${REST.heavy}.`);
-        const d = dropCount(def);
-        if (d) steps.push(`רסט-פאוז במקום דרופים: ${AB_RP_REST} שנ׳ מנוחה ואז ${d === 1 ? "מיני-סט אחד" : d + " מיני-סטים"} עד כשל באותו משקל, ${AB_RP_REST} שנ׳ בין כל אחד (כפתור ⏱ בשורה מפעיל ספירה לאחור).`);
-        else steps.push("בלי רסט-פאוז" + (def.deload ? " (שבוע הורדה)." : "."));
-        steps.push("טכניקה: הישבן דבוק למושב והאגן נעול במקום. דוחף את הכריות למטה עם החזה – לא עם הידיים. מגלגל את עמוד השדרה למטה חוליה אחר חוליה ומקרב את הצלעות לאגן. לא מושך עם הידיים ולא עם מכופפי הירך – הבטן עושה את העבודה. נושף את כל האוויר בכיווץ, ועולה לאט חזרה למעלה עד מתיחה מלאה.");
-        steps.push("אופציונלי: אחרי הכשל במיני-סט האחרון – חצאי חזרות בחצי העליון (המתוח) של התנועה.");
       } else if (def.type === "normal") {
         steps.push(`סט כבד: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("heavy", def, cyc))}. מנוחה לפניו ${REST.heavy}.`);
         const d = dropCount(def);
@@ -4819,6 +4794,12 @@
         else steps.push("בלי דרופים" + (def.deload ? " (שבוע הורדה)." : "."));
       } else if (def.type === "max") {
         steps.push(`${setCountOf(def)} סטים עד כשל טכני${top ? ` (${kg(top)})` : ""}${plan && plan.reps ? `, יעד ${plan.reps} חזרות` : ""}, ${rirTxt(rirFor("max", def, cyc))}. מנוחה ${REST.set} בין הסטים. מעל ${def.repMax} חזרות – מוסיפים משקל.`);
+      } else if (def.abStraight) {
+        steps.push(`${setCountOf(def)} סטים ישרים וקשים: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("simple", def, cyc))}. מנוחה ${REST.set} בין הסטים.`);
+        steps.push("בסט האחרון: עד כשל מלא, ומיד אחריו 5-8 חצאי חזרות בחצי העליון (המתוח) של התנועה.");
+        steps.push(`טמפו ${AB_TEMPO}: ${AB_TEMPO_WORDS}.`);
+        steps.push("טכניקה: הישבן דבוק למושב והאגן נעול במקום. דוחף את הכריות למטה עם החזה – לא עם הידיים. מגלגל את עמוד השדרה למטה חוליה אחר חוליה ומקרב את הצלעות לאגן. לא מושך עם מכופפי הירך. נושף את כל האוויר בכיווץ, ועולה בשליטה עד מתיחה מלאה.");
+        steps.push("למה ככה: מה שבונה שריר זה קרבה לכשל, טווח תנועה מלא (במיוחד במתיחה) ועומס שעולה עם הזמן – לא טמפו קיצוני. טמפו איטי מדי רק מכריח משקל נמוך ופחות חזרות איכותיות.");
       } else {
         steps.push(`${setCountOf(def)} סטים: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("simple", def, cyc))}. מנוחה ${REST.set} בין הסטים.`);
       }
@@ -4826,8 +4807,8 @@
       else {
         const s = plan && plan.s;
         if (s && s.explain) steps.push(`התקדמות: ${s.explain}`);
-        if (def.abTempo) {
-          steps.push(abTempoTip());
+        if (def.abStraight) {
+          steps.push(`כלל ההתקדמות (עמדה בסטק ${stackSummary(def)}): כשכל ${setCountOf(def)} הסטים מגיעים ל-${def.repMax} – מוסיפים פלטה (+${fmtKg(def.increment || 15)} lb) וחוזרים ל-${def.repMin}+. מתחת ל-${def.repMin} – פלטה למטה. ב-${wt(abStackMax(def), def)} (מקסימום) – עוד חזרות, אקסצנטרי איטי, עצירה בכיווץ או פלטה ביד.`);
         } else if (s && s.kind === "stackmax") {
           steps.push("במקסימום הסטק: לא קופצים משקל. מרחיבים חזרות עד כ-20–25, מאטים את ההורדה (3–4 שנ׳), עוצרים בכיווץ מלא, או מוסיפים פלטה/משקולת ביד.");
         } else if (def.type !== "max") {
@@ -4844,11 +4825,10 @@
       const box = document.getElementById("log-howto");
       if (!box) return;
       const steps = howToSteps(def, plan);
-      const tb = def.abTempo ? (st => `<div class="tempo-banner" id="tempo-banner">⏱ טמפו ${st.t} · ${def.deload ? "שבוע הורדה" : `שלב ${readAbStage() + 1}/${AB_TEMPO_STAGES.length}`}<small>${tempoWords(st)}</small></div>`)(abStageInfo()) : "";
-      const sb = def.abTempo ? `<div class="tempo-stage-btns"><button class="btn btn-sm btn-outline" onclick="changeAbStage(-1)" ${readAbStage() === 0 ? "disabled" : ""}>שלב טמפו קודם</button><button class="btn btn-sm btn-outline" onclick="changeAbStage(1)" ${readAbStage() >= AB_TEMPO_STAGES.length - 1 ? "disabled" : ""}>שלב טמפו הבא</button></div>` : "";
+      const tb = def.abStraight ? `<div class="tempo-banner" id="tempo-banner">⏱ טמפו ${AB_TEMPO} · ${setCountOf(def)}×${repRange(def)} עד כשל<small>${AB_TEMPO_WORDS}</small></div>` : "";
       box.innerHTML = `${tb}<div class="howto-title">📋 איך לבצע</div>
         <ol class="howto-steps">${steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
-        ${def.notes ? `<div class="howto-notes" id="log-notes">📝 ${esc(def.notes)}</div>` : ""}${sb}`;
+        ${def.notes ? `<div class="howto-notes" id="log-notes">📝 ${esc(def.notes)}</div>` : ""}`;
     }
 
     // ---- program loading / restore ----
@@ -5022,7 +5002,7 @@
         <li>אם רושמים RIR בפועל: קל מהיעד נחשב כחזרות נוספות, קשה מהיעד – לא מוסיפים חזרה.</li>
         <li>קפיצות משקל לפי ציוד: מכונה 5 ק״ג, כבל 2.5 ק״ג, משקולות יד 2 ק״ג, מוט 2.5 ק״ג, מכונה בליברות – לפי סטק הפלטות (במקסימום הסטק: עוד חזרות/טמפו/פלטה ביד), משקולות יד 4–50 ק״ג בקפיצות של 2. כל המשקלים המומלצים (חימום, בק-אוף, דרופים, הורדה) מעוגלים לקפיצה / לעמדה בסטק של התרגיל.</li>
         <li>בבק-אוף מורידים 10-15% מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
-        <li>⏱ כפיפת בטן במכשיר (במקסימום 190 lb): המשקל נשאר, מתקדמים בטמפו – 1-2-3 ← 1-2-5 ← 1-3-5. (1 שנ׳ למטה לכיווץ – חזה לכיוון הירכיים, החזקה, חזרה איטית למעלה למתיחה מלאה בלי שהסטק נוגע). ב-12 חזרות נקיות עולים שלב וחוזרים ל-8. אחרי הסט הכבד: 2 מיני-סטים רסט-פאוז עם 15 שנ׳ מנוחה. הישבן דבוק למושב, דוחפים את הכריות עם החזה ולא עם הידיים, ומגלגלים את הגב למטה חוליה אחר חוליה.</li>
+        <li>⏱ כפיפת בטן במכשיר: חימום, ואז 3 סטים ישרים וקשים של 12-20 חזרות (RIR 0-1); בסט האחרון עד כשל מלא + 5-8 חצאי חזרות בחצי העליון. טמפו 1-1-2/3: 1 שנ׳ למטה לכיווץ (חזה לכיוון הירכיים), 1 שנ׳ סחיטה, 2-3 שנ׳ חזרה מבוקרת למעלה למתיחה מלאה בלי שהסטק נוגע. הישבן דבוק למושב, דוחפים את הכריות עם החזה ולא עם הידיים, מגלגלים את הגב למטה חוליה אחר חוליה ונושפים בכיווץ. כשכל הסטים מגיעים ל-20 – פלטה אחת למעלה (עד 190). למה: קרבה לכשל + טווח מלא + עומס שעולה בונים שריר יותר מטמפו קיצוני.</li>
         <li>📉 אחוז הבק-אוף מותאם לכל תרגיל (12.5% בהתחלה, בין 7.5% ל-25%): אם בפעם הקודמת יצא מתחת לטווח – מורידים יותר (+2.5%, או +5% אם חסרו 2+ חזרות); מעל הטווח – מורידים פחות (‎-2.5%).</li>
         <li>אימונים של שבוע ההורדה לא נחשבים בחישוב ההתקדמות.</li></ul></div>`;
 
@@ -5660,6 +5640,7 @@
     migrateLatPulldownV9();
     migrateParamountLbV10();
     migrateCableRowV12();
+    try { localStorage.removeItem(K("abTempoStage_v1")); } catch (e) {} // v16/v17 tempo stages retired in v18
     requestPersistentStorage();
     applySavedBackground();
     initHome();
