@@ -724,6 +724,9 @@
     .howto-steps li { margin-bottom: 3px; }
     .tempo-banner { margin: 0 0 8px; padding: 8px 10px; border-radius: 10px; background: rgba(225, 29, 72, 0.14); border: 1px solid rgba(225, 29, 72, 0.5); font-weight: 700; font-size: 0.95rem; }
     .tempo-banner small { display: block; font-weight: 500; font-size: 0.8rem; opacity: 0.9; margin-top: 2px; }
+    .howto-links { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+    .howto-links a { color: #93c5fd; text-decoration: underline; }
+    body.theme-pastel .howto-links a { color: #2b4fb3; }
     .howto-notes { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.12); color: #fde68a; }
     .cycle-card { background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.45); border-radius: 12px; padding: 10px 14px; margin: -6px 0 12px; cursor: pointer; }
     .cycle-card.deload { background: rgba(168, 85, 247, 0.14); border-color: rgba(168, 85, 247, 0.5); }
@@ -4424,7 +4427,7 @@
               notes: "כתף אמצעית – גם באימון הרגליים, כדי להגיע לנפח שבועי מספיק. תנועה נקייה בלי תנופה." }
           ] },
         { id: "B", name: "אימון B – דחיפה (חזה, כתפיים, יד אחורית)",
-          desc: "באנץ' עליון (טופ+בק-אוף) • מקבילים • פרפר • הרחקה לצדדים • פשיטה מאחורי הראש • פשיטה בפולי",
+          desc: "באנץ' עליון (טופ+בק-אוף) • מקבילים • פרפר • הרחקה לצדדים • פשיטה מעל הראש בכבל עם חבל • פשיטה בפולי",
           exercises: [
             { name: "באנץ' עליון", equip: "barbell", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "באנץ' עליון",
               notes: "מוט או סמית', ספסל בשיפוע של כ-30°. בטופ – עם שומר. בק-אוף ולא דרופ." },
@@ -4434,8 +4437,8 @@
               notes: "מתיחה מלאה בפתיחה. בדרופ האחרון: חזרות חלקיות בטווח הפתוח." },
             { name: "הרחקה לצדדים", equip: "db", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 2, origName: "הרחקה לצדדים",
               notes: "משקולות, בלי תנופה, קפיצה של 1 ק״ג. בדרופ האחרון: חזרות חלקיות." },
-            { name: "פשיטת מרפק מאחורי הראש עם משקולת", equip: "db", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 2, origName: "פשיטת מרפק מאחורי הראש עם משקולת",
-              notes: "מעל הראש – הראש הארוך של התלת-ראשי עובד במתיחה (Maeo 2023). אפשר גם בכבל." },
+            { name: "פשיטת מרפק מעל הראש בכבל עם חבל", equip: "cable", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 2.5, origName: "פשיטת מרפק מעל הראש בכבל עם חבל",
+              notes: "גב לכבל, חבל, גלגלת בגובה הירך או נמוך יותר. מעל הראש – הראש הארוך של התלת-ראשי עובד במתיחה (Maeo 2023). הוחלף מהמשקולת בגלל כאב במרפק ימין (צד פנימי)." },
             { name: "פשיטת מרפק בפולי", equip: "cable", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 2.5, origName: "פשיטת מרפק בפולי",
               notes: "מרפקים צמודים לגוף, יישור מלא בכל חזרה." }
           ] },
@@ -4688,6 +4691,23 @@
     const CALF_HALF_HINT = "🔥 אחרי הכשל: 5-8 חצאי חזרות בחצי התחתון (המתוח) – עקב למטה עד הסוף, עולה רק עד כף רגל ישרה";
     const CALF_HALF_HOWTO = "חצאי חזרות במתיחה – רק בסט האחרון, כשכבר אין חזרה מלאה: יורד עד מתיחה מלאה (העקב הכי נמוך), ועולה רק עד חצי הדרך (בערך כף רגל ישרה) – לא עד קצות האצבעות. ירידה מבוקרת של 1-2 שנ׳, בלי קפיצות, חצי שנייה עצירה במתיחה, ודוחף למעלה. 5-8 חצאי חזרות או עד שאין יותר עלייה. טעות נפוצה: קפיצות קטנות שעובדות עם הגיד (אכילס) במקום עם השריר.";
 
+    // v20: overhead triceps – dumbbell replaced by rope cable (medial right-elbow pain). Main profile only.
+    const OH_OLD = "פשיטת מרפק מאחורי הראש עם משקולת", OH_NEW = "פשיטת מרפק מעל הראש בכבל עם חבל";
+    const OH_NOTES = "גב לכבל, חבל, גלגלת בגובה הירך או נמוך יותר. מעל הראש – הראש הארוך של התלת-ראשי עובד במתיחה (Maeo 2023). הוחלף מהמשקולת בגלל כאב במרפק ימין (צד פנימי).";
+    const OH_LINKS = [["▶ הדגמה: פשיטה מעל הראש בכבל עם חבל", "https://www.youtube.com/watch?v=kqidUIf1eJE"], ["▶ הדגמה: חלופה – קטאנה ביד אחת בכבל", "https://www.youtube.com/watch?v=4aaSlbdMEK0"]];
+    function isOverheadRope(def) {
+      return !!def && !isPartnerProfile() && (def.name === OH_NEW || def.origName === OH_NEW);
+    }
+    function overheadRopeSteps(def, hasLogs) {
+      const out = [];
+      if (!hasLogs) out.push(`ציוד חדש (כבל במקום משקולת) – אין המלצת משקל עד הסשן הראשון. בחר משקל בינוני שאיתו אתה עושה ${def.repMin}-${def.repMax} חזרות נקיות בלי כאב. ההיסטוריה של המשקולת נשמרה בשם הישן ("${OH_OLD}").`);
+      out.push("מיקום: גלגלת בגובה הירך או נמוך יותר, גב לכבל, עמידה מפוסקת (רגל אחת קדימה) ונטייה קלה קדימה. המרפקים ליד הראש ומצביעים קדימה.");
+      out.push("ביצוע: נותן לחבל למשוך את הידיים אחורה מאחורי הראש עד מתיחה מלאה, ואז פושט קדימה-למעלה עד יישור מלא ומפריד את קצוות החבל בסוף. חזרה מבוקרת של 2-3 שנ׳.");
+      out.push("כלל כאב: עד 2-3 מתוך 10 במרפק, ולא מחמיר למחרת. אם עדיין כואב – עוברים לחלופה.");
+      out.push("חלופה ידידותית יותר למרפק: פשיטת קטאנה ביד אחת בכבל – גלגלת נמוכה, המרפק מוטה מעט החוצה באלכסון.");
+      return out;
+    }
+
     // Reference weight for today's top / heavy set (progression or deload).
     function planFor(name, def) {
       const cyc = getCycleInfo();
@@ -4814,6 +4834,7 @@
         const d = dropCount(def);
         if (d) steps.push(`מיד אחריו ${d === 1 ? "דרופ אחד" : d + " דרופים"}: בכל דרופ מורידים 20-30% מהמשקל וממשיכים עד כשל, מנוחה ${REST.drop} בלבד.`);
         if (d && isCalfPriority(def)) steps.push(CALF_HALF_HOWTO);
+        if (isOverheadRope(def)) overheadRopeSteps(def, !!(getData().logs[def.name] || []).length).forEach(x => steps.push(x));
         else steps.push("בלי דרופים" + (def.deload ? " (שבוע הורדה)." : "."));
       } else if (def.type === "max") {
         steps.push(`${setCountOf(def)} סטים עד כשל טכני${top ? ` (${kg(top)})` : ""}${plan && plan.reps ? `, יעד ${plan.reps} חזרות` : ""}, ${rirTxt(rirFor("max", def, cyc))}. מנוחה ${REST.set} בין הסטים. מעל ${def.repMax} חזרות – מוסיפים משקל.`);
@@ -4851,7 +4872,7 @@
       const tb = def.abStraight ? `<div class="tempo-banner" id="tempo-banner">⏱ טמפו ${AB_TEMPO} · ${setCountOf(def)}×${repRange(def)} עד כשל<small>${AB_TEMPO_WORDS}</small></div>` : "";
       box.innerHTML = `${tb}<div class="howto-title">📋 איך לבצע</div>
         <ol class="howto-steps">${steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
-        ${def.notes ? `<div class="howto-notes" id="log-notes">📝 ${esc(def.notes)}</div>` : ""}`;
+        ${def.notes ? `<div class="howto-notes" id="log-notes">📝 ${esc(def.notes)}</div>` : ""}${isOverheadRope(def) ? `<div class="howto-links" id="log-links">${OH_LINKS.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}</div>` : ""}`;
     }
 
     // ---- program loading / restore ----
@@ -4869,7 +4890,7 @@
       data.program = normalizeProgram(JSON.parse(JSON.stringify(RESEARCH_PROGRAM)));
       data.programSource = RESEARCH_PROGRAM_ID;
       data.cycle = { start: toDateKey(cycleStartSunday()), num: 1 };
-      data.equipV8 = true; data.latV9 = true; data.paramountLbV10 = true; data.cableRowV12 = true;
+      data.equipV8 = true; data.latV9 = true; data.paramountLbV10 = true; data.cableRowV12 = true; data.overheadRopeV20 = true;
       saveData(data);
       showToast("התוכנית נטענה ✓ שבוע 1 מתוך 6");
       refreshAfterProgramChange();
@@ -5025,6 +5046,7 @@
         <li>אם רושמים RIR בפועל: קל מהיעד נחשב כחזרות נוספות, קשה מהיעד – לא מוסיפים חזרה.</li>
         <li>קפיצות משקל לפי ציוד: מכונה 5 ק״ג, כבל 2.5 ק״ג, משקולות יד 2 ק״ג, מוט 2.5 ק״ג, מכונה בליברות – לפי סטק הפלטות (במקסימום הסטק: עוד חזרות/טמפו/פלטה ביד), משקולות יד 4–50 ק״ג בקפיצות של 2. כל המשקלים המומלצים (חימום, בק-אוף, דרופים, הורדה) מעוגלים לקפיצה / לעמדה בסטק של התרגיל.</li>
         <li>בבק-אוף מורידים 10-15% מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
+        <li>💪 פשיטה מעל הראש: במקום המשקולת (כאב בצד הפנימי של מרפק ימין) – פשיטה מעל הראש בכבל עם חבל, גב לכבל. אותם סטים ואותו מקום באימון B; התקדמות מתחילה מחדש (ההיסטוריה של המשקולת נשמרת בשם הישן). כאב עד 2-3 מתוך 10 ולא מחמיר למחרת – אחרת עוברים לקטאנה ביד אחת בכבל.</li>
         <li>🦵 תאומים בעדיפות: זו הנקודה החלשה, לכן בימי התאומים (ראשון, שלישי, חמישי) הם הראשונים באימון – לפני התרגיל הראשי, כשאתה הכי רענן. אותם סטים ואותה עצירה של 2 שנ׳ בתחתית, ובדרופ האחרון 5-8 חצאי חזרות במתיחה (עקב למטה עד הסוף, עולה רק עד כף רגל ישרה). לא מוסיפים אימון רביעי – רק סדר ואיכות.</li>
         <li>⏱ כפיפת בטן במכשיר: חימום, ואז 3 סטים ישרים וקשים של 12-20 חזרות (RIR 0-1); בסט האחרון עד כשל מלא + 5-8 חצאי חזרות בחצי העליון. טמפו 1-1-2/3: 1 שנ׳ למטה לכיווץ (חזה לכיוון הירכיים), 1 שנ׳ סחיטה, 2-3 שנ׳ חזרה מבוקרת למעלה למתיחה מלאה בלי שהסטק נוגע. הישבן דבוק למושב, דוחפים את הכריות עם החזה ולא עם הידיים, מגלגלים את הגב למטה חוליה אחר חוליה ונושפים בכיווץ. כשכל הסטים מגיעים ל-20 – פלטה אחת למעלה (עד 190). למה: קרבה לכשל + טווח מלא + עומס שעולה בונים שריר יותר מטמפו קיצוני.</li>
         <li>📉 אחוז הבק-אוף מותאם לכל תרגיל (12.5% בהתחלה, בין 7.5% ל-25%): אם בפעם הקודמת יצא מתחת לטווח – מורידים יותר (+2.5%, או +5% אם חסרו 2+ חזרות); מעל הטווח – מורידים פחות (‎-2.5%).</li>
@@ -5165,6 +5187,40 @@
 
     // v12: one-arm cable row is a Technogym seated low-row station: machine, 5 kg steps, 5..125.
     // Only if still at the auto-assigned cable 2.5 without a stack; notes replaced only if still the old default.
+    // v20: replace the dumbbell overhead extension with the rope cable version in the stored research program.
+    // New name = fresh progression; dumbbell history stays under the old name. Keeps position + sets/reps/drops.
+    function migrateOverheadRopeV20() {
+      try {
+        if (isPartnerProfile()) return;
+        const data = getData();
+        if (data.programSource !== RESEARCH_PROGRAM_ID || data.overheadRopeV20 || !data.program) return;
+        const prog = normalizeProgram(data.program);
+        if (!prog) return;
+        let changed = false;
+        prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach((x, i) => {
+          if (x.name !== OH_OLD && x.origName !== OH_OLD) return;
+          if (g.exercises.some(e => e.name === OH_NEW)) return;
+          const y = Object.assign({}, x, { name: OH_NEW, origName: OH_NEW, equip: "cable", increment: 2.5, notes: OH_NOTES });
+          delete y.unit; delete y.stack; delete y.stackStart; delete y.stackPlates;
+          g.exercises[i] = y;
+          changed = true;
+        }));
+        prog.workouts.forEach(w => { if (w.desc) w.desc = w.desc.replace("פשיטה מאחורי הראש", "פשיטה מעל הראש בכבל עם חבל"); });
+        if (changed) {
+          data.program = prog;
+          // today's custom order: swap the name in place; drop a today-edit made for the dumbbell version
+          try {
+            const orders = readSessionOrders();
+            Object.keys(orders).forEach(k => { if (Array.isArray(orders[k])) orders[k] = orders[k].map(n => n === OH_OLD ? OH_NEW : n); });
+            writeSessionOrders(orders);
+            const ov = readSessionOverrides(); if (ov[OH_OLD]) { delete ov[OH_OLD]; writeSessionOverrides(ov); }
+          } catch (e) {}
+        }
+        data.overheadRopeV20 = true;
+        saveData(data);
+      } catch (e) { console.warn("overhead rope migration failed", e); }
+    }
+
     function migrateCableRowV12() {
       try {
         const data = getData();
@@ -5664,6 +5720,7 @@
     migrateLatPulldownV9();
     migrateParamountLbV10();
     migrateCableRowV12();
+    migrateOverheadRopeV20();
     try { localStorage.removeItem(K("abTempoStage_v1")); } catch (e) {} // v16/v17 tempo stages retired in v18
     requestPersistentStorage();
     applySavedBackground();
