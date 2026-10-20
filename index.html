@@ -3464,6 +3464,7 @@
     // Double progression from last session's working set (deload sessions ignored).
     function computeSuggestion(logs, def, opts) {
       if (isMeasureType(def.type)) return measureSuggestion(logs, def, opts);
+      if (isWideCableRow(def) && !(logs || []).some(e => getWorkingSet(e))) return wideRowEstimate(def, { deload: !!(opts && opts.deload) });
       if (def.abStraight && !(opts && opts.deload)) return abStraightSuggestion(logs, def);
       const all = (logs || []).filter(e => getWorkingSet(e));
       if (!all.length) return null;
@@ -4443,12 +4444,12 @@
               notes: "מרפקים צמודים לגוף, יישור מלא בכל חזרה." }
           ] },
         { id: "C", name: "אימון C – משיכה (גב, כתף אחורית, יד קדמית)",
-          desc: "משיכה רחבה • טי-בר (טופ+בק-אוף) • חתירה ביד אחת בכבל • הרחקה אופקית • הרחקה לצדדים בכבל • פריצ'ר • פטישים",
+          desc: "משיכה רחבה • חתירה רחבה בכבל (טופ+בק-אוף) • חתירה ביד אחת בכבל • הרחקה אופקית • הרחקה לצדדים בכבל • פריצ'ר • פטישים",
           exercises: [
             { name: "משיכה בפולי רחב", equip: "machine", type: "normal", warmups: 2, drops: 2, repMin: 6, repMax: 10, increment: 5, origName: "משיכה בפולי רחב",
               notes: "מכונה – לכן דרופים. מתיחה מלאה למעלה, מושכים לחזה העליון." },
-            { name: "חתירה בטי-בר רחב", equip: "barbell", type: "topback", warmups: 1, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "חתירה בטי-בר רחב",
-              notes: "בק-אוף ולא דרופ. אם יש – עדיף טי-בר עם תמיכה לחזה." },
+            { name: "חתירה בכבל בישיבה באחיזה רחבה", equip: "machine", type: "topback", warmups: 1, backoffs: 2, repMin: 6, repMax: 10, increment: 5, stackStart: 5, stackPlates: 24, origName: "חתירה בכבל בישיבה באחיזה רחבה",
+              notes: "עמדת חתירה בישיבה (Technogym, כבל תחתון – אותה עמדה כמו החתירה ביד אחת: 5–125 ק״ג, קפיצות של 5), מוט רחב. הוחלף מהטי-בר שלחץ על החזה/בטן במשקלים כבדים. בק-אוף ולא דרופ." },
             { name: "חתירה ביד אחת בכבל", equip: "machine", type: "normal", warmups: 0, drops: 2, repMin: 8, repMax: 12, increment: 5, stackStart: 5, stackPlates: 24,
               notes: "עמדת חתירה בישיבה (Technogym, כבל תחתון), ידית אחת. בכל חזרה נותנים לשכמה ולכתף להימתח קדימה עד הסוף, ומושכים את המרפק לכיוון הירך/מותן. מכונה: קפיצות של 5 ק״ג, מקסימום 125." },
             { name: "הרחקה אופקית במכונה", equip: "machine", type: "normal", warmups: 0, drops: 2, repMin: 12, repMax: 20, increment: 5, origName: "הרחקה אופקית במכונה",
@@ -4708,6 +4709,78 @@
       return out;
     }
 
+    // v21: T-bar row (pressed on chest/belly) → seated wide-grip cable row on the Technogym low-row station. Main profile only.
+    const ROW_OLD = "חתירה בטי-בר רחב", ROW_NEW = "חתירה בכבל בישיבה באחיזה רחבה";
+    const ROW_NOTES = "עמדת חתירה בישיבה (Technogym, כבל תחתון – אותה עמדה כמו החתירה ביד אחת: 5–125 ק״ג, קפיצות של 5), מוט רחב. הוחלף מהטי-בר שלחץ על החזה/בטן במשקלים כבדים. בק-אוף ולא דרופ.";
+    const ROW_LINKS = [["▶ הדגמה: חתירה בכבל בישיבה באחיזה רחבה", "https://www.youtube.com/watch?v=YKAeU55CkVk"], ["▶ הדגמה נוספת", "https://www.youtube.com/watch?v=e9oe5qbN0jo"]];
+    // Starting-weight estimate for the new row (first session only; afterwards normal progression from real weights).
+    // Exercises differ a lot (T-bar: lever + plates, no friction; cable stack: pulley friction, flatter curve), so it is
+    // deliberately conservative and aims at RIR 2-3 in the first top set (he adjusts up from there):
+    //  e1RM (avg Epley/Brzycki, reps capped) of the latest non-deload heavy/top set of a reference exercise
+    //  × relative-strength factor → two-arm wide cable row e1RM, then the load for (repMin+1) reps + 2.5 RIR,
+    //  snapped DOWN to the stack (5–125, step 5).
+    // Reference priority (most reliable first):
+    //  1) one-arm cable row – same Technogym low-row station/pulley: ×1.7 (two arms ≈ 1.7× one arm, bilateral deficit);
+    //  2) wide lat pulldown – also a cable stack: ×0.9;
+    //  3) T-bar – logged as the plates he loaded (no bar): ×0.65 (lever advantage, chest support, no pulley friction).
+    // Other available references are shown as a cross-check in the explanation.
+    const ROW_REFS = [
+      { name: "חתירה ביד אחת בכבל", f: 1.7, label: "חתירה ביד אחת" },
+      { name: "משיכה בפולי רחב", f: 0.9, label: "פולי עליון" },
+      { name: "חתירה בטי-בר רחב", f: 0.65, label: "טי-בר" }
+    ];
+    const ROW_FIRST_RIR = 2.5;
+    function isWideCableRow(def) {
+      return !!def && !isPartnerProfile() && (def.name === ROW_NEW || def.origName === ROW_NEW);
+    }
+    function e1rmOf(w, r) {
+      const rr = r <= 15 ? r : (r <= 20 ? 15 + (r - 15) * 0.2 : 16);
+      return (w * (1 + rr / 30) + w * 36 / (37 - rr)) / 2;
+    }
+    function repFactor(t) { return ((1 + t / 30) + 36 / (37 - t)) / 2; }
+    function lastHeavySet(name) {
+      const logs = (getData().logs[name] || []).filter(e => e && !e.deload && Array.isArray(e.sets) && e.type !== "simple");
+      for (let k = logs.length - 1; k >= 0; k--) {
+        const h = logs[k].sets[2];
+        if (h && numOrNull(h.weight) > 0 && numOrNull(h.reps) > 0) return { weight: Number(h.weight), reps: Number(h.reps), date: logs[k].date };
+      }
+      return null;
+    }
+    function wideRowEstimate(def, opts) {
+      const target = def.repMin + 1;
+      const st = stackWeights(def);
+      const kgx = x => Math.round(x * 10) / 10;
+      const refs = ROW_REFS.map(r => {
+        const set = lastHeavySet(r.name);
+        if (!set) return null;
+        const rowE1 = e1rmOf(set.weight, set.reps) * r.f;
+        return Object.assign({}, r, { set, rowE1, load: rowE1 / repFactor(target + ROW_FIRST_RIR) });
+      }).filter(Boolean);
+      if (!refs.length) return null;
+      const use = refs[0];
+      let raw = use.load * (opts && opts.deload ? 0.9 : 1);
+      let w = st ? snapDown(raw, st) : roundWeight(raw, def, "down");
+      if (st) w = Math.min(st[st.length - 1], Math.max(st[0], w != null ? w : st[0]));
+      const W = x => wt(x, def);
+      const cross = refs.slice(1).map(r => `${r.label} ${W(r.set.weight)}×${r.set.reps} → כ-${W(kgx(r.load))}`).join(" · ");
+      return { weight: w, reps: target, kind: "estimate", source: use.name, raw, refs: refs.map(r => ({ name: r.name, load: r.load })),
+        rule: "הערכה ראשונית – אחרי הסשן הראשון ההתקדמות הרגילה ממשיכה מהמשקל האמיתי.",
+        explain: `הערכה לפי ${use.label === "טי-בר" ? "הטי-בר" : use.label} – תתאים בסט הראשון: ${use.label} אחרון ${W(use.set.weight)} × ${use.set.reps} (1RM משוער כ-${W(kgx(e1rmOf(use.set.weight, use.set.reps)))}) × ${use.f} (המרה שמרנית לחתירה רחבה בכבל) ← ${W(w)} × ${target}, יעד RIR 2-3 בסט הראשון – אם קל, עולים בסט הבא.${cross ? ` בדיקה מול: ${cross}.` : ""}${opts && opts.deload ? " (שבוע הורדה, ‎-10%)" : ""}` };
+    }
+    function wideRowSteps(def, hasLogs, s) {
+      const out = [];
+      if (!hasLogs && !(s && s.kind === "estimate")) out.push("ציוד חדש – אין היסטוריה. בחר משקל בינוני שאיתו אתה עושה 7-8 חזרות נקיות, עם 2-3 חזרות ברזרבה.");
+      out.push("אחיזה: מוט רחב, אחיזה עליונה (כפות למטה). יושב זקוף, רגליים על המשטח וברכיים מעט כפופות.");
+      out.push("ביצוע: מושך לחזה התחתון, מרפקים החוצה בזווית של כ-45°, וסוחט את השכמות שנייה אחת. חזרה מבוקרת של 2-3 שנ׳ עד מתיחה מלאה – השכמות נפתחות קדימה.");
+      out.push("גוף: מותר להיטות מעט קדימה במתיחה, אבל בלי נדנוד של הגו – הגב עושה את העבודה, לא התנופה.");
+      return out;
+    }
+    function exerciseLinks(def) {
+      if (isOverheadRope(def)) return OH_LINKS;
+      if (isWideCableRow(def)) return ROW_LINKS;
+      return null;
+    }
+
     // Reference weight for today's top / heavy set (progression or deload).
     function planFor(name, def) {
       const cyc = getCycleInfo();
@@ -4742,7 +4815,7 @@
         });
         if (plan.top) currentRecs.w3 = plan.top;
         const tgt = plan.top ? `${kg(plan.top)} × ${plan.reps != null ? plan.reps : repRange(def)}` : `${repRange(def)} חזרות`;
-        put("hint-3", `🎯 ${tgt} · ${rirTxt(rirFor(tb ? "top" : "heavy", def, cyc))} · מנוחה לפני: ${tb ? REST.top : REST.heavy}`);
+        put("hint-3", `🎯 ${tgt}${plan.s && plan.s.kind === "estimate" ? " (הערכה)" : ""} · ${rirTxt(rirFor(tb ? "top" : "heavy", def, cyc))} · מנוחה לפני: ${tb ? REST.top : REST.heavy}${plan.s && plan.s.kind === "estimate" ? `<br/>📐 הערכה לפי ${(ROW_REFS.find(r => r.name === plan.s.source) || {}).label === "טי-בר" ? "הטי-בר" : "ה" + ((ROW_REFS.find(r => r.name === plan.s.source) || {}).label || "היסטוריה")} – תתאים בסט הראשון (יעד RIR 2-3)` : ""}`);
         let prev = valOf("w3") != null ? valOf("w3") : plan.top;
         for (let i = 4; i <= 6; i++) {
           let w = null;
@@ -4829,6 +4902,7 @@
           const bw = top ? stepBelowDef(top * (1 - bo.pct / 100), top, def) : null;
           steps.push(`${b === 1 ? "סט בק-אוף אחד" : b + " סטי בק-אוף"}: מורידים ${fmtKg(bo.pct)}% ממשקל הטופ של היום (בסיס 10-15%, מותאם לפי הפעם הקודמת${bo.note ? ": " + bo.note : ""})${bw ? ` (כ-${kg(bw)})` : ""} × ${backoffReps(def)}, ${rirTxt(rirFor("backoff", def, cyc))}. מנוחה ${REST.backoff} בין הסטים.`);
         } else steps.push("בלי סטי בק-אוף.");
+        if (isWideCableRow(def)) wideRowSteps(def, !!(getData().logs[def.name] || []).length, plan && plan.s).forEach(x => steps.push(x));
       } else if (def.type === "normal") {
         steps.push(`סט כבד: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("heavy", def, cyc))}. מנוחה לפניו ${REST.heavy}.`);
         const d = dropCount(def);
@@ -4872,7 +4946,7 @@
       const tb = def.abStraight ? `<div class="tempo-banner" id="tempo-banner">⏱ טמפו ${AB_TEMPO} · ${setCountOf(def)}×${repRange(def)} עד כשל<small>${AB_TEMPO_WORDS}</small></div>` : "";
       box.innerHTML = `${tb}<div class="howto-title">📋 איך לבצע</div>
         <ol class="howto-steps">${steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
-        ${def.notes ? `<div class="howto-notes" id="log-notes">📝 ${esc(def.notes)}</div>` : ""}${isOverheadRope(def) ? `<div class="howto-links" id="log-links">${OH_LINKS.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}</div>` : ""}`;
+        ${def.notes ? `<div class="howto-notes" id="log-notes">📝 ${esc(def.notes)}</div>` : ""}${exerciseLinks(def) ? `<div class="howto-links" id="log-links">${exerciseLinks(def).map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}</div>` : ""}`;
     }
 
     // ---- program loading / restore ----
@@ -4890,7 +4964,7 @@
       data.program = normalizeProgram(JSON.parse(JSON.stringify(RESEARCH_PROGRAM)));
       data.programSource = RESEARCH_PROGRAM_ID;
       data.cycle = { start: toDateKey(cycleStartSunday()), num: 1 };
-      data.equipV8 = true; data.latV9 = true; data.paramountLbV10 = true; data.cableRowV12 = true; data.overheadRopeV20 = true;
+      data.equipV8 = true; data.latV9 = true; data.paramountLbV10 = true; data.cableRowV12 = true; data.overheadRopeV20 = true; data.wideCableRowV21 = true;
       saveData(data);
       showToast("התוכנית נטענה ✓ שבוע 1 מתוך 6");
       refreshAfterProgramChange();
@@ -5034,7 +5108,7 @@
       h += `<div class="card g-text"><p>📈 חזרות הרבה מעל הטווח (3+ מעל הסוף) → המשקל הבא מחושב לפי כוח משוער (1RM: ממוצע אפלי וברז׳יצקי, ב-95%), ולא רק +2 קפיצות.</p></div>`;
       const week = c ? c.week : null;
       h += `<div class="section-title">מאמץ (RIR = חזרות לפני כשל)</div><div class="card">` + guideTable(["סוג תרגיל", "שבועות 1-2", "שבועות 3-6"], [
-        ["טופ בתרגיל מורכב (לחיצת רגליים, באנץ', טי-בר, דדליפט רומני)", "2", "0-1 (בדדליפט רומני לא פחות מ-1)"],
+        ["טופ בתרגיל מורכב (לחיצת רגליים, באנץ', חתירה רחבה בכבל, דדליפט רומני)", "2", "0-1 (בדדליפט רומני לא פחות מ-1)"],
         ["בק-אוף", "2-3", "1-2"], ["בידוד ומכונות (סט כבד ודרופים)", "1", "0 – כשל מלא"]]) +
         `<p class="g-muted">${week ? (c.deload ? "השבוע: שבוע הורדה – RIR 3-4 בכל הסטים." : `השבוע: שבוע ${week} – עמודת ${week <= 2 ? "שבועות 1-2" : "שבועות 3-6"}.`) : ""} יעד ה-RIR מוצג גם ליד כל סט במסך הרישום.</p></div>`;
 
@@ -5046,6 +5120,7 @@
         <li>אם רושמים RIR בפועל: קל מהיעד נחשב כחזרות נוספות, קשה מהיעד – לא מוסיפים חזרה.</li>
         <li>קפיצות משקל לפי ציוד: מכונה 5 ק״ג, כבל 2.5 ק״ג, משקולות יד 2 ק״ג, מוט 2.5 ק״ג, מכונה בליברות – לפי סטק הפלטות (במקסימום הסטק: עוד חזרות/טמפו/פלטה ביד), משקולות יד 4–50 ק״ג בקפיצות של 2. כל המשקלים המומלצים (חימום, בק-אוף, דרופים, הורדה) מעוגלים לקפיצה / לעמדה בסטק של התרגיל.</li>
         <li>בבק-אוף מורידים 10-15% מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
+        <li>🚣 חתירה רחבה בכבל: במקום הטי-בר (לחץ על החזה/בטן במשקלים כבדים) – חתירה בכבל בישיבה באחיזה רחבה, באותה עמדה של החתירה ביד אחת (5–125 ק״ג). אותו מקום באימון C ואותה שיטה (טופ + 2 בק-אוף, 6-10). בפעם הראשונה המשקל הוא הערכה לפי הטי-בר – מתאימים בסט הראשון, ומשם התקדמות רגילה. ההיסטוריה של הטי-בר נשמרת בשם הישן.</li>
         <li>💪 פשיטה מעל הראש: במקום המשקולת (כאב בצד הפנימי של מרפק ימין) – פשיטה מעל הראש בכבל עם חבל, גב לכבל. אותם סטים ואותו מקום באימון B; התקדמות מתחילה מחדש (ההיסטוריה של המשקולת נשמרת בשם הישן). כאב עד 2-3 מתוך 10 ולא מחמיר למחרת – אחרת עוברים לקטאנה ביד אחת בכבל.</li>
         <li>🦵 תאומים בעדיפות: זו הנקודה החלשה, לכן בימי התאומים (ראשון, שלישי, חמישי) הם הראשונים באימון – לפני התרגיל הראשי, כשאתה הכי רענן. אותם סטים ואותה עצירה של 2 שנ׳ בתחתית, ובדרופ האחרון 5-8 חצאי חזרות במתיחה (עקב למטה עד הסוף, עולה רק עד כף רגל ישרה). לא מוסיפים אימון רביעי – רק סדר ואיכות.</li>
         <li>⏱ כפיפת בטן במכשיר: חימום, ואז 3 סטים ישרים וקשים של 12-20 חזרות (RIR 0-1); בסט האחרון עד כשל מלא + 5-8 חצאי חזרות בחצי העליון. טמפו 1-1-2/3: 1 שנ׳ למטה לכיווץ (חזה לכיוון הירכיים), 1 שנ׳ סחיטה, 2-3 שנ׳ חזרה מבוקרת למעלה למתיחה מלאה בלי שהסטק נוגע. הישבן דבוק למושב, דוחפים את הכריות עם החזה ולא עם הידיים, מגלגלים את הגב למטה חוליה אחר חוליה ונושפים בכיווץ. כשכל הסטים מגיעים ל-20 – פלטה אחת למעלה (עד 190). למה: קרבה לכשל + טווח מלא + עומס שעולה בונים שריר יותר מטמפו קיצוני.</li>
@@ -5062,7 +5137,7 @@
 
       h += `<div class="section-title">נפח שבועי – סטים קשים לכל שריר</div><div class="card">` + guideTable(["שריר", "מה תורם (לאימון)", "בשבוע", "מטרה"], [
         ["חזה", "באנץ' 3, מקבילים 2, פרפר 2", "14", "12-18"], ["ארבע-ראשי", "לחיצת רגליים 3, בולגרי 2, פשיטה 2", "14", "12-18"],
-        ["גב", "פולי 2, טי-בר 3, חתירה בכבל 2", "14", "12-16"], ["ירך אחורית", "דדליפט רומני 3, כפיפת ברך 2", "10", "~10"],
+        ["גב", "פולי 2, חתירה רחבה בכבל 3, חתירה ביד אחת 2", "14", "12-16"], ["ירך אחורית", "דדליפט רומני 3, כפיפת ברך 2", "10", "~10"],
         ["כתף אמצעית", "הרחקה ב-A 2, ב-B 2, ב-C 2", "12", "10-12+"], ["כתף אחורית", "הרחקה אופקית 2 + עקיף מחתירות", "9", "8-12"],
         ["כתף קדמית", "עקיף: באנץ', מקבילים", "5", "מספיק"], ["תלת-ראשי", "2 פשיטות × 2 + עקיף", "13", "10-16"],
         ["דו-ראשי", "פריצ'ר 2, פטישים 2 + עקיף", "15", "10-16"], ["ישבן", "עקיף: לחיצה, בולגרי, דדליפט רומני", "8-10", "~8-12"],
@@ -5219,6 +5294,38 @@
         data.overheadRopeV20 = true;
         saveData(data);
       } catch (e) { console.warn("overhead rope migration failed", e); }
+    }
+
+    // v21: T-bar row → seated wide-grip cable row (same position, same top+back-off scheme; T-bar history stays under its name).
+    function migrateWideCableRowV21() {
+      try {
+        if (isPartnerProfile()) return;
+        const data = getData();
+        if (data.programSource !== RESEARCH_PROGRAM_ID || data.wideCableRowV21 || !data.program) return;
+        const prog = normalizeProgram(data.program);
+        if (!prog) return;
+        let changed = false;
+        prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach((x, i) => {
+          if (x.name !== ROW_OLD && x.origName !== ROW_OLD) return;
+          if (g.exercises.some(e => e.name === ROW_NEW)) return;
+          const y = Object.assign({}, x, { name: ROW_NEW, origName: ROW_NEW, equip: "machine", increment: 5, stackStart: 5, stackPlates: 24, notes: ROW_NOTES });
+          delete y.unit; delete y.stack;
+          g.exercises[i] = normalizeExercise(y) || y;
+          changed = true;
+        }));
+        prog.workouts.forEach(w => { if (w.desc) w.desc = w.desc.replace("טי-בר (טופ+בק-אוף)", "חתירה רחבה בכבל (טופ+בק-אוף)"); });
+        if (changed) {
+          data.program = prog;
+          try {
+            const orders = readSessionOrders();
+            Object.keys(orders).forEach(k => { if (Array.isArray(orders[k])) orders[k] = orders[k].map(n => n === ROW_OLD ? ROW_NEW : n); });
+            writeSessionOrders(orders);
+            const ov = readSessionOverrides(); if (ov[ROW_OLD]) { delete ov[ROW_OLD]; writeSessionOverrides(ov); }
+          } catch (e) {}
+        }
+        data.wideCableRowV21 = true;
+        saveData(data);
+      } catch (e) { console.warn("wide cable row migration failed", e); }
     }
 
     function migrateCableRowV12() {
@@ -5721,6 +5828,7 @@
     migrateParamountLbV10();
     migrateCableRowV12();
     migrateOverheadRopeV20();
+    migrateWideCableRowV21();
     try { localStorage.removeItem(K("abTempoStage_v1")); } catch (e) {} // v16/v17 tempo stages retired in v18
     requestPersistentStorage();
     applySavedBackground();
