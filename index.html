@@ -1139,7 +1139,7 @@
         <option value="machine">מכונה – 5 ק״ג</option>
         <option value="cable">כבל – 2.5 ק״ג</option>
         <option value="db">משקולות יד – 2 ק״ג</option>
-        <option value="barbell">מוט – 2.5 ק״ג</option>
+        <option value="barbell">מוט – 5 ק״ג (10 בקפיצה גדולה)</option>
         <option value="bw">משקל גוף (+ חגורה) – 2.5 ק״ג</option>
         <option value="machine_lb">מכונה בליברות (סטק מותאם)</option>
       </select>
@@ -1243,7 +1243,7 @@
         <option value="machine">מכונה – 5 ק״ג</option>
         <option value="cable">כבל – 2.5 ק״ג</option>
         <option value="db">משקולות יד – 2 ק״ג</option>
-        <option value="barbell">מוט – 2.5 ק״ג</option>
+        <option value="barbell">מוט – 5 ק״ג (10 בקפיצה גדולה)</option>
         <option value="bw">משקל גוף (+ חגורה) – 2.5 ק״ג</option>
         <option value="machine_lb">מכונה בליברות (סטק מותאם)</option>
       </select>
@@ -1441,13 +1441,14 @@
     // so nothing changes until the user edits it.
     const LEGACY_MAX_REPS = ["מקבילים", "הרמות רגליים במתח", "לאנץ' בולגרי"];
     const LEGACY_SIMPLE = ["דדליפט"];
+    const LEGACY_BARBELL = ["באנץ' עליון", "דדליפט"]; // v24: barbell lifts of the original hardcoded program step in 5 kg
     const SMALL_INCREMENT = ["הרחקה לצדדים", "פשיטת מרפק מאחורי הראש עם משקולת", "כפיפה בפריצ'ר", "פטישים"];
     const DEFAULT_ACCESSORY_BY_DAY = ["calves", "abs", "calves", "abs", "calves", "abs", null]; // Sun..Sat
     const EQUIP = {
       machine: { label: "מכונה", step: 5 },
       cable: { label: "כבל", step: 2.5 },
       db: { label: "משקולות יד", step: 2 },
-      barbell: { label: "מוט", step: 2.5 },
+      barbell: { label: "מוט", step: 5 },
       bw: { label: "משקל גוף", step: 2.5 },
       machine_lb: { label: "מכונה בליברות", step: 15, unit: "lb" }
     };
@@ -1455,7 +1456,7 @@
 
     function defaultExercise(name) {
       const type = LEGACY_MAX_REPS.includes(name) ? "max" : (LEGACY_SIMPLE.includes(name) ? "simple" : "normal");
-      return { name, type, repMin: 6, repMax: 10, increment: SMALL_INCREMENT.includes(name) ? 1 : 2.5, origName: name };
+      return { name, type, repMin: 6, repMax: 10, increment: SMALL_INCREMENT.includes(name) ? 1 : (LEGACY_BARBELL.includes(name) ? 5 : 2.5), origName: name };
     }
 
     function buildDefaultProgram() {
@@ -4420,7 +4421,7 @@
               notes: "טווח תנועה קצר יותר, בלי כאב בברך, רגליים גבוה על המשטח. הורדה מבוקרת 2-3 שנ׳, בלי לקפוץ מהתחתית." },
             { name: "לאנץ' בולגרי", equip: "db", type: "simple", setCount: 2, warmups: 0, repMin: 8, repMax: 12, increment: 2, rir: "1-2", origName: "לאנץ' בולגרי",
               notes: "2 סטים לכל רגל. משקולות ביד, צעד ארוך, נטייה קלה קדימה (דגש על הישבן)." },
-            { name: "דדליפט רומני", equip: "barbell", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, rir: "1-2",
+            { name: "דדליפט רומני", equip: "barbell", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 5, rir: "1-2",
               notes: "מחליף את הדדליפט הרגיל. יורדים עד מתיחה חזקה בירך האחורית, גב ניטרלי. בלי כשל – תמיד לפחות חזרה אחת ברזרבה." },
             { name: "כפיפת ברך במכונה", equip: "machine", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 5, origName: "כפיפת ברך במכונה",
               notes: "עדיף בישיבה (מתיחה גדולה יותר בירך האחורית). בדרופ האחרון: 3-6 חזרות חלקיות בטווח המתיחה." },
@@ -4432,7 +4433,7 @@
         { id: "B", name: "אימון B – דחיפה (חזה, כתפיים, יד אחורית)",
           desc: "באנץ' עליון (טופ+בק-אוף) • מקבילים • פרפר • הרחקה לצדדים • פשיטה מעל הראש בכבל עם חבל • פשיטה בפולי",
           exercises: [
-            { name: "באנץ' עליון", equip: "barbell", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 2.5, origName: "באנץ' עליון",
+            { name: "באנץ' עליון", equip: "barbell", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 5, origName: "באנץ' עליון",
               notes: "מוט או סמית', ספסל בשיפוע של כ-30°. בטופ – עם שומר. בק-אוף ולא דרופ." },
             { name: "מקבילים", equip: "bw", type: "max", setCount: 2, warmups: 0, repMin: 6, repMax: 15, increment: 2.5, origName: "מקבילים",
               notes: "גוף נוטה קדימה, יורדים עמוק למתיחה בחזה. מעל 15 חזרות – מוסיפים משקל בחגורה." },
@@ -5120,7 +5121,7 @@
         <li>בתוך הטווח ← אותו משקל, ומנסים עוד חזרה.</li>
         <li>מתחת לטווח ← מורידים קפיצה. אם חסרה רק חזרה אחת – בפעם הראשונה נשארים באותו משקל, ואם זה קורה פעמיים ברצף – מורידים.</li>
         <li>אם רושמים RIR בפועל: קל מהיעד נחשב כחזרות נוספות, קשה מהיעד – לא מוסיפים חזרה.</li>
-        <li>קפיצות משקל לפי ציוד: מכונה 5 ק״ג, כבל 2.5 ק״ג, משקולות יד 2 ק״ג, מוט 2.5 ק״ג, מכונה בליברות – לפי סטק הפלטות (במקסימום הסטק: עוד חזרות/טמפו/פלטה ביד), משקולות יד 4–50 ק״ג בקפיצות של 2. כל המשקלים המומלצים (חימום, בק-אוף, דרופים, הורדה) מעוגלים לקפיצה / לעמדה בסטק של התרגיל.</li>
+        <li>קפיצות משקל לפי ציוד: מכונה 5 ק״ג, כבל 2.5 ק״ג, משקולות יד 2 ק״ג, מוט 5 ק״ג (2+ חזרות מעל הטווח = קפיצה של 10), מכונה בליברות – לפי סטק הפלטות (במקסימום הסטק: עוד חזרות/טמפו/פלטה ביד), משקולות יד 4–50 ק״ג בקפיצות של 2. כל המשקלים המומלצים (חימום, בק-אוף, דרופים, הורדה) מעוגלים לקפיצה / לעמדה בסטק של התרגיל.</li>
         <li>בבק-אוף מורידים 10-15% מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
         <li>🚣 חתירה רחבה בכבל: במקום הטי-בר (לחץ על החזה/בטן במשקלים כבדים) – חתירה בכבל בישיבה באחיזה רחבה, באותה עמדה של החתירה ביד אחת (5–125 ק״ג). אותו מקום באימון C ואותה שיטה (טופ + 2 בק-אוף, 6-10). בפעם הראשונה המשקל הוא הערכה לפי הטי-בר – מתאימים בסט הראשון, ומשם התקדמות רגילה. ההיסטוריה של הטי-בר נשמרת בשם הישן.</li>
         <li>💪 פשיטה מעל הראש: במקום המשקולת (כאב בצד הפנימי של מרפק ימין) – פשיטה מעל הראש בכבל עם חבל, גב לכבל. אותם סטים ואותו מקום באימון B; התקדמות מתחילה מחדש (ההיסטוריה של המשקולת נשמרת בשם הישן). כאב עד 2-3 מתוך 10 ולא מחמיר למחרת – אחרת עוברים לקטאנה ביד אחת בכבל.</li>
@@ -5330,6 +5331,24 @@
         data.partnerV23 = true;
         saveData(data);
       } catch (e) { console.warn("partner v23 migration failed", e); }
+    }
+
+    // v24: HIS barbell / free-weight lifts step in 5 kg (base) instead of 2.5. 2+ reps over the range = 2 steps = 10 kg,
+    // 3+ over = estimated-strength jump snapped down to 5. Stored program only, in place, once (his other edits and
+    // history untouched). With no stored program nothing is written (defaults carry the new step). Main profile only.
+    function migrateMainBarbellV24() {
+      try {
+        if (isPartnerProfile()) return;
+        const data = getData();
+        if (data.mainBarbellV24 || !data.program || !Array.isArray(data.program.workouts)) return;
+        let changed = 0;
+        data.program.workouts.concat(Array.isArray(data.program.accessories) ? data.program.accessories : []).forEach(g => (g.exercises || []).forEach(x => {
+          const barbell = x.equip === "barbell" || (!x.equip && (LEGACY_BARBELL.includes(x.name) || LEGACY_BARBELL.includes(x.origName)));
+          if (barbell && Number(x.increment) === 2.5 && !x.stack) { x.increment = 5; changed++; }
+        }));
+        data.mainBarbellV24 = true;
+        saveData(data);
+      } catch (e) { console.warn("barbell v24 migration failed", e); }
     }
 
     // v21: T-bar row → seated wide-grip cable row (same position, same top+back-off scheme; T-bar history stays under its name).
@@ -5869,6 +5888,7 @@
     migrateWideCableRowV21();
     migratePartnerV22();
     migratePartnerV23();
+    migrateMainBarbellV24();
     try { localStorage.removeItem(K("abTempoStage_v1")); } catch (e) {} // v16/v17 tempo stages retired in v18
     requestPersistentStorage();
     applySavedBackground();
