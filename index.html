@@ -2186,6 +2186,56 @@
     }
 
     // ========== WORKOUT ==========
+
+    // ========== v25: PARTNER LIGHT SESSION 1 (after session 4 with no rest day) ==========
+    const LIGHT_KEY = "light1Day";
+    function isLightActive() { return isPartnerProfile() && lsGet(K(LIGHT_KEY)) === toDateKey(new Date()); }
+    function setLightSession(on) {
+      if (on) localStorage.setItem(K(LIGHT_KEY), toDateKey(new Date())); else localStorage.removeItem(K(LIGHT_KEY));
+      if (currentWorkout) startWorkout(currentWorkout);
+    }
+    function isLightSessionFor(name) {
+      if (!isLightActive() || currentWorkout !== "A") return false;
+      const w = findWorkout("A", getProgram());
+      return !!(w && w.exercises.some(e => e.name === name));
+    }
+    // Light variant: glutes were hammered in session 4 → top set at RIR 3 (~10% lighter), 1 back-off; drops on glute/hamstring isolation → straight sets.
+    function lightDef(def, o) {
+      const d = Object.assign({}, def);
+      const has = f => o && o[f] != null;
+      if (d.type === "topback") { if (!has("backoffs")) d.backoffs = 1; d.drops = 0; d.rir = "3"; d.light = true; }
+      else if (d.type === "normal") { if (!has("drops")) d.drops = 0; d.rir = "2"; d.light = true; }
+      return d;
+    }
+    function lightSuggestion(s, def) {
+      if (def.type === "topback") return Object.assign({}, s, { kind: "light",
+        rule: "אימון 1 קל (אחרי אימון 4 בלי יום מנוחה): כ-10% פחות מהטופ הרגיל, RIR 3, בק-אוף אחד. לא מתקדמים היום – וזה לא נחשב ירידה.",
+        explain: (s.explain || "").replace("השבוע (הורדה, ‎-10%)", "היום (קל, ‎-10%)").replace("השבוע (הורדה)", "היום (קל)") });
+      return Object.assign({}, s, { rule: "אימון 1 קל: סטים ישרים בלי דרופים, RIR 2. " + (s.rule || "") });
+    }
+    // Detect: last session before this one was session 4 (D), logged today or yesterday.
+    function cameRightAfterSession4() {
+      const sess = (getData().sessions || []).filter(x => x && x.date);
+      const today = toDateKey(new Date());
+      const y = new Date(); y.setDate(y.getDate() - 1); const yest = toDateKey(y);
+      const prior = sess.filter(x => { const k = toDateKey(new Date(x.date)); return k < today || (k === today && x.workout === "D"); })
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      const last = prior[prior.length - 1];
+      if (!last || last.workout !== "D") return false;
+      const k = toDateKey(new Date(last.date));
+      return k === today || k === yest;
+    }
+    function lightBannerHtml() {
+      if (!isPartnerProfile() || currentWorkout !== "A") return "";
+      const on = isLightActive(), auto = cameRightAfterSession4();
+      const why = "אימון 4 כבר העמיס על הישבן (היפ ת'ראסט במכונה + רגל אחת). בלי יום מנוחה ביניהם – גרסה קלה: היפ ת'ראסט טופ ב-RIR 3 (כ-10% פחות) + בק-אוף אחד, בלי דרופים בבעיטה/הרחקה/כפיפת ברך. גב, אופניים וקרדיו כרגיל. אימון קל לא מוריד את ההתקדמות.";
+      return `<div id="light-banner" class="card" style="margin-bottom:12px;padding:12px;border:1px solid var(--accent, #e91e63);">
+        <div style="font-weight:700;margin-bottom:6px;">${on ? "🌙 אימון 1 קל – פעיל היום" : (auto ? "🌙 עשית אימון 4 אתמול/היום – לעשות אימון 1 קל?" : "🌙 אפשר לבחור אימון 1 קל")}</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:8px;">${why}</div>
+        <button id="light-toggle" class="btn btn-sm ${on ? "btn-outline" : ""}" onclick="setLightSession(${on ? "false" : "true"})">${on ? "חזרה לאימון 1 רגיל" : "כן, אימון 1 קל"}</button>
+      </div>`;
+    }
+
     function startWorkout(key) {
       const prog = getProgram();
       const w = findWorkout(key, prog);
@@ -2205,6 +2255,8 @@
       const list = document.getElementById("exercise-list");
       list.innerHTML = sessionRowsHtml("w:" + w.id, w.exercises.map(e => e.name)) ||
         `<div class="empty-state" style="padding:16px;">אין תרגילים באימון הזה. אפשר להוסיף ב"עריכת תוכנית".</div>`;
+      const lb = lightBannerHtml(); if (lb) list.innerHTML = lb + list.innerHTML;
+      if (isPartnerProfile() && key === "A" && isLightActive()) document.getElementById("workout-title").textContent = "אימון 1 קל – גלוטס + גב";
 
       const manualAcc = findAccessory(manualAccessory, prog);
       const chosen = manualAcc || plannedAcc;
@@ -2524,6 +2576,7 @@
 
       const extra = {};
       if (currentDef && currentDef.deload) extra.deload = true;
+      if (currentDef && currentDef.light) extra.light = true;
       if (currentDef && currentDef.abStraight && isDynType(logMode)) {
         const wu = [1, 2].map(i => {
           const w = document.getElementById("aw" + i).value, r = document.getElementById("ar" + i).value;
@@ -3471,7 +3524,7 @@
       if (def.abStraight && !(opts && opts.deload)) return abStraightSuggestion(logs, def);
       const all = (logs || []).filter(e => getWorkingSet(e));
       if (!all.length) return null;
-      const normal = all.filter(e => !e.deload);
+      const normal = all.filter(e => !e.deload && !e.light); // v25: light-session logs never drive progression
       const entries = normal.length ? normal : all;
       const lastE = entries[entries.length - 1];
       const prevE = entries.length >= 2 ? entries[entries.length - 2] : null;
@@ -3585,7 +3638,8 @@
       const box = document.getElementById("suggestion-box");
       const def = getEffectiveDef(exerciseName);
       const logs = getData().logs[exerciseName] || [];
-      const s = computeSuggestion(logs, def, { deload: !!def.deload });
+      let s = computeSuggestion(logs, def, { deload: !!def.deload || (!!def.light && def.type === "topback") });
+      if (s && def.light && !def.deload) s = lightSuggestion(s, def);
       currentSuggestion = s;
       if (!s) {
         box.classList.add("hidden");
@@ -4080,6 +4134,7 @@
         def = normalizeExercise(merged) || base;
       }
       def = abStraightDef(def, o);
+      if (isLightSessionFor(name)) def = lightDef(def, o);
       if (!(opts && opts.noDeload) && isDeloadWeek()) def = deloadDef(def, o);
       return def;
     }
@@ -4592,7 +4647,7 @@
     const BACKOFF_DEFAULT = 12.5, BACKOFF_MIN = 7.5, BACKOFF_MAX = 25;
     function backoffDropInfo(name, def) {
       const clamp = x => Math.min(BACKOFF_MAX, Math.max(BACKOFF_MIN, x));
-      const logs = ((getData().logs || {})[name] || []).filter(e => e && !e.deload && e.type === "topback" && Array.isArray(e.sets));
+      const logs = ((getData().logs || {})[name] || []).filter(e => e && !e.deload && !e.light && e.type === "topback" && Array.isArray(e.sets));
       const lo = def.repMin + 2, hi = def.repMax + 2;
       for (let k = logs.length - 1; k >= 0; k--) {
         const e = logs[k];
@@ -4654,7 +4709,7 @@
     function abStraightSuggestion(logs, def) {
       const W = w => wt(w, def), max = abStackMax(def), lo = def.repMin, hi = def.repMax;
       const rule = `שיטה: ${setCountOf(def)} סטים ישרים של ${lo}-${hi} חזרות, RIR 0-1. כשכל הסטים מגיעים ל-${hi} – מוסיפים פלטה אחת (${fmtKg(def.increment || 15)} lb). המקסימום: ${W(max)}.`;
-      const all = (logs || []).filter(e => e && !e.deload && Array.isArray(e.sets) && e.sets.some(x => x && x.reps != null));
+      const all = (logs || []).filter(e => e && !e.deload && !e.light && Array.isArray(e.sets) && e.sets.some(x => x && x.reps != null));
       const lastE = all[all.length - 1];
       if (!lastE) return { weight: null, reps: 15, kind: "start", rule, explain: `אין היסטוריה – בחר משקל שבו 15 חזרות הן כמעט כשל (RIR 0-1).` };
       if (lastE.type !== "simple") {
@@ -4742,7 +4797,7 @@
     }
     function repFactor(t) { return ((1 + t / 30) + 36 / (37 - t)) / 2; }
     function lastHeavySet(name) {
-      const logs = (getData().logs[name] || []).filter(e => e && !e.deload && Array.isArray(e.sets) && e.type !== "simple");
+      const logs = (getData().logs[name] || []).filter(e => e && !e.deload && !e.light && Array.isArray(e.sets) && e.type !== "simple");
       for (let k = logs.length - 1; k >= 0; k--) {
         const h = logs[k].sets[2];
         if (h && numOrNull(h.weight) > 0 && numOrNull(h.reps) > 0) return { weight: Number(h.weight), reps: Number(h.reps), date: logs[k].date };
