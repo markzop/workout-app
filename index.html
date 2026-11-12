@@ -831,6 +831,72 @@
     body.theme-pastel .stopwatch button { background: rgba(255, 255, 255, 0.92); border-color: rgba(30, 42, 94, 0.16); color: #1e2a5e; }
     body.theme-pastel .stopwatch #sw-toggle { background: rgba(217, 70, 127, 0.14); border-color: rgba(217, 70, 127, 0.5); color: #a92f61; }
     body.theme-pastel .stopwatch.running #sw-toggle { background: rgba(217, 70, 127, 0.24); border-color: rgba(217, 70, 127, 0.7); }
+
+    /* ===== V26: friend profile – Maccabi Tel Aviv basketball colors (no official logo) ===== */
+    .profile-choice.maccabi { background: linear-gradient(165deg, #00338D 0 42%, #FCD116 42% 58%, #001B4D 58% 100%); color: #fff; border-color: #FCD116; }
+    .profile-choice.maccabi .pc-name { color: #FCD116; text-shadow: 0 1px 0 #001B4D; }
+    .profile-choice.maccabi .pc-sub { color: #fff8d0; }
+    .friend-prog-toggle { border-radius: 16px; padding: 12px 14px; margin: 0 0 12px; background: rgba(0, 51, 141, 0.28); border: 1px solid rgba(252, 209, 22, 0.55); }
+    .friend-prog-toggle .fpt-label { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+    .friend-prog-toggle .fpt-row { display: flex; gap: 8px; }
+    .friend-prog-toggle .fpt-row .btn { flex: 1; width: auto; padding: 10px 8px; font-size: 0.88rem; border: 2px solid var(--border); background: transparent; color: var(--text); }
+    .friend-prog-toggle .fpt-row .btn.on { background: var(--primary); color: #001B4D; border-color: var(--primary); }
+    .friend-prog-toggle .fpt-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; }
+
+    body.theme-maccabi {
+      --bg: #000b1f; --card: #0c1d42; --card2: #102552; --primary: #FCD116; --primary-dark: #e0b800;
+      --success: #3ddc84; --text: #fff8e7; --text-muted: #b8c6e3; --border: rgba(252, 209, 22, 0.28);
+      --light-set: #8aa0c8; --heavy-set: #FCD116; --drop-set: #ff9f1c; --max-set: #FCD116;
+      --color-a: #FCD116; --color-b: #5B8DEF; --color-c: #ff9f1c;
+      background-image: none !important; background-color: #000b1f;
+    }
+    body.theme-maccabi::before {
+      background:
+        repeating-linear-gradient(90deg, #FCD116 0 14px, #00338D 14px 28px) top / 100% 7px no-repeat,
+        radial-gradient(ellipse at 50% -10%, rgba(0, 51, 141, 0.85), #000b1f 68%);
+    }
+    body.theme-maccabi header {
+      background: linear-gradient(180deg, #00338D 0%, #002266 100%);
+      border: 2px solid #FCD116; border-radius: 18px; padding: 14px 12px; margin-bottom: 12px;
+      box-shadow: 0 6px 22px rgba(0, 19, 64, 0.45);
+    }
+    body.theme-maccabi header h1 { color: #FCD116; }
+    body.theme-maccabi header p { color: #dce6ff; }
+    body.theme-maccabi .btn-primary { color: #001B4D; }
+    body.theme-maccabi .btn-outline { background: rgba(0, 27, 77, 0.55); border-color: rgba(252, 209, 22, 0.45); color: #FCD116; }
+    body.theme-maccabi .workout-btn, body.theme-maccabi .card, body.theme-maccabi .stat-box, body.theme-maccabi .day-info, body.theme-maccabi .prev-info {
+      background: rgba(12, 29, 66, 0.88); border-color: rgba(252, 209, 22, 0.28);
+    }
+    body.theme-maccabi .workout-btn:active { background: rgba(0, 51, 141, 0.92); }
+    body.theme-maccabi .workout-btn.next { border-color: #FCD116; }
+    body.theme-maccabi .workout-btn h2, body.theme-maccabi .suggest-main b { color: #FCD116; }
+    body.theme-maccabi .section-title { color: #FCD116; }
+    body.theme-maccabi .back-btn { color: #FCD116; }
+    body.theme-maccabi input[type="number"], body.theme-maccabi .form-input, body.theme-maccabi .paste-modal-box textarea {
+      background: #0a1840; color: #fff8e7; border-color: rgba(252, 209, 22, 0.35);
+    }
+    body.theme-maccabi .paste-modal { background: rgba(0, 11, 31, 0.62); }
+    body.theme-maccabi .paste-modal-box { background: #0c1d42; border-color: rgba(252, 209, 22, 0.4); }
+    body.theme-maccabi .exercise-item.done .exercise-name { color: #3ddc84; }
+    body.theme-maccabi .check-done, body.theme-maccabi .cmp-up { color: #3ddc84; }
+    body.theme-maccabi .cmp-down { color: #ff6b6b; }
+    body.theme-maccabi .cal-day { background: rgba(16, 37, 82, 0.7); border-color: rgba(252, 209, 22, 0.18); }
+    body.theme-maccabi .cal-day.today { border-color: #FCD116; }
+    body.theme-maccabi .cal-day.workout-A { background: rgba(252, 209, 22, 0.22); }
+    body.theme-maccabi .cal-day.workout-B { background: rgba(91, 141, 239, 0.28); }
+    body.theme-maccabi .cal-day.workout-C { background: rgba(255, 159, 28, 0.22); }
+    body.theme-maccabi .cal-header button, body.theme-maccabi .icon-btn { background: rgba(16, 37, 82, 0.9); color: #FCD116; }
+    body.theme-maccabi .suggest-box { background: rgba(0, 51, 141, 0.55); border-color: rgba(252, 209, 22, 0.55); }
+    body.theme-maccabi .next-card { background: rgba(0, 51, 141, 0.55); border-color: #FCD116; box-shadow: 0 6px 22px rgba(252, 209, 22, 0.12); }
+    body.theme-maccabi .next-card .nx-title { color: #FCD116; }
+    body.theme-maccabi .next-tag, body.theme-maccabi .today-tag, body.theme-maccabi .reorder-toggle.active { color: #001B4D; background: #FCD116; }
+    body.theme-maccabi .cycle-card { background: rgba(0, 51, 141, 0.5); border-color: rgba(91, 141, 239, 0.55); }
+    body.theme-maccabi .cycle-card.deload { background: rgba(80, 50, 0, 0.45); border-color: #ff9f1c; }
+    body.theme-maccabi .backup-banner { background: rgba(0, 51, 141, 0.55); border-color: #FCD116; }
+    body.theme-maccabi .stopwatch { background: linear-gradient(165deg, rgba(12, 29, 66, 0.97), rgba(0, 51, 141, 0.9)); border-color: rgba(252, 209, 22, 0.45); }
+    body.theme-maccabi .stopwatch .sw-time { color: #FCD116; }
+    body.theme-maccabi .friend-prog-toggle { background: rgba(0, 51, 141, 0.55); border-color: #FCD116; }
+
   </style>
 </head>
 <body>
@@ -845,6 +911,15 @@
       <div class="day-info">
         <span id="today-text"></span>
         <span id="accessory-badge" class="badge"></span>
+      </div>
+
+      <div id="friend-prog-toggle" class="friend-prog-toggle hidden">
+        <div class="fpt-label">תוכנית</div>
+        <div class="fpt-row">
+          <button type="button" id="fpt-fb" class="btn btn-sm" onclick="switchFriendProgram('fb')">פול באדי 3 ימים</button>
+          <button type="button" id="fpt-ul" class="btn btn-sm" onclick="switchFriendProgram('ul')">עליון / תחתון</button>
+        </div>
+        <p class="fpt-note">אותה היסטוריה לתרגיל שמופיע בשתי התוכניות. עליון/תחתון מתאים לשבוע של 2 או 4 אימונים (סבב א׳/ב׳).</p>
       </div>
 
       <div id="next-card" class="next-card hidden">
@@ -1324,6 +1399,12 @@
       </button>
       <label class="form-label" for="chooser-p2-name">השם של הפרופיל שלה (אפשר לשנות)</label>
       <input type="text" id="chooser-p2-name" class="form-input" maxlength="40" autocomplete="off" value="הפרופיל שלה" oninput="document.getElementById('choose-p2-name').textContent = this.value.trim() || 'הפרופיל שלה'" />
+      <button class="btn profile-choice maccabi" id="choose-p3" onclick="chooseProfile('p3')">
+        <span class="pc-name" id="choose-p3-name">החבר</span>
+        <span class="pc-sub">פול באדי 3 ימים / עליון-תחתון · עיצוב מכבי ת״א</span>
+      </button>
+      <label class="form-label" for="chooser-p3-name">השם של פרופיל החבר (אפשר לשנות)</label>
+      <input type="text" id="chooser-p3-name" class="form-input" maxlength="40" autocomplete="off" value="החבר" oninput="document.getElementById('choose-p3-name').textContent = this.value.trim() || 'החבר'" />
     </div>
   </div>
 
@@ -1341,6 +1422,7 @@
       <select id="pf-theme" class="form-input">
         <option value="dark">כהה (שחור / אדום)</option>
         <option value="pastel">פסטל (שמיים, ורוד וכחול)</option>
+        <option value="maccabi">מכבי (צהוב וכחול)</option>
       </select>
       <label class="pf-check"><input type="checkbox" id="pf-rotation" /> <span>מצב סבב – בלי ימים קבועים: האימון הבא לפי הסדר, בלי מנוחה קבועה בשבת</span></label>
       <div class="backup-row" style="margin-top:14px;">
@@ -1372,8 +1454,10 @@
     const ACTIVE_PROFILE_KEY = "workoutActiveProfile_v1";
     const PROFILE_DEFAULTS = {
       main: { id: "main", prefix: "", name: "הפרופיל הראשי", title: "", theme: "dark", rotation: false, feminine: false, kind: "default" },
-      p2: { id: "p2", prefix: "p2:", name: "הפרופיל שלה", title: "", theme: "pastel", rotation: true, feminine: true, kind: "partner" }
+      p2: { id: "p2", prefix: "p2:", name: "הפרופיל שלה", title: "", theme: "pastel", rotation: true, feminine: true, kind: "partner" },
+      p3: { id: "p3", prefix: "p3:", name: "החבר", title: "", theme: "maccabi", rotation: true, feminine: false, kind: "friend" }
     };
+    const THEME_IDS = { dark: 1, pastel: 1, maccabi: 1 };
     function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
     let profilesCache = null;
     function readProfiles() {
@@ -1388,7 +1472,7 @@
         out[id] = Object.assign({}, d, {
           name: typeof s.name === "string" && s.name.trim() ? s.name.trim().slice(0, 40) : d.name,
           title: typeof s.title === "string" ? s.title.trim().slice(0, 40) : d.title,
-          theme: s.theme === "pastel" || s.theme === "dark" ? s.theme : d.theme,
+          theme: THEME_IDS[s.theme] ? s.theme : d.theme,
           rotation: typeof s.rotation === "boolean" ? s.rotation : d.rotation,
           created: id === "main" || !!s.created || lsGet(d.prefix + "workoutData_v1") != null
         });
@@ -1408,20 +1492,29 @@
     function K(key) { return PROFILE_PREFIX + key; }
     function activeProfile() { return readProfiles()[ACTIVE_PROFILE_ID]; }
     function isPartnerProfile() { return activeProfile().kind === "partner"; }
+    function isFriendProfile() { return activeProfile().kind === "friend"; }
+    function isMainProfile() { return !isPartnerProfile() && !isFriendProfile(); }
     function isRotationProfile() { return !!activeProfile().rotation; }
     function isFem() { return !!activeProfile().feminine; }
     function T(m, f) { return isFem() ? f : m; }
     function applyProfileTheme() {
-      const pastel = activeProfile().theme === "pastel";
-      document.body.classList.toggle("theme-pastel", pastel);
+      const t = activeProfile().theme;
+      document.body.classList.toggle("theme-pastel", t === "pastel");
+      document.body.classList.toggle("theme-maccabi", t === "maccabi");
       const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute("content", pastel ? "#cdd3e1" : "#000000");
+      if (meta) meta.setAttribute("content", t === "pastel" ? "#cdd3e1" : (t === "maccabi" ? "#00338D" : "#000000"));
     }
     applyProfileTheme();
 
     // Her program (approved: research_training/partner_program_app.json, with timed/distance/cardio types).
     const PARTNER_PROGRAM_ID = "partner-glutes4-v1";
     const PARTNER_PROGRAM = {"version":1,"workouts":[{"id":"A","name":"אימון 1 – גלוטס כבד + גב","desc":"היפ ת'ראסט (טופ+בק-אוף) • בעיטה אחורית בכבל • הרחקת ירכיים • כפיפת ברך בישיבה • פולי עליון • חתירה • אופניים עם משקל • קרדיו 25-30 דק׳","exercises":[{"name":"היפ ת'ראסט","type":"topback","warmups":2,"backoffs":2,"repMin":6,"repMax":10,"increment":5,"equip":"barbell","rir":"1-2","notes":"צלעות למטה, סנטר מורכן. למעלה: אגן מגולגל קדימה (posterior tilt) ועצירה כשהירך ישרה – לא מקשתים גב. 1 שנייה החזקה למעלה. בק-אוף: 10-15% פחות. כאב גב = עוצרים. קפיצות משקל: 5 ק״ג (בסיס); 10 ק״ג כשעוברים את הטווח ב-2+ חזרות."},{"name":"בעיטה אחורית בכבל","type":"normal","warmups":0,"drops":1,"repMin":10,"repMax":15,"increment":2.5,"equip":"cable","rir":"0-1","notes":"לכל רגל. גוף נוטה קדימה (אחיזה במכונה), מתחילים מירך מכופפת – מתיחה בישבן. בועטים אחורה-החוצה עד ירך ישרה, בלי לקשת גב."},{"name":"הרחקת ירכיים במכונה","type":"normal","warmups":1,"drops":2,"repMin":12,"repMax":20,"increment":5,"equip":"machine","rir":"0-1","notes":"ישיבה זקופה, טווח מלא, 1 שנייה החזקה בפתיחה. דרופ אחרון: חצאי חזרות בטווח הפתוח."},{"name":"כפיפת ברך בישיבה","type":"normal","warmups":1,"drops":1,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"1","notes":"גוף נוטה מעט קדימה (מתיחה בירך האחורית). שליטה מלאה, בלי תנופה. אי נוחות בברך שמאל = להפחית משקל/טווח."},{"name":"פולי עליון","type":"simple","warmups":1,"setCount":3,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"אחיזה ניטרלית או רחבה. חזה מורם, בלי להישען אחורה ובלי לקשת."},{"name":"חתירה במכונה בישיבה","type":"simple","warmups":0,"setCount":2,"repMin":10,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"תמיכת חזה אם יש. גב ניטרלי, מושכים עם השכמות."},{"name":"אופניים עם משקל","type":"simple","warmups":0,"setCount":3,"repMin":12,"repMax":20,"increment":2,"equip":"db","rir":"2","notes":"חזרות לכל צד. משקולת/צלחת קלה מוחזקת על החזה. גב תחתון צמוד לרצפה כל הזמן, סיבוב איטי ומבוקר מהצלעות (מרפק לכיוון ברך נגדית), נשיפה בכל חזרה, בלי למשוך בצוואר. ברך שמאל: רגל מכופפת בנוחות. מגיעה ל-20 בכל הסטים → +2 ק״ג וחוזרים ל-12."},{"name":"קרדיו זון 2","type":"cardio","warmups":0,"setCount":1,"repMin":25,"repMax":30,"increment":1,"notes":"היום 25-30 דק׳ (אחרי היפ ת'ראסט כבד). זון 2: אפשר לדבר במשפטים מלאים, מאמץ 3-4 מתוך 10. אופניים / אליפטי / הליכה בשיפוע (6-12%, 4.5-5.5 קמ״ש). בלי ריצה וקפיצות (ברך). אחד משני הקרדיו של השבוע (אימונים 1 ו-3). רושמים דקות + רמה/שיפוע, ודופק ממוצע אם יש. סה״כ היום עד 90 דק׳."}]},{"id":"B","name":"אימון 2 – פלג עליון + ליבה","desc":"לחיצת חזה • מתח בעזרה • חתירה עם תמיכת חזה • לחיצת כתפיים • הרחקה לצדדים • יד אחורית/קדמית • הרחקת ירך בכבל • פלאנק צידי • בירד דוג","exercises":[{"name":"לחיצת חזה במכונה","type":"simple","warmups":1,"setCount":3,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"כתפיים למטה ואחורה, טווח נוח לכתף."},{"name":"מתח בעזרה","type":"simple","warmups":1,"setCount":3,"repMin":5,"repMax":8,"increment":5,"equip":"machine","rir":"1-2","notes":"מכונת מתח בעזרה (משקל הנגדי = העזרה) או גומייה. רושמים משקל נטו = משקל גוף פחות העזרה (למשל 60 גוף, עזרה 25 → 35), כך שהיעד העולה באפליקציה = פחות עזרה. אחיזה ניטרלית/רחבה, שכמות למטה, צלעות למטה ובטן אסופה – בלי להקשית גב ובלי תנופה ברגליים. מגיעה ל-8 בכל הסטים → פחות עזרה (-5 ק״ג / גומייה דקה יותר) וחוזרים ל-5. אין מכונה? 3 × 3-5 שליליות (ירידה 3-5 שנ׳) מקופסה – בלי לקפוץ מהברך.","topTip":"ב-8 בכל הסטים: +5 נטו = 5 ק״ג פחות עזרה."},{"name":"חתירה עם תמיכת חזה","type":"simple","warmups":1,"setCount":3,"repMin":8,"repMax":12,"increment":2,"equip":"db","rir":"1-2","notes":"על ספסל משופע (או מכונה). הגב נתמך – בלי עומס על הגב התחתון."},{"name":"לחיצת כתפיים במכונה","type":"simple","warmups":0,"setCount":2,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"בישיבה עם גב נתמך, בלי לקשת את הגב."},{"name":"הרחקה לצדדים","type":"normal","warmups":0,"drops":2,"repMin":12,"repMax":20,"increment":2,"equip":"db","rir":"0-1","notes":"בלי תנופה. אפשר בישיבה."},{"name":"פשיטת מרפק בפולי","type":"simple","warmups":0,"setCount":2,"repMin":10,"repMax":15,"increment":2.5,"equip":"cable","rir":"1","notes":"סופרסט עם כפיפת מרפק בכבל."},{"name":"כפיפת מרפק בכבל","type":"simple","warmups":0,"setCount":2,"repMin":10,"repMax":15,"increment":2.5,"equip":"cable","rir":"1","notes":"סופרסט עם פשיטת מרפק בפולי."},{"name":"הרחקת ירך בכבל בעמידה","type":"simple","warmups":0,"setCount":2,"repMin":12,"repMax":20,"increment":2.5,"equip":"cable","rir":"1","notes":"לכל רגל. אחיזה במכונה, גוף זקוף, רגל עובדת מעט אחורה. בלי להטות את הגוף."},{"name":"פלאנק צידי","type":"timed","warmups":0,"setCount":3,"repMin":20,"repMax":40,"increment":2.5,"equip":"bw","rir":"2","notes":"שניות לכל צד – רושמים את הצד החלש. ירך-כתף-אוזן בקו אחד. אפשר להתחיל על הברכיים.","topTip":"מעל 40 שנ׳ מוסיפים סט ולא זמן. כשזה קל – עוברים מהברכיים לכפות הרגליים."},{"name":"בירד דוג","type":"simple","warmups":0,"setCount":3,"repMin":5,"repMax":8,"increment":2.5,"equip":"bw","rir":"3","notes":"חזרות לכל צד, 8-10 שניות החזקה בכל חזרה (מקגיל). גב שטוח, אגן לא מסתובב."}]},{"id":"C","name":"אימון 3 – גלוטס במתיחה + חד-צדדי","desc":"לחיצת רגליים גבוה ורחב (טופ+בק-אוף) • עלייה לספסל נמוך • הרחקת ירכיים בהטיה קדימה • כפיפת ברך בישיבה • כרל-אפ מקגיל • קרדיו 25-35 דק׳","exercises":[{"name":"לחיצת רגליים רגליים גבוה ורחב","type":"topback","warmups":2,"backoffs":2,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"כפות רגליים גבוה ורחב על הפלטה, אצבעות מעט החוצה. יורדים עד מתיחה בישבן ועוצרים לפני שהאגן מתגלגל/הגב התחתון מתרומם. ברך שמאל ביציבות מעל כף הרגל. דוחפים מהעקבים."},{"name":"עלייה לספסל נמוך","type":"simple","warmups":0,"setCount":2,"repMin":8,"repMax":12,"increment":2,"equip":"db","rir":"1-2","notes":"לכל רגל. תיבה 30-40 ס\"מ (ברך לא מתחת ל-90°). גוף נוטה קדימה, שוק כמעט אנכית, דוחפים מהעקב ולא קופצים מהרגל האחורית. כאב/חוסר יציבות בברך שמאל → להחליף להיפ ת'ראסט B-stance."},{"name":"הרחקת ירכיים במכונה בהטיה קדימה","type":"normal","warmups":0,"drops":2,"repMin":12,"repMax":20,"increment":5,"equip":"machine","rir":"0-1","notes":"אותה מכונה, אבל גוף נוטה קדימה (אמות על הידיות/ירכיים) – דגש על החלק העליון של הישבן. גב ניטרלי."},{"name":"כפיפת ברך בישיבה","type":"normal","warmups":1,"drops":1,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"1","notes":"גוף נוטה מעט קדימה (מתיחה בירך האחורית). שליטה מלאה, בלי תנופה. אי נוחות בברך שמאל = להפחית משקל/טווח."},{"name":"כרל-אפ מקגיל","type":"simple","warmups":0,"setCount":3,"repMin":5,"repMax":8,"increment":2.5,"equip":"bw","rir":"3","notes":"רגל אחת כפופה, ידיים מתחת לגב התחתון (שומרות על הקשת הטבעית). מרימים ראש+כתפיים מעט, 8-10 שניות החזקה. לא כפיפות בטן."},{"name":"קרדיו זון 2","type":"cardio","warmups":0,"setCount":1,"repMin":25,"repMax":35,"increment":1,"notes":"היום 25-35 דק׳. זון 2: אפשר לדבר במשפטים מלאים, מאמץ 3-4 מתוך 10. אופניים / אליפטי / הליכה בשיפוע (6-12%, 4.5-5.5 קמ״ש). בלי ריצה וקפיצות (ברך). אחד משני הקרדיו של השבוע (אימונים 1 ו-3). רושמים דקות + רמה/שיפוע, ודופק ממוצע אם יש. סה״כ היום עד 90 דק׳."}]},{"id":"D","name":"אימון 4 – גלוטס נפח + פלג עליון","desc":"היפ ת'ראסט במכונה • היפ ת'ראסט רגל אחת • פולי עליון צר • הרחקה לצדדים בכבל • פלאנק צידי • אופניים עם משקל","exercises":[{"name":"היפ ת'ראסט במכונה","type":"normal","warmups":1,"drops":2,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"0-1","notes":"אם אין מכונה: גשר ישבן במוט/סמית'. צלעות למטה, עצירה בירך ישרה. דרופים בלי לאבד טכניקה."},{"name":"היפ ת'ראסט רגל אחת","type":"simple","warmups":0,"setCount":2,"repMin":10,"repMax":15,"increment":2,"equip":"db","rir":"1","notes":"לכל רגל, גב עליון על ספסל, משקולת על הירך. אפשר B-stance (הרגל השנייה רק לאיזון)."},{"name":"פולי עליון אחיזה צרה","type":"simple","warmups":1,"setCount":2,"repMin":10,"repMax":12,"increment":5,"equip":"machine","rir":"1-2","notes":"מושכים לחזה העליון, בלי להישען אחורה."},{"name":"הרחקה לצדדים בכבל","type":"normal","warmups":0,"drops":1,"repMin":12,"repMax":20,"increment":2.5,"equip":"cable","rir":"0-1","notes":"כבל מאחורי הגוף, יד אחת בכל פעם."},{"name":"פלאנק צידי","type":"timed","warmups":0,"setCount":3,"repMin":20,"repMax":40,"increment":2.5,"equip":"bw","rir":"2","notes":"שניות לכל צד – רושמים את הצד החלש. ירך-כתף-אוזן בקו אחד. אפשר להתחיל על הברכיים.","topTip":"מעל 40 שנ׳ מוסיפים סט ולא זמן. כשזה קל – עוברים מהברכיים לכפות הרגליים."},{"name":"אופניים עם משקל","type":"simple","warmups":0,"setCount":3,"repMin":12,"repMax":20,"increment":2,"equip":"db","rir":"2","notes":"חזרות לכל צד. משקולת/צלחת קלה מוחזקת על החזה. גב תחתון צמוד לרצפה כל הזמן, סיבוב איטי ומבוקר מהצלעות (מרפק לכיוון ברך נגדית), נשיפה בכל חזרה, בלי למשוך בצוואר. ברך שמאל: רגל מכופפת בנוחות. מגיעה ל-20 בכל הסטים → +2 ק״ג וחוזרים ל-12."}]}],"accessories":[{"id":"mobility","name":"מוביליטי יומי (10 דק')","desc":null,"exercises":[{"name":"חתול-גמל","type":"simple","warmups":0,"setCount":1,"repMin":6,"repMax":8,"increment":2.5,"equip":"bw","notes":"תנועה איטית בטווח נוח, לא לכפות קצוות."},{"name":"מתיחת כופפי ירך בכריעה","type":"timed","warmups":0,"setCount":2,"repMin":30,"repMax":45,"increment":2.5,"equip":"bw","notes":"שניות לכל צד. ריפוד מתחת לברך, אגן מגולגל אחורה + כיווץ ישבן. אם ברך שמאל לא נוחה בכריעה – מתיחה בעמידה.","topTip":"ב-45 שנ׳ נשארים על 45 – לא צריך יותר. העיקר קביעות, כמעט כל יום."},{"name":"90/90 לירך","type":"simple","warmups":0,"setCount":2,"repMin":6,"repMax":8,"increment":2.5,"equip":"bw","notes":"החלפות צד בישיבה, גו זקוף. ברך שמאל – טווח נוח בלבד."},{"name":"מתיחת ירך אחורית בשכיבה עם רצועה","type":"timed","warmups":0,"setCount":2,"repMin":30,"repMax":45,"increment":2.5,"equip":"bw","notes":"שניות לכל רגל. בשכיבה על הגב – הגב התחתון נתמך (במקום כפיפה קדימה בעמידה).","topTip":"ב-45 שנ׳ נשארים על 45 – לא צריך יותר. העיקר קביעות, כמעט כל יום."},{"name":"פתיחת חזה בשכיבה צידית","type":"simple","warmups":0,"setCount":1,"repMin":6,"repMax":8,"increment":2.5,"equip":"bw","notes":"Open book – לכל צד, סיבוב מהגב העליון, ברכיים צמודות."}]}],"accessoryByDay":[null,null,null,null,null,null,null]};
+
+    // v26: friend (p3) programs – 3-day full body (default) and A/B upper/lower. Same exercise names share log history.
+    const FRIEND_FB_PROGRAM_ID = "friend-fb3-v1";
+    const FRIEND_UL_PROGRAM_ID = "friend-ul-v1";
+    const FRIEND_FB_PROGRAM = {"version":1,"workouts":[{"id":"A","name":"אימון 1 – פול באדי כבד","desc":"סקוואט • לחיצת חזה במוט • חתירה עם תמיכת חזה • הרחקה לצדדים • כפיפת ברך בישיבה • פשיטת מרפק מעל הראש","exercises":[{"name":"סקוואט עם מוט על הגב","type":"topback","warmups":2,"backoffs":2,"repMin":5,"repMax":8,"increment":5,"equip":"barbell","rir":"0-1","notes":"ברכיים בקו כפות הרגליים, גב ניטרלי, יורדים לפחות למקביל. מנוחה 2-2.5 דק׳ בסטים כבדים. קפיצות משקל במוט: 5 ק״ג (בסיס); 10 ק״ג כשעוברים את הטווח ב-2+ חזרות."},{"name":"לחיצת חזה במוט","type":"topback","warmups":2,"backoffs":2,"repMin":6,"repMax":10,"increment":5,"equip":"barbell","rir":"0-1","notes":"שכמות למטה ואחורה, רגליים יציבות, המוט לקו הפטמות. מנוחה 2-2.5 דק׳ בסטים כבדים. קפיצות משקל במוט: 5 ק״ג (בסיס); 10 ק״ג כשעוברים את הטווח ב-2+ חזרות."},{"name":"חתירה עם תמיכת חזה","type":"topback","warmups":1,"backoffs":1,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"0-1","notes":"מכונה או טי-בר עם תמיכת חזה. גב ניטרלי, מושכים עם השכמות. מנוחה 2-2.5 דק׳ בסטים כבדים."},{"name":"הרחקה לצדדים","type":"normal","warmups":0,"drops":2,"repMin":12,"repMax":15,"increment":2,"equip":"db","rir":"0-1","notes":"משקולות או כבל. בלי תנופה, מרפק רך. דרופים כ-20-25%. אפשר סופרסט עם פשיטת מרפק כדי להישאר ב-60 דק׳. מנוחה 60-90 שנ׳."},{"name":"כפיפת ברך בישיבה","type":"normal","warmups":1,"drops":1,"repMin":10,"repMax":12,"increment":5,"equip":"machine","rir":"0-1","notes":"גוף נוטה מעט קדימה (מתיחה בירך האחורית). שליטה מלאה, בלי תנופה. דרופ כ-20-25%. מנוחה 60-90 שנ׳."},{"name":"פשיטת מרפק מעל הראש בכבל עם חבל","type":"normal","warmups":0,"drops":1,"repMin":10,"repMax":12,"increment":2.5,"equip":"cable","rir":"0-1","notes":"חבל מעל הראש, מרפקים יציבים, מתיחה מלאה למעלה. דרופ כ-20-25%. אפשר סופרסט עם הרחקה לצדדים. מנוחה 60-90 שנ׳."}]},{"id":"B","name":"אימון 2 – פול באדי משיכה","desc":"דדליפט רומני • מתח / פולי עליון • לחיצת חזה עליונה • לאנץ' בולגרי • הרחקה לצדדים בכבל • כפיפת מרפק בייסיאן","exercises":[{"name":"דדליפט רומני","type":"topback","warmups":2,"backoffs":1,"repMin":6,"repMax":10,"increment":5,"equip":"barbell","rir":"0-1","notes":"גב ניטרלי, מוט צמוד לרגליים, מתיחה בירך האחורית, ברכיים רכות. מנוחה 2-2.5 דק׳ בסטים כבדים. קפיצות משקל במוט: 5 ק״ג (בסיס); 10 ק״ג כשעוברים את הטווח ב-2+ חזרות."},{"name":"מתח / פולי עליון","type":"topback","warmups":1,"backoffs":2,"repMin":6,"repMax":10,"increment":5,"equip":"machine","rir":"0-1","notes":"מתח אם אפשר (רושמים משקל גוף + תוספת, או 0 למשקל גוף בלבד). אחרת פולי עליון. אחיזה רחבה או ניטרלית, חזה מורם, בלי תנופה. מנוחה 2-2.5 דק׳ בסטים כבדים."},{"name":"לחיצת חזה עליונה במשקולות","type":"topback","warmups":1,"backoffs":1,"repMin":8,"repMax":12,"increment":2,"equip":"db","rir":"0-1","notes":"ספסל 30-45°, כתפיים למטה, טווח מלא שנוח לכתף. מנוחה 2-2.5 דק׳ בסטים כבדים."},{"name":"לאנץ' בולגרי","type":"simple","warmups":0,"setCount":3,"repMin":8,"repMax":12,"increment":2,"rir":"1","notes":"לכל רגל. רגל אחורית על ספסל, גוף נוטה מעט קדימה, דוחפים מהעקב. מנוחה 60-90 שנ׳. בין רגליים; כ-2 דק׳ בין סטים.","equip":"db"},{"name":"הרחקה לצדדים בכבל","type":"normal","warmups":0,"drops":2,"repMin":12,"repMax":15,"increment":2.5,"equip":"cable","rir":"0-1","notes":"כבל מאחורי הגוף. בלי תנופה. דרופים כ-20-25%. סופרסט עם כפיפת מרפק בייסיאן. מנוחה 60-90 שנ׳."},{"name":"כפיפת מרפק בייסיאן בכבל","type":"normal","warmups":0,"drops":1,"repMin":10,"repMax":12,"increment":2.5,"equip":"cable","rir":"0-1","notes":"כבל מאחורי הגוף (Bayesian), מרפק יציב, מתיחה בקדמת הזרוע בתחילת התנועה. דרופ כ-20-25%. סופרסט עם הרחקה לצדדים. מנוחה 60-90 שנ׳."}]},{"id":"C","name":"אימון 3 – פול באדי נפח","desc":"לחיצת חזה במוט • סקוואט • פשיטת ברך • פולי עליון צר • פרפר • מקבילים / פשיטת מרפק","exercises":[{"name":"לחיצת חזה במוט","type":"topback","warmups":2,"backoffs":1,"repMin":8,"repMax":12,"increment":5,"equip":"barbell","rir":"0-1","notes":"אותה טכניקה, טווח חזרות גבוה יותר. מנוחה 2-2.5 דק׳ בסטים כבדים. קפיצות משקל במוט: 5 ק״ג (בסיס); 10 ק״ג כשעוברים את הטווח ב-2+ חזרות."},{"name":"סקוואט עם מוט על הגב","type":"topback","warmups":2,"backoffs":1,"repMin":8,"repMax":12,"increment":5,"equip":"barbell","rir":"0-1","notes":"אותה טכניקה כמו ביום הכבד, טווח חזרות גבוה יותר. מנוחה 2-2.5 דק׳ בסטים כבדים. קפיצות משקל במוט: 5 ק״ג (בסיס); 10 ק״ג כשעוברים את הטווח ב-2+ חזרות."},{"name":"פשיטת ברך במכונה","type":"normal","warmups":0,"drops":1,"repMin":12,"repMax":15,"increment":5,"equip":"machine","rir":"0-1","notes":"טווח מלא, שליטה בירידה. דרופ כ-20-25%. אפשר סופרסט עם פרפר / כפיפת ברך. מנוחה 60-90 שנ׳."},{"name":"פולי עליון אחיזה צרה / ניטרלית","type":"topback","warmups":1,"backoffs":1,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"0-1","notes":"אחיזה צרה או ניטרלית, מושכים לחזה העליון, בלי להישען אחורה. מנוחה 2-2.5 דק׳ בסטים כבדים."},{"name":"פרפר","type":"normal","warmups":0,"drops":1,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"0-1","notes":"כבל או מכונה, מתיחה מבוקרת, בלי נעילה קשה בכתף. דרופ כ-20-25%. אפשר סופרסט עם פשיטת ברך. מנוחה 60-90 שנ׳."},{"name":"מקבילים / פשיטת מרפק מעל הראש","type":"topback","warmups":1,"backoffs":1,"repMin":8,"repMax":12,"increment":5,"equip":"bw","rir":"0-1","notes":"מקבילים (אפשר עם תוספת משקל; רושמים את התוספת, או 0 למשקל גוף). אם אין מקבילים או לא נוח לכתף: פשיטת מרפק מעל הראש בכבל עם חבל. מנוחה 2-2.5 דק׳ בסטים כבדים."}]}],"accessories":[],"accessoryByDay":[null,null,null,null,null,null,null]};
+    const FRIEND_UL_PROGRAM = {"version":1,"workouts":[{"id":"A","name":"אימון 1 – עליון","desc":"לחיצת חזה במוט • פולי עליון • לחיצת חזה עליונה • חתירה עם תמיכת חזה • הרחקה לצדדים • בייסיאן + פשיטת מרפק (סופרסט)","exercises":[{"name":"לחיצת חזה במוט","type":"topback","warmups":2,"backoffs":2,"repMin":6,"repMax":10,"increment":5,"equip":"barbell","rir":"0-1","notes":"שכמות למטה ואחורה, רגליים יציבות, המוט לקו הפטמות. מנוחה 2-2.5 דק׳ בסטים כבדים. קפיצות משקל במוט: 5 ק״ג (בסיס); 10 ק״ג כשעוברים את הטווח ב-2+ חזרות."},{"name":"מתח / פולי עליון","type":"topback","warmups":1,"backoffs":2,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"0-1","notes":"מתח אם אפשר (רושמים משקל גוף + תוספת, או 0 למשקל גוף בלבד). אחרת פולי עליון. אחיזה רחבה או ניטרלית, חזה מורם, בלי תנופה. מנוחה 2-2.5 דק׳ בסטים כבדים."},{"name":"לחיצת חזה עליונה במשקולות","type":"topback","warmups":1,"backoffs":1,"repMin":8,"repMax":12,"increment":2,"equip":"db","rir":"0-1","notes":"ספסל 30-45°, כתפיים למטה, טווח מלא שנוח לכתף. מנוחה 2-2.5 דק׳ בסטים כבדים."},{"name":"חתירה עם תמיכת חזה","type":"topback","warmups":1,"backoffs":1,"repMin":8,"repMax":12,"increment":5,"equip":"machine","rir":"0-1","notes":"מכונה או טי-בר עם תמיכת חזה. גב ניטרלי, מושכים עם השכמות. מנוחה 2-2.5 דק׳ בסטים כבדים."},{"name":"הרחקה לצדדים","type":"normal","warmups":0,"drops":2,"repMin":12,"repMax":15,"increment":2,"equip":"db","rir":"0-1","notes":"משקולות או כבל. בלי תנופה, מרפק רך. דרופים כ-20-25%. מנוחה 60-90 שנ׳."},{"name":"כפיפת מרפק בייסיאן בכבל","type":"normal","warmups":0,"drops":1,"repMin":10,"repMax":12,"increment":2.5,"equip":"cable","rir":"0-1","notes":"כבל מאחורי הגוף (Bayesian), מרפק יציב, מתיחה בקדמת הזרוע. דרופ כ-20-25%. סופרסט עם פשיטת מרפק מעל הראש. מנוחה 60-90 שנ׳."},{"name":"פשיטת מרפק מעל הראש בכבל עם חבל","type":"normal","warmups":0,"drops":1,"repMin":10,"repMax":12,"increment":2.5,"equip":"cable","rir":"0-1","notes":"חבל מעל הראש, מרפקים יציבים. דרופ כ-20-25%. סופרסט עם כפיפת מרפק בייסיאן. מנוחה 60-90 שנ׳."}]},{"id":"B","name":"אימון 2 – תחתון","desc":"סקוואט • דדליפט רומני • לאנץ' בולגרי • כפיפת ברך + פשיטת ברך (סופרסט) • הרמת עקבים • הרמות רגליים במתח","exercises":[{"name":"סקוואט עם מוט על הגב","type":"topback","warmups":2,"backoffs":2,"repMin":5,"repMax":8,"increment":5,"equip":"barbell","rir":"0-1","notes":"ברכיים בקו כפות הרגליים, גב ניטרלי, יורדים לפחות למקביל. מנוחה 2-2.5 דק׳ בסטים כבדים. קפיצות משקל במוט: 5 ק״ג (בסיס); 10 ק״ג כשעוברים את הטווח ב-2+ חזרות."},{"name":"דדליפט רומני","type":"topback","warmups":2,"backoffs":1,"repMin":6,"repMax":10,"increment":5,"equip":"barbell","rir":"0-1","notes":"גב ניטרלי, מוט צמוד לרגליים, מתיחה בירך האחורית, ברכיים רכות. מנוחה 2-2.5 דק׳ בסטים כבדים. קפיצות משקל במוט: 5 ק״ג (בסיס); 10 ק״ג כשעוברים את הטווח ב-2+ חזרות."},{"name":"לאנץ' בולגרי","type":"simple","warmups":0,"setCount":3,"repMin":8,"repMax":12,"increment":2,"rir":"1","notes":"לכל רגל. רגל אחורית על ספסל, גוף נוטה מעט קדימה, דוחפים מהעקב. מנוחה 60-90 שנ׳. בין רגליים; כ-2 דק׳ בין סטים.","equip":"db"},{"name":"כפיפת ברך בישיבה","type":"normal","warmups":1,"drops":1,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"0-1","notes":"גוף נוטה מעט קדימה, שליטה מלאה. דרופ כ-20-25%. סופרסט עם פשיטת ברך. טווח 10-15. מנוחה 60-90 שנ׳."},{"name":"פשיטת ברך במכונה","type":"normal","warmups":0,"drops":1,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"0-1","notes":"טווח מלא, שליטה בירידה. דרופ כ-20-25%. סופרסט עם כפיפת ברך בישיבה. טווח 10-15. מנוחה 60-90 שנ׳."},{"name":"הרמת עקבים","type":"normal","warmups":0,"drops":2,"repMin":10,"repMax":15,"increment":5,"equip":"machine","rir":"0-1","notes":"בעמידה או בישיבה. טווח מלא, עצירה קצרה למעלה. דרופים כ-20-25%. מנוחה 60-90 שנ׳."},{"name":"הרמות רגליים במתח","type":"simple","warmups":0,"setCount":3,"repMin":10,"repMax":15,"increment":2.5,"rir":"2","notes":"תלייה יציבה, בלי נדנוד. ברכיים לכיוון החזה או רגליים ישרות לפי נוחות. 3 × 10-15.","equip":"bw"}]}],"accessories":[],"accessoryByDay":[null,null,null,null,null,null,null]};
 
     // V13: measured exercise types – the main value is stored in `reps` (seconds / meters / minutes).
     // cardio sets: { weight: null, reps: minutes, level }, entry.hr = optional average heart rate.
@@ -1664,7 +1757,9 @@
     }
 
     function defaultProgramForProfile() {
-      return isPartnerProfile() ? normalizeProgram(JSON.parse(JSON.stringify(PARTNER_PROGRAM))) : buildDefaultProgram();
+      if (isPartnerProfile()) return normalizeProgram(JSON.parse(JSON.stringify(PARTNER_PROGRAM)));
+      if (isFriendProfile()) return normalizeProgram(JSON.parse(JSON.stringify(friendBuiltinProgram())));
+      return buildDefaultProgram();
     }
 
     function findWorkout(id, prog) {
@@ -1707,6 +1802,10 @@
       if (document.body && document.body.classList.contains("theme-pastel")) {
         const P = { A: "#d9467f", B: "#7c6cc4", C: "#3f9c8f", D: "#e08a3c" };
         if (P[id]) return P[id];
+      }
+      if (document.body && document.body.classList.contains("theme-maccabi")) {
+        const M = { A: "#FCD116", B: "#5B8DEF", C: "#ff9f1c" };
+        if (M[id]) return M[id];
       }
       if (id === "A") return "#e11d48";
       if (id === "B") return "#3b82f6";
@@ -1993,7 +2092,7 @@
           meta = `פעם קודמת: ${heavy?.weight != null ? wt(heavy.weight, getEffectiveDef(name)) : "—"}`;
         }
       }
-      if (!isPartnerProfile()) { const ed = getEffectiveDef(name); if (ed && ed.abStraight) meta += ` · ${setCountOf(ed)}×${repRange(ed)} עד כשל · ⏱ ${AB_TEMPO}`; }
+      if (isMainProfile()) { const ed = getEffectiveDef(name); if (ed && ed.abStraight) meta += ` · ${setCountOf(ed)}×${repRange(ed)} עד כשל · ⏱ ${AB_TEMPO}`; }
       const check = done ? `<span class="check-done">✓</span>` : `<span class="arrow">‹</span>`;
       const shown = displayName(name);
       const tag = getSessionOverride(name) ? `<span class="today-tag">שונה להיום</span>` : "";
@@ -2165,7 +2264,7 @@
       cc.classList.toggle("hidden", !cyc);
       cc.classList.toggle("deload", !!(cyc && cyc.deload));
       cc.innerHTML = cyc ? `<div class="cy-title">${esc(cycleTitleText(cyc))}</div><div class="cy-sub">${esc(cycleSummaryText(cyc))}</div>` : "";
-      document.getElementById("research-load-btn").classList.toggle("hidden", getData().programSource === RESEARCH_PROGRAM_ID || isPartnerProfile());
+      document.getElementById("research-load-btn").classList.toggle("hidden", getData().programSource === RESEARCH_PROGRAM_ID || isPartnerProfile() || isFriendProfile());
       renderHomeProfile(prog, rot);
       renderBackupBanner();
     }
@@ -2286,7 +2385,7 @@
       }
 
       // v19: calves are his weakest point → on calf days (main profile) they go first, before the main exercises.
-      const calvesFirst = !!chosen && chosen.id === "calves" && !isPartnerProfile();
+      const calvesFirst = !!chosen && chosen.id === "calves" && isMainProfile();
       const wl = document.getElementById("exercise-list");
       if (calvesFirst) {
         wl.parentNode.insertBefore(accTitle, wl);
@@ -3770,6 +3869,14 @@
           <button class="btn btn-outline" style="margin-top:8px;" onclick="openCycleModal()">📅 מחזור: ${cyc0 ? esc(cycleTitleText(cyc0)) : "לא פעיל"}</button>
           <p class="pe-note" style="margin-top:8px;margin-bottom:0;">ההיסטוריה נשמרת בכל מקרה.</p>
         </div>`;
+      else if (isFriendProfile()) html += `<div class="section-title" style="margin-top:20px;">התוכנית ומחזור</div>
+        <div class="card">
+          <button class="btn btn-primary" onclick="switchFriendProgram('${friendProgramMode() === "ul" ? "fb" : "ul"}')">${friendProgramMode() === "ul" ? "⇄ עבור לפול באדי 3 ימים" : "⇄ עבור לעליון / תחתון"}</button>
+          <button class="btn btn-outline" style="margin-top:8px;" onclick="loadFriendProgram(friendProgramMode())">↺ טען מחדש את התוכנית הנוכחית</button>
+          ${d0.programPrev ? `<button class="btn btn-outline" style="margin-top:8px;" id="restore-prev-btn" onclick="restorePreviousProgram()">↩ שחזור התוכנית הקודמת</button>` : ""}
+          <button class="btn btn-outline" style="margin-top:8px;" onclick="openCycleModal()">📅 מחזור: ${cyc0 ? esc(cycleTitleText(cyc0)) : "לא פעיל"}</button>
+          <p class="pe-note" style="margin-top:8px;margin-bottom:0;">ההיסטוריה משותפת לתרגיל שמופיע בשתי התוכניות.</p>
+        </div>`;
       else html += `<div class="section-title" style="margin-top:20px;">תוכנית מבוססת מחקר ומחזור</div>
         <div class="card">
           <button class="btn btn-primary" onclick="loadResearchProgram()">🔬 ${d0.programSource === RESEARCH_PROGRAM_ID ? "טען מחדש תוכנית מבוססת מחקר" : "טען תוכנית מבוססת מחקר"}</button>
@@ -3891,6 +3998,7 @@
         if (e.origName && e.origName !== e.name && defaultNames.has(e.origName)) mergeLogs(data, e.name, e.origName);
       }));
       if (partner) { data.program = defaults; data.programSource = PARTNER_PROGRAM_ID; } // her default = her program
+      else if (isFriendProfile()) { data.program = defaults; data.programSource = friendProgramMode() === "ul" ? FRIEND_UL_PROGRAM_ID : FRIEND_FB_PROGRAM_ID; }
       else {
         delete data.program;
         delete data.programSource;
@@ -4679,7 +4787,7 @@
     const AB_TEMPO = "\u20661-1-2/3\u2069";
     const AB_TEMPO_WORDS = "1 שנ׳ למטה לכיווץ (חזה לכיוון הירכיים) · 1 שנ׳ סחיטה בכיווץ · 2-3 שנ׳ חזרה מבוקרת למעלה למתיחה מלאה, בלי שהסטק נוגע";
     function isAbStraightExercise(def) {
-      return !!def && !isPartnerProfile() && (def.type === "normal" || def.type === "simple") && (def.name === AB_NAME || def.origName === AB_NAME) && !!stackWeights(def);
+      return !!def && isMainProfile() && (def.type === "normal" || def.type === "simple") && (def.name === AB_NAME || def.origName === AB_NAME) && !!stackWeights(def);
     }
     function abStraightDef(def, o) {
       if (!isAbStraightExercise(def) || (o && o.type != null && o.type !== "simple")) return def;
@@ -4745,7 +4853,7 @@
     // v19: calf priority (main profile) – stretched half-reps after failure on the last drop.
     const CALF_NAMES = ["הרמת עקבים בעמידה", "הרמת עקבים בישיבה"];
     function isCalfPriority(def) {
-      return !!def && !isPartnerProfile() && def.type === "normal" && (CALF_NAMES.includes(def.name) || CALF_NAMES.includes(def.origName));
+      return !!def && isMainProfile() && def.type === "normal" && (CALF_NAMES.includes(def.name) || CALF_NAMES.includes(def.origName));
     }
     const CALF_HALF_HINT = "🔥 אחרי הכשל: 5-8 חצאי חזרות בחצי התחתון (המתוח) – עקב למטה עד הסוף, עולה רק עד כף רגל ישרה";
     const CALF_HALF_HOWTO = "חצאי חזרות במתיחה – רק בסט האחרון, כשכבר אין חזרה מלאה: יורד עד מתיחה מלאה (העקב הכי נמוך), ועולה רק עד חצי הדרך (בערך כף רגל ישרה) – לא עד קצות האצבעות. ירידה מבוקרת של 1-2 שנ׳, בלי קפיצות, חצי שנייה עצירה במתיחה, ודוחף למעלה. 5-8 חצאי חזרות או עד שאין יותר עלייה. טעות נפוצה: קפיצות קטנות שעובדות עם הגיד (אכילס) במקום עם השריר.";
@@ -4755,7 +4863,7 @@
     const OH_NOTES = "גב לכבל, חבל, גלגלת בגובה הירך או נמוך יותר. מעל הראש – הראש הארוך של התלת-ראשי עובד במתיחה (Maeo 2023). הוחלף מהמשקולת בגלל כאב במרפק ימין (צד פנימי).";
     const OH_LINKS = [["▶ הדגמה: פשיטה מעל הראש בכבל עם חבל", "https://www.youtube.com/watch?v=kqidUIf1eJE"], ["▶ הדגמה: חלופה – קטאנה ביד אחת בכבל", "https://www.youtube.com/watch?v=4aaSlbdMEK0"]];
     function isOverheadRope(def) {
-      return !!def && !isPartnerProfile() && (def.name === OH_NEW || def.origName === OH_NEW);
+      return !!def && isMainProfile() && (def.name === OH_NEW || def.origName === OH_NEW);
     }
     function overheadRopeSteps(def, hasLogs) {
       const out = [];
@@ -4789,7 +4897,7 @@
     ];
     const ROW_FIRST_RIR = 2.5;
     function isWideCableRow(def) {
-      return !!def && !isPartnerProfile() && (def.name === ROW_NEW || def.origName === ROW_NEW);
+      return !!def && isMainProfile() && (def.name === ROW_NEW || def.origName === ROW_NEW);
     }
     function e1rmOf(w, r) {
       const rr = r <= 15 ? r : (r <= 20 ? 15 + (r - 15) * 0.2 : 16);
@@ -5109,6 +5217,7 @@
       const box = document.getElementById("guide-content");
       if (!box) return;
       if (isPartnerProfile() || getData().programSource === PARTNER_PROGRAM_ID) { renderPartnerGuide(box); return; } // v13: her guide
+      if (isFriendProfile() || getData().programSource === FRIEND_FB_PROGRAM_ID || getData().programSource === FRIEND_UL_PROGRAM_ID) { renderFriendGuide(box); return; }
       const data = getData();
       const loaded = data.programSource === RESEARCH_PROGRAM_ID;
       const prog = loaded ? getProgram(data) : normalizeProgram(JSON.parse(JSON.stringify(RESEARCH_PROGRAM)));
@@ -5324,7 +5433,7 @@
     // New name = fresh progression; dumbbell history stays under the old name. Keeps position + sets/reps/drops.
     function migrateOverheadRopeV20() {
       try {
-        if (isPartnerProfile()) return;
+        if (!isMainProfile()) return;
         const data = getData();
         if (data.programSource !== RESEARCH_PROGRAM_ID || data.overheadRopeV20 || !data.program) return;
         const prog = normalizeProgram(data.program);
@@ -5393,7 +5502,7 @@
     // history untouched). With no stored program nothing is written (defaults carry the new step). Main profile only.
     function migrateMainBarbellV24() {
       try {
-        if (isPartnerProfile()) return;
+        if (!isMainProfile()) return;
         const data = getData();
         if (data.mainBarbellV24 || !data.program || !Array.isArray(data.program.workouts)) return;
         let changed = 0;
@@ -5409,7 +5518,7 @@
     // v21: T-bar row → seated wide-grip cable row (same position, same top+back-off scheme; T-bar history stays under its name).
     function migrateWideCableRowV21() {
       try {
-        if (isPartnerProfile()) return;
+        if (!isMainProfile()) return;
         const data = getData();
         if (data.programSource !== RESEARCH_PROGRAM_ID || data.wideCableRowV21 || !data.program) return;
         const prog = normalizeProgram(data.program);
@@ -5665,7 +5774,7 @@
       if (rot.trainedToday && rot.streakBefore >= 1)
         return `🌿 ${rot.streakBefore + 1} ימי אימון ברצף – מחר יום מנוחה.`;
       const ids = rot.ids;
-      if (!rot.trainedToday && ids.length > 1 && rot.nextId === ids[0] && rot.lastId === ids[ids.length - 1] && rot.lastKey === rot.yesterdayKey)
+      if (isPartnerProfile() && !rot.trainedToday && ids.length > 1 && rot.nextId === ids[0] && rot.lastId === ids[ids.length - 1] && rot.lastKey === rot.yesterdayKey)
         return "💡 בין אימון 4 לאימון 1 עדיף יום מנוחה (שניהם עובדים על הישבן). אם אין ברירה – אפשר, אימון 4 קל יותר.";
       return "";
     }
@@ -5702,10 +5811,14 @@
       if (p.kind === "partner") {
         h1.textContent = p.title || "🌸 האימונים שלי";
         sub.textContent = "ישבן · ליבה · גמישות · כושר";
+      } else if (p.kind === "friend") {
+        h1.textContent = p.title || "🏀 האימונים של החבר";
+        sub.textContent = friendProgramMode() === "ul" ? "עליון / תחתון · 2 או 4 אימונים בשבוע" : "פול באדי · 3 אימונים בשבוע";
       } else {
         h1.textContent = p.title || "💪 אימונים שלי";
         sub.textContent = "מעקב פיתוח גוף";
       }
+      renderFriendProgramToggle();
       document.getElementById("pick-title").textContent = rot ? T("או בחר אימון אחר", "או בחרי אימון אחר") : T("בחר אימון", "בחרי אימון");
       document.getElementById("profile-btn").textContent = `👤 פרופיל: ${p.name}`;
       renderNextCard(prog, rot);
@@ -5725,11 +5838,14 @@
       document.getElementById("choose-main-name").textContent = pr.main.name;
       document.getElementById("choose-p2-name").textContent = pr.p2.name;
       document.getElementById("chooser-p2-name").value = pr.p2.name;
+      document.getElementById("choose-p3-name").textContent = pr.p3.name;
+      document.getElementById("chooser-p3-name").value = pr.p3.name;
       document.getElementById("profile-chooser").classList.remove("hidden");
     }
     function closeProfileChooser() { document.getElementById("profile-chooser").classList.add("hidden"); }
     function chooseProfile(id) {
       if (id === "p2") createPartnerProfile((document.getElementById("chooser-p2-name").value || "").trim());
+      if (id === "p3") createFriendProfile((document.getElementById("chooser-p3-name").value || "").trim());
       switchProfile(id);
     }
     // A new partner profile starts with her program and a fresh 6+1 week cycle (nothing to confirm: it is empty).
@@ -5745,6 +5861,67 @@
         try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) { showToast("אין מקום באחסון"); }
       }
     }
+    function createFriendProfile(name) {
+      const profiles = readProfiles();
+      if (name) profiles.p3.name = name.slice(0, 40);
+      profiles.p3.created = true;
+      writeProfiles(profiles);
+      const key = PROFILE_DEFAULTS.p3.prefix + "workoutData_v1";
+      if (lsGet(key) == null) {
+        const data = { logs: {}, sessions: [], program: normalizeProgram(JSON.parse(JSON.stringify(FRIEND_FB_PROGRAM))),
+          programSource: FRIEND_FB_PROGRAM_ID, cycle: { start: toDateKey(cycleStartSunday()), num: 1 } };
+        try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) { showToast("אין מקום באחסון"); }
+      }
+    }
+    function friendBuiltinProgram(mode) {
+      return (mode || friendProgramMode()) === "ul" ? FRIEND_UL_PROGRAM : FRIEND_FB_PROGRAM;
+    }
+    function friendProgramMode() {
+      return isFriendProfile() && getData().programSource === FRIEND_UL_PROGRAM_ID ? "ul" : "fb";
+    }
+    function renderFriendProgramToggle() {
+      const el = document.getElementById("friend-prog-toggle");
+      if (!el) return;
+      const on = isFriendProfile();
+      el.classList.toggle("hidden", !on);
+      if (!on) return;
+      const mode = friendProgramMode();
+      document.getElementById("fpt-fb").classList.toggle("on", mode === "fb");
+      document.getElementById("fpt-ul").classList.toggle("on", mode === "ul");
+    }
+    function switchFriendProgram(mode) {
+      if (!isFriendProfile() || (mode !== "fb" && mode !== "ul")) return false;
+      if (friendProgramMode() === mode && getData().program) { showToast(mode === "ul" ? "כבר בתוכנית עליון / תחתון" : "כבר בתוכנית פול באדי"); return false; }
+      const label = mode === "ul" ? "עליון / תחתון" : "פול באדי 3 ימים";
+      if (!confirm("לעבור לתוכנית \"" + label + "\"?\nהיסטוריית התרגילים נשמרת (אותו תרגיל = אותה התקדמות). שינויים שערכת בתוכנית הנוכחית נשמרים.")) return false;
+      const data = getData();
+      const cur = friendProgramMode();
+      if (data.program) {
+        data.friendSaved = data.friendSaved || {};
+        data.friendSaved[cur] = { program: getProgram(data), savedAt: new Date().toISOString() };
+      }
+      const saved = data.friendSaved && data.friendSaved[mode] && data.friendSaved[mode].program;
+      data.program = normalizeProgram(JSON.parse(JSON.stringify(saved || friendBuiltinProgram(mode))));
+      data.programSource = mode === "ul" ? FRIEND_UL_PROGRAM_ID : FRIEND_FB_PROGRAM_ID;
+      saveData(data);
+      showToast("עברת ל" + label + " ✓");
+      goHome();
+      return true;
+    }
+    function loadFriendProgram(mode) {
+      mode = mode || friendProgramMode();
+      if (!confirm("לטעון מחדש את התוכנית? שינויים שעשית בה יוחלפו.\nההיסטוריה נשמרת, והתוכנית הנוכחית נשמרת לשחזור.")) return false;
+      const data = getData();
+      data.programPrev = { savedAt: new Date().toISOString(), program: data.program ? getProgram(data) : null, cycle: data.cycle || null, source: data.programSource || null };
+      data.program = normalizeProgram(JSON.parse(JSON.stringify(friendBuiltinProgram(mode))));
+      data.programSource = mode === "ul" ? FRIEND_UL_PROGRAM_ID : FRIEND_FB_PROGRAM_ID;
+      if (data.friendSaved) delete data.friendSaved[mode];
+      if (!data.cycle) data.cycle = { start: toDateKey(cycleStartSunday()), num: 1 };
+      saveData(data);
+      showToast("התוכנית נטענה ✓");
+      refreshAfterProgramChange();
+      return true;
+    }
     function switchProfile(id) {
       if (!PROFILE_DEFAULTS[id]) return;
       try { localStorage.setItem(ACTIVE_PROFILE_KEY, id); } catch (e) {}
@@ -5756,7 +5933,7 @@
       document.getElementById("profile-active-note").textContent = `פרופיל פעיל: ${p.name}. לכל פרופיל תוכנית, היסטוריה, מחזור, סטופר וגיבויים משלו.`;
       document.getElementById("profile-switch-list").innerHTML = Object.keys(pr).filter(id => id !== ACTIVE_PROFILE_ID).map(id => pr[id].created
         ? `<button class="btn btn-outline" style="margin-top:8px;" onclick="switchProfile('${id}')">⇄ מעבר ל: ${esc(pr[id].name)}</button>`
-        : `<button class="btn btn-outline" style="margin-top:8px;" onclick="createPartnerProfile(''); switchProfile('${id}')">🌸 יצירת פרופיל חדש: ${esc(pr[id].name)}</button>`).join("");
+        : `<button class="btn btn-outline" style="margin-top:8px;" onclick="${id === "p3" ? "createFriendProfile('')" : "createPartnerProfile('')"}; switchProfile('${id}')">${id === "p3" ? "🏀" : "🌸"} יצירת פרופיל חדש: ${esc(pr[id].name)}</button>`).join("");
       document.getElementById("pf-name").value = p.name;
       document.getElementById("pf-title").value = p.title || "";
       document.getElementById("pf-theme").value = p.theme;
@@ -5769,7 +5946,8 @@
       const p = Object.assign({}, pr[ACTIVE_PROFILE_ID]);
       p.name = document.getElementById("pf-name").value.trim().slice(0, 40) || PROFILE_DEFAULTS[ACTIVE_PROFILE_ID].name;
       p.title = document.getElementById("pf-title").value.trim().slice(0, 40);
-      p.theme = document.getElementById("pf-theme").value === "pastel" ? "pastel" : "dark";
+      const themeVal = document.getElementById("pf-theme").value;
+      p.theme = THEME_IDS[themeVal] ? themeVal : PROFILE_DEFAULTS[ACTIVE_PROFILE_ID].theme;
       p.rotation = document.getElementById("pf-rotation").checked;
       pr[ACTIVE_PROFILE_ID] = p;
       writeProfiles(pr);
@@ -5897,6 +6075,43 @@
         "כתפיים וידיים כבר טובות – מספיק לשמור.",
         "מעקב: פעם ב-4 שבועות תמונות (אותה תאורה, שעה ותנוחה), היקף ישבן בנקודה הרחבה, והמשקלים בהיפ ת'ראסט ובהרחקה.",
         "תזונה בקצרה: חלבון סביב 1.6 גרם לק״ג גוף ביום (Morton 2018). לבדוק עם דיאטנית אם רלוונטי."])}</div>`;
+      box.innerHTML = h;
+    }
+
+
+    function renderFriendGuide(box) {
+      const data = getData();
+      const prog = getProgram(data);
+      const c = getCycleInfo(data);
+      const rot = rotationState(data, prog);
+      const ulMode = friendProgramMode() === "ul";
+      const ul = items => `<ul>${items.map(x => `<li>${x}</li>`).join("")}</ul>`;
+      let h = `<div class="card">
+        <p>תוכנית לחבר – מתאמן טבעי עם ניסיון, בלי פציעות, בחדר כושר. כל אימון כ-<b>60 דק׳</b>.</p>
+        <p class="g-muted">שתי תוכניות עם אותה היסטוריית תרגילים (אותו שם = אותה התקדמות): <b>פול באדי 3 ימים</b> (ברירת מחדל) ו<b>עליון / תחתון</b> לשבוע של 2 או 4 אימונים. מחליפים במסך הראשי.</p>
+        ${c ? `<p style="margin-top:8px;"><b>${esc(cycleTitleText(c))}</b><br/><span class="g-muted">${esc(cycleSummaryText(c))}</span></p>` : ""}
+        ${rot.nextId ? `<p style="margin-top:8px;">האימון הבא בתור: <b>${esc(rotationLabel(rot.nextId, prog))}</b></p>` : ""}
+      </div>`;
+      h += `<div class="section-title">איזו תוכנית ומתי</div><div class="card g-text">${ul([
+        "<b>פול באדי 3 ימים:</b> שלושה אימונים מלאים בשבוע, עם יום מנוחה ביניהם (למשל א׳ / ד׳ / ו׳).",
+        "<b>עליון / תחתון:</b> סבב א׳–ב׳. בשבוע של 2 אימונים – אחד מכל סוג. בשבוע של 4 – א׳ ב׳ א׳ ב׳, בלי יותר מיומיים ברצף.",
+        "המבנה זהה: חימום בתרגילים הראשיים (כ-50% × 10 ואז כ-75% × 5), סט טופ אחד ב-RIR 0-1, בק-אופים כ-10-12% יותר קלים (האפליקציה מתאימה), ודרופים של כ-20-25% בבידוד.",
+        "<b>מנוחה:</b> 2-2.5 דק׳ בתרגילי כבדים · 60-90 שנ׳ בבידוד. בבידוד אפשר סופרסטים כדי להישאר ב-60 דק׳.",
+        "קפיצות: מוט 5 ק״ג (10 כשעוברים את הטווח ב-2+ חזרות) · משקולות 2 · כבלים 2.5 · מכונות 5. אותה מנוע התקדמות (כולל 1RM משוער ודילואד) כמו בשאר הפרופילים."])}
+      </div>`;
+      const exCard = e => `<div class="g-ex"><div class="g-ex-name">${esc(e.name)}</div>
+        <div class="g-ex-plan">${esc(TYPE_LABELS[e.type] || "")} · ${esc(planText(e))}${e.equip ? ` · ${EQUIP[e.equip].label}${e.type !== "cardio" ? ` (${fmtKg(e.increment)} ${unitLabel(e)})` : ""}` : ""}${e.rir ? ` · ${esc(rirTxt(e.rir))}` : ""}</div>
+        ${e.notes ? `<div class="g-ex-notes">${esc(e.notes)}</div>` : ""}</div>`;
+      h += `<div class="section-title">התוכנית הפעילה: ${ulMode ? "עליון / תחתון" : "פול באדי 3 ימים"}</div>`;
+      prog.workouts.forEach(w => {
+        h += `<div class="section-title">${esc(w.name)}${w.id === rot.nextId ? " · הבא בתור" : ""}</div><div class="card">${w.exercises.map(exCard).join("") || `<div class="g-muted">אין תרגילים</div>`}</div>`;
+      });
+      h += `<div class="section-title">התקדמות ודילואד</div><div class="card g-text">${ul([
+        "פרוגרסיה כפולה: בסוף טווח החזרות מוסיפים משקל וחוזרים לתחילת הטווח. האפליקציה מחשבת את היעד.",
+        "הרבה מעל הטווח (3+) → המשקל הבא לפי כוח משוער, מעוגל כלפי מטה לקפיצה.",
+        "שבוע 7 – דילואד: חצי מהסטים, בלי דרופים, כ-10% פחות משקל, RIR 3-4."])}
+        ${c ? `<p class="g-muted">${esc(cycleSummaryText(c))}</p>` : ""}
+      </div>`;
       box.innerHTML = h;
     }
 
