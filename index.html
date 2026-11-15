@@ -2081,6 +2081,11 @@
       const last = getLastPerformance(name);
       const done = sessionCompleted.has(name) || loggedToday(name);
       let meta = "עדיין אין נתונים";
+      if (!last && isMainProfile() && name === LEG_EXT_NEW) {
+        const two = twoLegExtLogs();
+        const tw = two.length ? getWorkingSet(two[two.length - 1]) : null;
+        if (tw && tw.weight != null) meta = `פעם קודמת (שתי רגליים יחד): ${wt(tw.weight, getEffectiveDef(name))} → התחלה כ-45% לכל רגל`;
+      }
       if (last) {
         if (isMeasureType(last.type)) {
           const ss = (last.sets || []).filter(Boolean);
@@ -2631,6 +2636,14 @@
         if (beforeLast) {
           html += `<div style="margin-top:8px;font-size:0.85rem;">לעומת הפעם שלפניה (${formatDate(beforeLast.date)}): ${formatCmp(lastVal, beforeVal) || "—"}</div>`;
         }
+        prevDiv.innerHTML = html;
+      } else if (isMainProfile() && exerciseName === LEG_EXT_NEW && twoLegExtLogs().length) {
+        const two = twoLegExtLogs();
+        const lastTwo = two[two.length - 1];
+        const tw = getWorkingSet(lastTwo);
+        let html = `<strong>פעם קודמת בשתי רגליים יחד (${formatDate(lastTwo.date)})</strong><br/>`;
+        html += tw && tw.weight != null ? `סט כבד: ${wt(tw.weight, def)} × ${tw.reps != null ? tw.reps : "—"}<br/>` : "";
+        html += `<div style="margin-top:8px;font-size:0.85rem;">ההיסטוריה של שתי הרגליים נשמרת (גם במסך ההיסטוריה) ולא מניעה את ההתקדמות בלי המרה ל-45% לכל רגל.</div>`;
         prevDiv.innerHTML = html;
       } else {
         prevDiv.innerHTML = "אין נתונים קודמים לתרגיל זה";
@@ -3616,11 +3629,84 @@
     }
     const PROGRESSION_RULE = "שיטה: לפי הסט הקובע בפעם הקודמת (טופ / סט כבד / הסט הטוב). מעל הטווח ← מוסיפים קפיצה (2 קפיצות אם 2+ חזרות מעל). בסוף הטווח ← קפיצה אחת. בתוך הטווח ← אותו משקל ועוד חזרה. מתחת לטווח ← מורידים קפיצה; אם חסרה רק חזרה אחת – בפעם הראשונה נשארים באותו משקל. RIR שנרשם נלקח בחשבון.";
 
+
+    // v27: main profile only – higher-rep leg press and single-leg leg extension (knee-friendly).
+    const LEG_PRESS_NAME = "לחיצת רגליים";
+    const LEG_EXT_OLD = "פשיטת ברך במכונה";
+    const LEG_EXT_NEW = "פשיטת ברך ברגל אחת";
+    const LEG_PRESS_NOTES_V27 = "הורדה של 3 שניות, רגליים גבוה על המשטח ורחב. לא לרדת עד שהאגן מתרומם מהמשענת. עוצרים 1-2 חזרות לפני כשל. כאב בברך עד 3/10 בסדר; אם הכאב חד או מחמיר – מורידים משקל. טווח 12-20: המשקל מותאם לפי 1RM משוער מהטווח הכבד הישן, לא ממשיכים מאותו משקל.";
+    const LEG_EXT_NOTES_V27 = "לכל רגל, 15-20 חזרות. מתחילים ברגל החלשה. קצב מבוקר, בלי נעילה קשה למעלה. אם כואב – אפשר לקצר את תחתית הטווח. משקל התחלה: כ-45% מהסט הכבד האחרון בשתי הרגליים, מעוגל ל-5 ק״ג (Technogym).";
+    function isLegPressDef(def) {
+      return isMainProfile() && !!def && (def.name === LEG_PRESS_NAME || def.origName === LEG_PRESS_NAME);
+    }
+    function isLegExtSingleDef(def) {
+      return isMainProfile() && !!def && (def.name === LEG_EXT_NEW || def.origName === LEG_EXT_NEW);
+    }
+    function twoLegExtLogs() {
+      return (getData().logs[LEG_EXT_OLD] || []).filter(e => getWorkingSet(e));
+    }
+    function roundTo5(x) {
+      const w = Math.round(x / 5) * 5;
+      return w > 0 ? w : 5;
+    }
+    // First suggestion after the v27 change: e1RM retarget (leg press) or 45% of two-leg (extension).
+    // Later sessions in the new scheme use normal progression. Deload is applied on top of the converted weight.
+    function kneeFirstSuggestion(logs, def, opts) {
+      if (!def) return null;
+      const deload = !!(opts && opts.deload);
+      const wrap = s => {
+        if (!s || !deload || s.weight == null) return s;
+        const w = roundWeight(s.weight * 0.9, def, "down");
+        const r = s.reps != null ? Math.max(def.repMin || s.reps, Math.min(s.reps, def.repMax || s.reps)) : (def.repMin || s.reps);
+        return Object.assign({}, s, { weight: w, reps: r, kind: "deload",
+          rule: "שבוע הורדה: כ-10% פחות משקל מהיעד החדש, חצי מהסטים, בלי דרופים, RIR 3-4. לא מתקדמים השבוע.",
+          explain: (s.explain || "") + ` ← שבוע הורדה (‎-10%): ${wt(w, def)} × ${r}` });
+      };
+      if (isLegPressDef(def)) {
+        const cutoff = getData().kneeHiRepV27At;
+        const all = (logs || []).filter(e => getWorkingSet(e));
+        const normal = all.filter(e => !e.deload && !e.light);
+        const entries = normal.length ? normal : all;
+        if (!entries.length) return null;
+        const post = cutoff ? entries.filter(e => !e.deload && !e.light && e.date >= cutoff) : [];
+        if (post.length) return null;
+        const lastE = entries[entries.length - 1];
+        const last = getWorkingSet(lastE);
+        const lo = def.repMin || 12;
+        if (!last || last.weight == null || last.reps == null || last.reps >= lo) return null;
+        const big = e1rmTarget(last.weight, last.reps, lo, def);
+        if (!big || big.weight == null) return null;
+        return wrap({ weight: big.weight, reps: lo, kind: "retarget",
+          rule: "טווח חדש 12-20: המשקל מחושב מכוח משוער (1RM), לא מהמשקל הכבד הישן. קפיצות של 5 ק״ג.",
+          explain: `בפעם הקודמת (טווח כבד): ${wt(last.weight, def)} × ${last.reps} (1RM משוער כ-${wt(big.e1rm, def)}) ← היום בטווח 12-20: ${wt(big.weight, def)} × ${lo}` });
+      }
+      if (isLegExtSingleDef(def)) {
+        const own = (logs || []).filter(e => getWorkingSet(e) && !e.deload && !e.light);
+        if (own.length) return null;
+        const two = twoLegExtLogs().filter(e => !e.deload && !e.light);
+        if (!two.length) return null;
+        const last = getWorkingSet(two[two.length - 1]);
+        if (!last || last.weight == null) return null;
+        const w = roundTo5(last.weight * 0.45);
+        const lo = def.repMin || 15;
+        return wrap({ weight: w, reps: lo, kind: "split45",
+          rule: "פשיטה ברגל אחת: משקל התחלה כ-45% מהסט הכבד האחרון בשתי הרגליים, מעוגל ל-5 ק״ג. היסטוריית שתי הרגליים נשמרת ולא מניעה התקדמות בלי ההמרה.",
+          explain: `שתי רגליים יחד בפעם האחרונה: ${wt(last.weight, def)} × ${last.reps != null ? last.reps : "—"} ← היום לכל רגל (חלשה קודם): ${wt(w, def)} × ${lo}-20` });
+      }
+      return null;
+    }
+    function markKneeV27(data) {
+      data.kneeHiRepV27 = true;
+      if (!data.kneeHiRepV27At) data.kneeHiRepV27At = new Date().toISOString();
+    }
+
     // Double progression from last session's working set (deload sessions ignored).
     function computeSuggestion(logs, def, opts) {
       if (isMeasureType(def.type)) return measureSuggestion(logs, def, opts);
       if (isWideCableRow(def) && !(logs || []).some(e => getWorkingSet(e))) return wideRowEstimate(def, { deload: !!(opts && opts.deload) });
       if (def.abStraight && !(opts && opts.deload)) return abStraightSuggestion(logs, def);
+      const kneeS = kneeFirstSuggestion(logs, def, opts);
+      if (kneeS) return kneeS;
       const all = (logs || []).filter(e => getWorkingSet(e));
       if (!all.length) return null;
       const normal = all.filter(e => !e.deload && !e.light); // v25: light-session logs never drive progression
@@ -4578,18 +4664,18 @@
       version: 1,
       workouts: [
         { id: "A", name: "אימון A – רגליים",
-          desc: "לחיצת רגליים (טופ+בק-אוף) • בולגרי • דדליפט רומני • כפיפת ברך בישיבה • פשיטת ברך • הרחקה לצדדים במכונה",
+          desc: "לחיצת רגליים (טופ 12-20) • בולגרי • דדליפט רומני • כפיפת ברך בישיבה • פשיטת ברך ברגל אחת • הרחקה לצדדים במכונה",
           exercises: [
-            { name: "לחיצת רגליים", equip: "machine", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 5, origName: "לחיצת רגליים",
-              notes: "טווח תנועה קצר יותר, בלי כאב בברך, רגליים גבוה על המשטח. הורדה מבוקרת 2-3 שנ׳, בלי לקפוץ מהתחתית." },
+            { name: "לחיצת רגליים", equip: "machine", type: "topback", warmups: 2, backoffs: 2, repMin: 12, repMax: 20, increment: 5, origName: "לחיצת רגליים",
+              notes: "הורדה של 3 שניות, רגליים גבוה על המשטח ורחב. לא לרדת עד שהאגן מתרומם מהמשענת. עוצרים 1-2 חזרות לפני כשל. כאב בברך עד 3/10 בסדר; אם הכאב חד או מחמיר – מורידים משקל. טווח 12-20: המשקל מותאם לפי 1RM משוער מהטווח הכבד הישן, לא ממשיכים מאותו משקל." },
             { name: "לאנץ' בולגרי", equip: "db", type: "simple", setCount: 2, warmups: 0, repMin: 8, repMax: 12, increment: 2, rir: "1-2", origName: "לאנץ' בולגרי",
               notes: "2 סטים לכל רגל. משקולות ביד, צעד ארוך, נטייה קלה קדימה (דגש על הישבן)." },
             { name: "דדליפט רומני", equip: "barbell", type: "topback", warmups: 2, backoffs: 2, repMin: 6, repMax: 10, increment: 5, rir: "1-2",
               notes: "מחליף את הדדליפט הרגיל. יורדים עד מתיחה חזקה בירך האחורית, גב ניטרלי. בלי כשל – תמיד לפחות חזרה אחת ברזרבה." },
             { name: "כפיפת ברך במכונה", equip: "machine", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 5, origName: "כפיפת ברך במכונה",
               notes: "עדיף בישיבה (מתיחה גדולה יותר בירך האחורית). בדרופ האחרון: 3-6 חזרות חלקיות בטווח המתיחה." },
-            { name: "פשיטת ברך במכונה", equip: "machine", type: "normal", warmups: 0, drops: 2, repMin: 10, repMax: 15, increment: 5, origName: "פשיטת ברך במכונה",
-              notes: "גב מעט אחורה. בדרופ האחרון: 3-6 חזרות חלקיות בחלק התחתון (המתוח)." },
+            { name: "פשיטת ברך ברגל אחת", equip: "machine", type: "normal", warmups: 0, drops: 1, repMin: 15, repMax: 20, increment: 5, origName: "פשיטת ברך ברגל אחת",
+              notes: "לכל רגל, 15-20 חזרות. מתחילים ברגל החלשה. קצב מבוקר, בלי נעילה קשה למעלה. אם כואב – אפשר לקצר את תחתית הטווח. משקל התחלה: כ-45% מהסט הכבד האחרון בשתי הרגליים, מעוגל ל-5 ק״ג (Technogym)." },
             { name: "הרחקה לצדדים במכונה", equip: "machine", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 5,
               notes: "כתף אמצעית – גם באימון הרגליים, כדי להגיע לנפח שבועי מספיק. תנועה נקייה בלי תנופה." }
           ] },
@@ -5129,6 +5215,7 @@
       }
       data.program = normalizeProgram(JSON.parse(JSON.stringify(RESEARCH_PROGRAM)));
       data.programSource = RESEARCH_PROGRAM_ID;
+      markKneeV27(data);
       data.cycle = { start: toDateKey(cycleStartSunday()), num: 1 };
       data.equipV8 = true; data.latV9 = true; data.paramountLbV10 = true; data.cableRowV12 = true; data.overheadRopeV20 = true; data.wideCableRowV21 = true;
       saveData(data);
@@ -5240,7 +5327,7 @@
       h += `<div class="section-title">שיטות הביצוע</div><div class="card g-text">
         <h4>טופ + בק-אוף</h4>
         <ul><li>קודם 2 סטי חימום (לא חובה לרשום): כ-50% × 10, ואז כ-75% × 5.</li>
-        <li><b>סט טופ אחד:</b> 6-10 חזרות, 0-1 חזרות לפני כשל (בשבועות 1-2: 2 לפני כשל).</li>
+        <li><b>סט טופ אחד:</b> 6-10 חזרות (בלחיצת רגליים: 12-20, משקל מותאם מ-1RM משוער), 0-1 חזרות לפני כשל (בשבועות 1-2: 2 לפני כשל; בלחיצת רגליים עוצרים 1-2 לפני כשל).</li>
         <li><b>סטי בק-אוף:</b> מורידים 10-15% מהמשקל של הטופ של היום, עוצרים 1-2 חזרות לפני כשל – בדרך כלל יוצא 8-12 חזרות.</li>
         <li>האפליקציה מחשבת לבד את משקל הבק-אוף לפי מה שהקלדת בטופ, ואת ההתקדמות לפי הטופ בלבד.</li></ul>
         <h4>כבד + דרופים</h4>
@@ -5315,7 +5402,7 @@
       h += `<div class="section-title">הערות</div><div class="card g-text"><ul>
         <li>עדיף לשמור על הסדר: A בראשון ורביעי, B בשני וחמישי, C בשלישי ושישי – כך התאומים והבטן יוצאים 3 פעמים בשבוע כל אחד.</li>
         <li>אין זמן? מוותרים על התרגיל האחרון (פטישים / פשיטה בפולי / הרחקה במכונה) או עושים דרופ אחד במקום שניים. <b>לא</b> מוותרים על הרחקות לצדדים ועל ירך אחורית.</li>
-        <li>לחיצת רגליים: לחיצה רגילה, טווח תנועה קצר יותר, בלי כאב בברך, רגליים גבוה על המשטח.</li>
+        <li>לחיצת רגליים: טופ 12-20, הורדה של 3 שניות, רגליים גבוה על המשטח ורחב, בלי לרדת עד שהאגן מתרומם. עוצרים 1-2 חזרות לפני כשל. כאב עד 3/10 בסדר; כאב חד או מחמיר – מורידים משקל. פשיטת ברך ברגל אחת (15-20 לכל רגל), מתחילים בחלשה.</li>
         <li>השמות הקיימים נשמרו כדי שההיסטוריה וההמלצות יימשכו. "כפיפת ברך במכונה" – מומלץ בישיבה.</li></ul></div>`;
       box.innerHTML = h;
     }
@@ -5500,6 +5587,48 @@
     // v24: HIS barbell / free-weight lifts step in 5 kg (base) instead of 2.5. 2+ reps over the range = 2 steps = 10 kg,
     // 3+ over = estimated-strength jump snapped down to 5. Stored program only, in place, once (his other edits and
     // history untouched). With no stored program nothing is written (defaults carry the new step). Main profile only.
+
+    // v27: main profile only. Leg press → 12-20 with e1RM retarget; leg extension → single-leg 15-20,
+    // first weight = 45% of last two-leg working set. History kept under the old name. In place, once.
+    function migrateKneeHiRepV27() {
+      try {
+        if (!isMainProfile()) return;
+        const data = getData();
+        if (data.kneeHiRepV27 || data.programSource !== RESEARCH_PROGRAM_ID) return;
+        if (data.program && Array.isArray(data.program.workouts)) {
+          const prog = normalizeProgram(data.program);
+          if (prog) {
+            prog.workouts.concat(Array.isArray(prog.accessories) ? prog.accessories : []).forEach(g => (g.exercises || []).forEach((x, i) => {
+              if (x.name === LEG_PRESS_NAME || x.origName === LEG_PRESS_NAME) {
+                x.repMin = 12; x.repMax = 20; x.increment = 5;
+                if (!x.equip) x.equip = "machine";
+                x.notes = LEG_PRESS_NOTES_V27;
+              }
+              if (x.name === LEG_EXT_OLD || x.origName === LEG_EXT_OLD) {
+                g.exercises[i] = Object.assign({}, x, {
+                  name: LEG_EXT_NEW, origName: LEG_EXT_NEW, repMin: 15, repMax: 20, increment: 5,
+                  drops: x.drops != null ? Math.min(Number(x.drops), 1) : 1, notes: LEG_EXT_NOTES_V27
+                });
+              }
+            }));
+            prog.workouts.forEach(w => {
+              if (w.desc) w.desc = w.desc.replace(/פשיטת ברך(?! ברגל אחת)/g, "פשיטת ברך ברגל אחת");
+            });
+            data.program = prog;
+            try {
+              const orders = readSessionOrders();
+              Object.keys(orders).forEach(k => { if (Array.isArray(orders[k])) orders[k] = orders[k].map(n => n === LEG_EXT_OLD ? LEG_EXT_NEW : n); });
+              writeSessionOrders(orders);
+              const ov = readSessionOverrides();
+              if (ov[LEG_EXT_OLD]) { ov[LEG_EXT_NEW] = ov[LEG_EXT_OLD]; delete ov[LEG_EXT_OLD]; writeSessionOverrides(ov); }
+            } catch (e) {}
+          }
+        }
+        markKneeV27(data);
+        saveData(data);
+      } catch (e) { console.warn("knee hi-rep v27 migration failed", e); }
+    }
+
     function migrateMainBarbellV24() {
       try {
         if (!isMainProfile()) return;
@@ -6159,6 +6288,7 @@
     migratePartnerV22();
     migratePartnerV23();
     migrateMainBarbellV24();
+    migrateKneeHiRepV27();
     try { localStorage.removeItem(K("abTempoStage_v1")); } catch (e) {} // v16/v17 tempo stages retired in v18
     requestPersistentStorage();
     applySavedBackground();
