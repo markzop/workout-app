@@ -330,6 +330,7 @@
     .set-label.heavy { color: var(--heavy-set); }
     .set-label.drop { color: var(--drop-set); }
     .set-label.max { color: var(--max-set); }
+    .set-label.partials { color: var(--heavy-set); font-weight: 700; }
 
     input[type="number"] {
       width: 100%;
@@ -1010,6 +1011,12 @@
           <input type="number" id="r3" placeholder="חזרות" inputmode="numeric" />
           <div class="set-hint" id="hint-3"></div>
         </div>
+        <div class="set-row hidden" id="extra-heavy-row-2">
+          <div class="set-label heavy" id="lbl-eh2">סט כבד 2</div>
+          <input type="number" id="w-eh2" placeholder="ק״ג" inputmode="decimal" />
+          <input type="number" id="r-eh2" placeholder="חזרות" inputmode="numeric" />
+          <div class="set-hint" id="hint-eh2"></div>
+        </div>
         <div class="set-row" id="drop-row-1">
           <div class="set-label drop" id="lbl-4">דרופ 1</div>
           <input type="number" id="w4" placeholder="ק״ג" inputmode="decimal" />
@@ -1027,6 +1034,12 @@
           <input type="number" id="w6" placeholder="ק״ג" inputmode="decimal" />
           <input type="number" id="r6" placeholder="חזרות" inputmode="numeric" />
           <div class="set-hint" id="hint-6"></div>
+        </div>
+        <div class="set-row hidden" id="partials-row">
+          <div class="set-label partials" id="lbl-lp">סט אחרון: חצאי חזרות במתיחה</div>
+          <input type="number" id="w-lp" placeholder="ק״ג" inputmode="decimal" />
+          <input type="number" id="r-lp" placeholder="חזרות" inputmode="numeric" />
+          <div class="set-hint" id="hint-lp"></div>
         </div>
         <div class="optional-drop">
           <button class="btn btn-sm btn-outline" id="add-drop-btn" onclick="addDrop()">+ הוסף דרופ</button>
@@ -1595,7 +1608,10 @@
       const wu = parseInt(e.warmups, 10);
       if (wu >= 0 && wu <= 2) out.warmups = wu;    // absent = 2 (normal / top+back-off), 0 otherwise
       const bo = parseInt(e.backoffs, 10);
-      if (bo >= 0 && bo <= 3) out.backoffs = bo;   // top+back-off only; absent = 2
+      if (bo >= 0 && bo <= 3) out.backoffs = bo;
+      const hs = parseInt(e.heavySets, 10);
+      if (hs >= 1 && hs <= 5) out.heavySets = hs;
+      if (e.lengthenedPartials) out.lengthenedPartials = true;   // top+back-off only; absent = 2
       if (typeof e.rir === "string" || typeof e.rir === "number") {
         const r = String(e.rir).trim().slice(0, 12);
         if (r) out.rir = r;                        // absent = by cycle week
@@ -2509,10 +2525,14 @@
         const b = backoffCount(def);
         return `${w ? (w === 1 ? "חימום + " : w + " חימום + ") : ""}טופ${b ? ` + ${b} בק-אוף` : ""}`;
       }
-      if (def.warmups == null || def.warmups === 2) return normalTypeLabel(def.drops);
+      if ((def.heavySets || 1) <= 1 && !def.lengthenedPartials && (def.warmups == null || def.warmups === 2)) return normalTypeLabel(def.drops);
       const d = def.drops;
       const tail = d == null ? " + דרופים" : (d === 0 ? " (ללא דרופים)" : (d === 1 ? " + דרופ" : ` + ${d} דרופים`));
-      return `${w === 1 ? "חימום + " : ""}כבד${tail}`;
+      const hs = def.heavySets || 1;
+      const heavy = hs > 1 ? `${hs} כבדים` : "כבד";
+      const lp = def.lengthenedPartials ? " + סט אחרון: חצאי חזרות במתיחה" : "";
+      const wuTxt = w === 0 ? "" : (w === 1 ? "חימום + " : (def.warmups == null || def.warmups === 2 ? "2 קלים + " : w + " חימום + "));
+      return `${wuTxt}${heavy}${tail}${lp}`;
     }
 
     // Hidden drop rows keep their values; only visible rows are saved.
@@ -2543,6 +2563,7 @@
         if (w) w.value = "";
         if (r) r.value = "";
       }
+      clearCalfExtraSlots();
 
       document.getElementById("normal-sets").classList.add("hidden");
       document.getElementById("dynamic-sets").classList.add("hidden");
@@ -2559,6 +2580,7 @@
       currentPlan = planFor(exerciseName, def);
       const ph = unitLabel(def);
       for (let i = 1; i <= 6; i++) { const w = document.getElementById("w" + i); if (w) w.placeholder = ph; }
+      ["w-eh2", "w-lp"].forEach(id => { const w = document.getElementById(id); if (w) w.placeholder = ph; });
       document.getElementById("rir-actual").value = "";
       document.getElementById("rir-actual-label").textContent =
         `RIR בפועל ב${def.type === "topback" ? "טופ" : (def.type === "normal" ? "סט הכבד" : "סט הטוב")} (לא חובה)`;
@@ -2588,15 +2610,47 @@
         const s = last && !lastDyn ? (last.sets || []) : [];
         const sameKind = !!last && (last.type || "normal") === logMode;
         setWarmupsVisible(warmCount(def));
-        for (let i = 0; i < 6; i++) {
-          // rows 1-3 share meaning between "normal" and "top+back-off"; drops vs back-offs do not
-          if (s[i] && (i < 3 || sameKind) && !(i < 2 && i >= warmVisible)) {
+        const lastHs = (!tb && last && last.heavySets) ? last.heavySets : 1;
+        const lastLp = !!(!tb && last && last.lengthenedPartials);
+        // rows 1-3 share meaning between "normal" and "top+back-off"; drops vs back-offs do not
+        for (let i = 0; i < 3; i++) {
+          if (s[i] && !(i < 2 && i >= warmVisible)) {
             document.getElementById("w" + (i + 1)).value = s[i].weight || "";
             document.getElementById("r" + (i + 1)).value = s[i].reps || "";
           }
         }
-        if (tb) setDropsVisible(backoffCount(def));
-        else setDropsVisible(def.drops != null ? def.drops : (s[5] && sameKind ? 3 : 2));
+        if (tb) {
+          for (let i = 3; i < 6; i++) {
+            if (s[i] && sameKind) {
+              document.getElementById("w" + (i + 1)).value = s[i].weight || "";
+              document.getElementById("r" + (i + 1)).value = s[i].reps || "";
+            }
+          }
+          setDropsVisible(backoffCount(def));
+        } else if (sameKind && (lastHs > 1 || lastLp)) {
+          let idx = 3;
+          if (lastHs > 1 && s[idx]) { fillSlot("w-eh2", "r-eh2", s[idx]); idx++; }
+          const dropStart = idx;
+          const dropEnd = lastLp ? s.length - 1 : s.length;
+          for (let d = 0; d < 3 && dropStart + d < dropEnd; d++) {
+            const st = s[dropStart + d];
+            if (st) {
+              document.getElementById("w" + (4 + d)).value = st.weight || "";
+              document.getElementById("r" + (4 + d)).value = st.reps || "";
+            }
+          }
+          setDropsVisible(def.drops != null ? def.drops : Math.max(0, dropEnd - dropStart));
+          if (lastLp) fillSlot("w-lp", "r-lp", s[s.length - 1]);
+        } else {
+          for (let i = 3; i < 6; i++) {
+            if (s[i] && sameKind) {
+              document.getElementById("w" + (i + 1)).value = s[i].weight || "";
+              document.getElementById("r" + (i + 1)).value = s[i].reps || "";
+            }
+          }
+          setDropsVisible(def.drops != null ? def.drops : (s[5] && sameKind ? 3 : 2));
+        }
+        setCalfExtraRowsVisible(def);
       }
 
       const prevDiv = document.getElementById("prev-info");
@@ -2625,13 +2679,21 @@
           for (let i = 3; i < s.length; i++) if (s[i]) parts.push(`בק-אוף ${i - 2}: ${wxr(s[i])}`);
           html += parts.join("<br/>");
         } else {
-          const s = last.sets;
+          const s = last.sets || [];
+          const hs = last.heavySets || 1;
+          const lp = !!last.lengthenedPartials;
           if (s[0]) html += `סט 1: ${wxr(s[0])} · `;
           if (s[1]) html += `סט 2: ${wxr(s[1])}<br/>`;
-          if (s[2]) html += `סט 3 (כבד): ${wxr(s[2])}<br/>`;
-          if (s[3]) html += `דרופ 1: ${wxr(s[3])} · `;
-          if (s[4]) html += `דרופ 2: ${wxr(s[4])}`;
-          if (s[5]) html += `<br/>דרופ 3: ${wxr(s[5])}`;
+          let idx = 2;
+          for (let h = 1; h <= hs; h++, idx++) {
+            if (s[idx]) html += `${h === 1 ? "סט " + (idx + 1) + " (כבד)" : "סט כבד " + h}: ${wxr(s[idx])}<br/>`;
+          }
+          const dropEnd = lp ? s.length - 1 : s.length;
+          let dn = 1;
+          for (; idx < dropEnd; idx++, dn++) {
+            if (s[idx]) html += `דרופ ${dn}: ${wxr(s[idx])}${idx + 1 < dropEnd ? " · " : ""}`;
+          }
+          if (lp && s[s.length - 1]) html += `${dn > 1 ? "<br/>" : ""}סט אחרון: חצאי חזרות במתיחה: ${wxr(s[s.length - 1])}`;
         }
         if (beforeLast) {
           html += `<div style="margin-top:8px;font-size:0.85rem;">לעומת הפעם שלפניה (${formatDate(beforeLast.date)}): ${formatCmp(lastVal, beforeVal) || "—"}</div>`;
@@ -2679,6 +2741,12 @@
           const r = document.getElementById("r" + i).value;
           sets.push((w || r) ? { weight: w ? parseFloat(w) : null, reps: r ? parseInt(r) : null } : null);
         }
+        if (currentDef && logMode === "normal" && heavyCount(currentDef) > 1) {
+          sets.splice(3, 0, readSlot("w-eh2", "r-eh2"));
+        }
+        if (currentDef && logMode === "normal" && showCalfPartialsSet(currentDef)) {
+          sets.push(readSlot("w-lp", "r-lp"));
+        }
       }
 
       if (!sets.some(s => s && (s.weight || s.reps || s.level))) {
@@ -2689,6 +2757,8 @@
       const extra = {};
       if (currentDef && currentDef.deload) extra.deload = true;
       if (currentDef && currentDef.light) extra.light = true;
+      if (currentDef && logMode === "normal" && heavyCount(currentDef) > 1) extra.heavySets = heavyCount(currentDef);
+      if (currentDef && logMode === "normal" && showCalfPartialsSet(currentDef)) extra.lengthenedPartials = true;
       if (currentDef && currentDef.abStraight && isDynType(logMode)) {
         const wu = [1, 2].map(i => {
           const w = document.getElementById("aw" + i).value, r = document.getElementById("ar" + i).value;
@@ -3598,14 +3668,16 @@
     // The set the progression is based on: heavy set (normal), heaviest set (simple), best-reps set (max).
     function getWorkingSet(entry) {
       if (!entry || !Array.isArray(entry.sets)) return null;
-      const sets = entry.sets.filter(s => s && (numOrNull(s.weight) != null || numOrNull(s.reps) != null))
+      let raw = entry.sets;
+      if (entry.lengthenedPartials && raw.length) raw = raw.slice(0, -1); // last set is stretch partials – not for e1RM / progression
+      const sets = raw.filter(s => s && (numOrNull(s.weight) != null || numOrNull(s.reps) != null))
         .map(s => ({ weight: numOrNull(s.weight), reps: numOrNull(s.reps) }));
       if (!sets.length) return null;
       if (entry.type === "max" || isMeasureType(entry.type)) {
         return sets.reduce((a, b) => ((b.reps || 0) > (a.reps || 0) ? b : a));
       }
       if (entry.type !== "simple") {
-        const h = entry.sets[2];
+        const h = raw[2];
         if (h && (numOrNull(h.weight) != null || numOrNull(h.reps) != null)) {
           return { weight: numOrNull(h.weight), reps: numOrNull(h.reps) };
         }
@@ -4288,7 +4360,7 @@
     // Per-exercise overrides for today's session (structure, rep range, display label).
     // Own key, not in workoutData_v1 / backups, ignored from the next day.
     const SESSION_OVERRIDES_KEY = K("workoutSessionOverrides_v1");
-    const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "rir", "notes", "equip", "unit", "stack", "stackStart", "stackPlates"];
+    const OVERRIDE_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "heavySets", "lengthenedPartials", "rir", "notes", "equip", "unit", "stack", "stackStart", "stackPlates"];
     let sxTarget = null;
 
     function readSessionOverrides() {
@@ -4555,6 +4627,10 @@
         vals.push({ w: w ? w.value : "", r: r ? r.value : "" });
       }
       vals.rir = document.getElementById("rir-actual").value;
+      const eh2w = document.getElementById("w-eh2"), eh2r = document.getElementById("r-eh2");
+      if (eh2w) vals.eh2 = { w: eh2w.value, r: eh2r ? eh2r.value : "" };
+      const lpw = document.getElementById("w-lp"), lpr = document.getElementById("r-lp");
+      if (lpw) vals.lp = { w: lpw.value, r: lpr ? lpr.value : "" };
       return vals;
     }
 
@@ -4578,6 +4654,14 @@
           document.getElementById("w" + (i + 1)).value = v.w;
           document.getElementById("r" + (i + 1)).value = v.r;
         });
+        if (vals.eh2) {
+          const w = document.getElementById("w-eh2"), r = document.getElementById("r-eh2");
+          if (w) w.value = vals.eh2.w; if (r) r.value = vals.eh2.r;
+        }
+        if (vals.lp) {
+          const w = document.getElementById("w-lp"), r = document.getElementById("r-lp");
+          if (w) w.value = vals.lp.w; if (r) r.value = vals.lp.r;
+        }
       }
     }
 
@@ -4722,10 +4806,10 @@
             notes: "עד כשל טכני, בלי נדנוד. מעל 15 חזרות – מוסיפים קושי." }
         ] },
         { id: "calves", name: "תאומים", desc: null, exercises: [
-          { name: "הרמת עקבים בעמידה", equip: "machine", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 5, origName: "הרמת עקבים בעמידה",
-            notes: "עצירה של 2 שנ׳ בתחתית (במתיחה), טווח מלא." },
+          { name: "הרמת עקבים בעמידה", equip: "machine", type: "normal", warmups: 1, drops: 2, heavySets: 2, lengthenedPartials: true, repMin: 8, repMax: 12, increment: 5, origName: "הרמת עקבים בעמידה",
+            notes: "הורדה 2-3 שנ׳, בלי לקפוץ, עצירה 2 שנ׳ במתיחה. טווח מלא בסטים הכבדים, RIR 0-1. סט אחרון: חצאי חזרות במתיחה (עקב למטה עד הסוף, עולה רק עד כף רגל ישרה) עד RIR 0-1. הסט האחרון לא נכנס לחישוב ההתקדמות." },
           { name: "הרמת עקבים בישיבה", equip: "machine", type: "normal", warmups: 0, drops: 2, repMin: 12, repMax: 20, increment: 5, origName: "הרמת עקבים בישיבה",
-            notes: "עצירה של 1-2 שנ׳ בתחתית, טווח מלא." }
+            notes: "הורדה 2-3 שנ׳, בלי לקפוץ, עצירה 2 שנ׳ במתיחה. טווח מלא, RIR 0-1. בדרופ האחרון אפשר 5-8 חצאי חזרות במתיחה." }
         ] }
       ],
       accessoryByDay: ["calves", "abs", "calves", "abs", "calves", "abs", null]
@@ -4764,6 +4848,7 @@
       const d = Object.assign({}, def);
       const has = f => o && o[f] != null;
       if (d.type === "normal" && !has("drops")) d.drops = 0;
+      if (d.type === "normal" && !has("heavySets") && (d.heavySets || 1) > 1) d.heavySets = Math.max(1, Math.ceil(d.heavySets / 2));
       if (d.type === "topback" && !has("backoffs")) d.backoffs = 1;
       const keepFull = d.type === "cardio" || (d.type === "timed" && isAccessoryOnlyExercise(d.name)); // cardio + mobility as normal
       if ((d.type === "simple" || d.type === "max" || d.type === "timed" || d.type === "distance") && !keepFull && !has("setCount")) d.setCount = Math.max(1, Math.ceil((d.setCount || 3) / 2));
@@ -4943,6 +5028,44 @@
     }
     const CALF_HALF_HINT = "🔥 אחרי הכשל: 5-8 חצאי חזרות בחצי התחתון (המתוח) – עקב למטה עד הסוף, עולה רק עד כף רגל ישרה";
     const CALF_HALF_HOWTO = "חצאי חזרות במתיחה – רק בסט האחרון, כשכבר אין חזרה מלאה: יורד עד מתיחה מלאה (העקב הכי נמוך), ועולה רק עד חצי הדרך (בערך כף רגל ישרה) – לא עד קצות האצבעות. ירידה מבוקרת של 1-2 שנ׳, בלי קפיצות, חצי שנייה עצירה במתיחה, ודוחף למעלה. 5-8 חצאי חזרות או עד שאין יותר עלייה. טעות נפוצה: קפיצות קטנות שעובדות עם הגיד (אכילס) במקום עם השריר.";
+    const STANDING_CALF_NOTES_V30 = "הורדה 2-3 שנ׳, בלי לקפוץ, עצירה 2 שנ׳ במתיחה. טווח מלא בסטים הכבדים, RIR 0-1. סט אחרון: חצאי חזרות במתיחה (עקב למטה עד הסוף, עולה רק עד כף רגל ישרה) עד RIR 0-1. הסט האחרון לא נכנס לחישוב ההתקדמות.";
+    const SEATED_CALF_NOTES_V30 = "הורדה 2-3 שנ׳, בלי לקפוץ, עצירה 2 שנ׳ במתיחה. טווח מלא, RIR 0-1. בדרופ האחרון אפשר 5-8 חצאי חזרות במתיחה.";
+    const CALF_PARTIALS_HINT = "סט אחרון: חצאי חזרות במתיחה — עקב למטה עד הסוף, עולה רק עד כף רגל ישרה (חצי תחתון), RIR 0-1. אותו משקל כמו הסט הכבד. לא נכנס להתקדמות.";
+    const CALF_PARTIALS_HOWTO = "סט אחרון – חצאי חזרות במתיחה (כל הסט, לא רק אחרי כשל): יורד עד מתיחה מלאה (העקב הכי נמוך), ועולה רק עד חצי הדרך (בערך כף רגל ישרה) – לא עד קצות האצבעות. הורדה 2-3 שנ׳, בלי קפיצות, עצירה 2 שנ׳ במתיחה, עד RIR 0-1. אותו משקל כמו הסט הכבד. הסט הזה לא נכנס לחישוב e1RM / התקדמות המשקל.";
+    function heavyCount(def) {
+      const n = def && def.heavySets != null ? Number(def.heavySets) : 1;
+      return Math.max(1, Math.min(5, n || 1));
+    }
+    function isStraightKneeCalf(def) {
+      if (!def || !isMainProfile()) return false;
+      const n = def.name || "", o = def.origName || "";
+      const seated = n.includes("בישיבה") || o.includes("בישיבה");
+      const calf = CALF_NAMES.includes(n) || CALF_NAMES.includes(o) || n.includes("עקבים") || o.includes("עקבים");
+      return !!(calf && !seated);
+    }
+    function showCalfPartialsSet(def) {
+      return !!(def && def.lengthenedPartials && isStraightKneeCalf(def));
+    }
+    function setCalfExtraRowsVisible(def) {
+      const extra = heavyCount(def) - 1;
+      const eh2 = document.getElementById("extra-heavy-row-2");
+      if (eh2) eh2.classList.toggle("hidden", extra < 1);
+      const pr = document.getElementById("partials-row");
+      if (pr) pr.classList.toggle("hidden", !showCalfPartialsSet(def));
+    }
+    function readSlot(wid, rid) {
+      const wEl = document.getElementById(wid), rEl = document.getElementById(rid);
+      const w = wEl ? wEl.value : "", r = rEl ? rEl.value : "";
+      return (w || r) ? { weight: w ? parseFloat(w) : null, reps: r ? parseInt(r) : null } : null;
+    }
+    function fillSlot(wid, rid, st) {
+      const wEl = document.getElementById(wid), rEl = document.getElementById(rid);
+      if (wEl) wEl.value = st && st.weight != null ? st.weight : "";
+      if (rEl) rEl.value = st && st.reps != null ? st.reps : "";
+    }
+    function clearCalfExtraSlots() {
+      ["w-eh2", "r-eh2", "w-lp", "r-lp"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+    }
 
     // v20: overhead triceps – dumbbell replaced by rope cable (medial right-elbow pain). Main profile only.
     const OH_OLD = "פשיטת מרפק מאחורי הראש עם משקולת", OH_NEW = "פשיטת מרפק מעל הראש בכבל עם חבל";
@@ -5068,6 +5191,14 @@
         if (plan.top) currentRecs.w3 = plan.top;
         const tgt = plan.top ? `${kg(plan.top)} × ${plan.reps != null ? plan.reps : repRange(def)}` : `${repRange(def)} חזרות`;
         put("hint-3", `🎯 ${tgt}${plan.s && plan.s.kind === "estimate" ? " (הערכה)" : ""} · ${rirTxt(rirFor(tb ? "top" : "heavy", def, cyc))} · מנוחה לפני: ${tb ? REST.top : REST.heavy}${plan.s && plan.s.kind === "estimate" ? `<br/>📐 הערכה לפי ${(ROW_REFS.find(r => r.name === plan.s.source) || {}).label === "טי-בר" ? "הטי-בר" : "ה" + ((ROW_REFS.find(r => r.name === plan.s.source) || {}).label || "היסטוריה")} – תתאים בסט הראשון (יעד RIR 2-3)` : ""}`);
+        if (!tb && heavyCount(def) > 1) {
+          if (plan.top) currentRecs["w-eh2"] = plan.top;
+          put("hint-eh2", `🎯 ${tgt} · טווח מלא · ${rirTxt(rirFor("heavy", def, cyc))} · מנוחה לפני: ${REST.heavy}`);
+        }
+        if (!tb && showCalfPartialsSet(def)) {
+          if (plan.top) currentRecs["w-lp"] = plan.top;
+          put("hint-lp", `🎯 ${plan.top ? kg(plan.top) + " (אותו משקל)" : "אותו משקל כמו הסט הכבד"} · ${CALF_PARTIALS_HINT} · ${rirTxt(rirFor("heavy", def, cyc))} · מנוחה לפני: ${REST.heavy}`);
+        }
         let prev = valOf("w3") != null ? valOf("w3") : plan.top;
         for (let i = 4; i <= 6; i++) {
           let w = null;
@@ -5078,7 +5209,7 @@
             put("hint-" + i, `בק-אוף: ${w ? "כ-" + kg(w) : "—"}${pct} × ${backoffReps(def)} · ${rirTxt(rirFor("backoff", def, cyc))} · מנוחה לפני: ${REST.backoff}${bo.note ? `<br/>📉 ${esc(bo.note)}` : ""}`);
           } else {
             w = prev ? stepBelowDef(prev * 0.75, prev, def) : null;
-            put("hint-" + i, `דרופ: ${w ? "כ-" + kg(w) : "—"} (‎-20-30%) · ${rirTxt(rirFor("drop", def, cyc))} · מנוחה ${REST.drop}${isCalfPriority(def) && i === 3 + normalDrops ? `<br/>${CALF_HALF_HINT}` : ""}`);
+            put("hint-" + i, `דרופ: ${w ? "כ-" + kg(w) : "—"} (‎-20-30%) · ${rirTxt(rirFor("drop", def, cyc))} · מנוחה ${REST.drop}${isCalfPriority(def) && !showCalfPartialsSet(def) && i === 3 + normalDrops ? `<br/>${CALF_HALF_HINT}` : ""}`);
             const typed = valOf("w" + i);
             prev = typed != null ? typed : w;
           }
@@ -5156,10 +5287,12 @@
         } else steps.push("בלי סטי בק-אוף.");
         if (isWideCableRow(def)) wideRowSteps(def, !!(getData().logs[def.name] || []).length, plan && plan.s).forEach(x => steps.push(x));
       } else if (def.type === "normal") {
-        steps.push(`סט כבד: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("heavy", def, cyc))}. מנוחה לפניו ${REST.heavy}.`);
+        const hs = heavyCount(def);
+        steps.push(`${hs > 1 ? hs + " סטים כבדים בטווח מלא" : "סט כבד"}: ${tgt} (טווח ${repRange(def)}), ${rirTxt(rirFor("heavy", def, cyc))}. מנוחה לפניו ${REST.heavy}.`);
         const d = dropCount(def);
         if (d) steps.push(`מיד אחריו ${d === 1 ? "דרופ אחד" : d + " דרופים"}: בכל דרופ מורידים 20-30% מהמשקל וממשיכים עד כשל, מנוחה ${REST.drop} בלבד.`);
-        if (d && isCalfPriority(def)) steps.push(CALF_HALF_HOWTO);
+        if (showCalfPartialsSet(def)) steps.push(CALF_PARTIALS_HOWTO);
+        else if (d && isCalfPriority(def)) steps.push(CALF_HALF_HOWTO);
         if (isOverheadRope(def)) overheadRopeSteps(def, !!(getData().logs[def.name] || []).length).forEach(x => steps.push(x));
         else steps.push("בלי דרופים" + (def.deload ? " (שבוע הורדה)." : "."));
       } else if (def.type === "max") {
@@ -5341,7 +5474,7 @@
         <h4>חזרות חלקיות בטווח המתיחה</h4>
         <ul><li>בדרופ האחרון של פשיטת ברך, כפיפת ברך, פרפר והרחקות: כשאין חזרה מלאה, עוד 3-6 חזרות של חצי טווח בחלק שבו השריר מתוח.</li></ul>
         <h4>קצב</h4>
-        <ul><li>הורדה מבוקרת של 2-3 שניות, בלי לקפוץ מהתחתית. בתאומים עוצרים 1-2 שניות בתחתית.</li></ul>
+        <ul><li>הורדה מבוקרת של 2-3 שניות, בלי לקפוץ מהתחתית. בתאומים עוצרים 2 שניות במתיחה.</li></ul>
       </div>`;
 
       h += `<div class="section-title">מנוחה</div><div class="card">` + guideTable(["מצב", "מנוחה"], [
@@ -5376,7 +5509,8 @@
         <li>בבק-אוף מורידים 10-15% מהמשקל החדש של הטופ (האפליקציה מחשבת).</li>
         <li>🚣 חתירה רחבה בכבל: במקום הטי-בר (לחץ על החזה/בטן במשקלים כבדים) – חתירה בכבל בישיבה באחיזה רחבה, באותה עמדה של החתירה ביד אחת (5–125 ק״ג). אותו מקום באימון C ואותה שיטה (טופ + 2 בק-אוף, 6-10). בפעם הראשונה המשקל הוא הערכה לפי הטי-בר – מתאימים בסט הראשון, ומשם התקדמות רגילה. ההיסטוריה של הטי-בר נשמרת בשם הישן.</li>
         <li>💪 פשיטה מעל הראש: במקום המשקולת (כאב בצד הפנימי של מרפק ימין) – פשיטה מעל הראש בכבל עם חבל, גב לכבל. אותם סטים ואותו מקום באימון B; התקדמות מתחילה מחדש (ההיסטוריה של המשקולת נשמרת בשם הישן). כאב עד 2-3 מתוך 10 ולא מחמיר למחרת – אחרת עוברים לקטאנה ביד אחת בכבל.</li>
-        <li>🦵 תאומים בעדיפות: זו הנקודה החלשה, לכן בימי התאומים (ראשון, שלישי, חמישי) הם הראשונים באימון – לפני התרגיל הראשי, כשאתה הכי רענן. אותם סטים ואותה עצירה של 2 שנ׳ בתחתית, ובדרופ האחרון 5-8 חצאי חזרות במתיחה (עקב למטה עד הסוף, עולה רק עד כף רגל ישרה). לא מוסיפים אימון רביעי – רק סדר ואיכות.</li>
+        <li>🦵 תאומים בעדיפות: זו הנקודה החלשה, לכן בימי התאומים (ראשון, שלישי, חמישי) הם הראשונים באימון – לפני התרגיל הראשי, כשאתה הכי רענן. בעמידה (ברך ישרה): 2 סטים כבדים בטווח מלא + 2 דרופים + סט אחרון של חצאי חזרות במתיחה (עקב למטה עד הסוף, עולה רק עד כף רגל ישרה, RIR 0-1; Kassiano et al. 2023) – הסט האחרון לא נכנס להתקדמות. בישיבה נשאר 1 כבד + 2 דרופים. בסה״כ כ-18 סטים בשבוע, 12 ברך ישרה / 6 ישיבה (יחס 2:1). הורדה 2-3 שנ׳, בלי לקפוץ, עצירה 2 שנ׳ במתיחה, RIR 0-1. לא מוסיפים אימון רביעי – רק סדר, נפח ואיכות.</li>
+        <li>📏 פעם בחודש: מודדים היקף תאומים (אותו מקום על השוק, אותה שעה ביום) כדי לעקוב אחרי הגדילה.</li>
         <li>⏱ כפיפת בטן במכשיר: חימום, ואז 3 סטים ישרים וקשים של 12-20 חזרות (RIR 0-1); בסט האחרון עד כשל מלא + 5-8 חצאי חזרות בחצי העליון. טמפו 1-1-2/3: 1 שנ׳ למטה לכיווץ (חזה לכיוון הירכיים), 1 שנ׳ סחיטה, 2-3 שנ׳ חזרה מבוקרת למעלה למתיחה מלאה בלי שהסטק נוגע. הישבן דבוק למושב, דוחפים את הכריות עם החזה ולא עם הידיים, מגלגלים את הגב למטה חוליה אחר חוליה ונושפים בכיווץ. כשכל הסטים מגיעים ל-20 – פלטה אחת למעלה (עד 190). למה: קרבה לכשל + טווח מלא + עומס שעולה בונים שריר יותר מטמפו קיצוני.</li>
         <li>📉 אחוז הבק-אוף מותאם לכל תרגיל (12.5% בהתחלה, בין 7.5% ל-25%): אם בפעם הקודמת יצא מתחת לטווח – מורידים יותר (+2.5%, או +5% אם חסרו 2+ חזרות); מעל הטווח – מורידים פחות (‎-2.5%).</li>
         <li>אימונים של שבוע ההורדה לא נחשבים בחישוב ההתקדמות.</li></ul></div>`;
@@ -5395,7 +5529,7 @@
         ["כתף אמצעית", "הרחקה ב-A 2, ב-B 2, ב-C 2", "12", "10-12+"], ["כתף אחורית", "הרחקה אופקית 2 + עקיף מחתירות", "9", "8-12"],
         ["כתף קדמית", "עקיף: באנץ', מקבילים", "5", "מספיק"], ["תלת-ראשי", "2 פשיטות × 2 + עקיף", "13", "10-16"],
         ["דו-ראשי", "פריצ'ר 2, פטישים 2 + עקיף", "15", "10-16"], ["ישבן", "עקיף: לחיצה, בולגרי, דדליפט רומני", "8-10", "~8-12"],
-        ["זוקפי גב", "דדליפט רומני 3", "6", "מספיק"], ["תאומים", "2 תרגילים × 2, 3 פעמים בשבוע", "12", "10-15"], ["בטן", "כפיפה + הרמות, 3 פעמים בשבוע", "10.5", "8-12"]
+        ["זוקפי גב", "דדליפט רומני 3", "6", "מספיק"], ["תאומים", "עמידה 4 (2 כבד + 2 דרופים + סט חצאי חזרות) · ישיבה 2, 3 פעמים בשבוע", "18 (12/6)", "10-15"], ["בטן", "כפיפה + הרמות, 3 פעמים בשבוע", "10.5", "8-12"]
       ]) + `<p class="g-muted">ספירה: טופ/בק-אוף/סט כבד = 1, דרופ = 0.5, חימום = 0, עקיף = חצי. עד 7 סטים לשריר באימון (מתחת לסף של כ-11). בערך 15-18 סטים קשים לאימון + 4-6 בתוספת.</p>
         <p class="g-muted">לעומת התוכנית הקודמת: כתף אמצעית 4 ← 12, גב 8 ← 14, ירך אחורית 7 ← 10, כתף אחורית 6 ← 9.</p></div>`;
 
@@ -5718,6 +5852,36 @@
       } catch (e) { console.warn("friend no-superset v29 migration failed", e); }
     }
 
+    function migrateCalfVolumeV30() {
+      try {
+        if (!isMainProfile()) return;
+        const data = getData();
+        if (data.calfVolumeV30 || data.programSource !== RESEARCH_PROGRAM_ID) return;
+        if (data.program && Array.isArray(data.program.workouts)) {
+          const prog = normalizeProgram(data.program) || data.program;
+          if (prog) {
+            (prog.workouts.concat(Array.isArray(prog.accessories) ? prog.accessories : [])).forEach(g => (g.exercises || []).forEach(x => {
+              const n = x.name || "", o = x.origName || "";
+              const standing = n === "הרמת עקבים בעמידה" || o === "הרמת עקבים בעמידה";
+              const seated = n === "הרמת עקבים בישיבה" || o === "הרמת עקבים בישיבה";
+              if (standing) {
+                x.heavySets = 2;
+                x.lengthenedPartials = true;
+                if (x.drops == null) x.drops = 2;
+                if (x.warmups == null) x.warmups = 1;
+                x.notes = STANDING_CALF_NOTES_V30;
+              } else if (seated) {
+                x.notes = SEATED_CALF_NOTES_V30;
+              }
+            }));
+            data.program = prog;
+          }
+        }
+        data.calfVolumeV30 = true;
+        saveData(data);
+      } catch (e) { console.warn("calf volume v30 migration failed", e); }
+    }
+
     function migrateKneeHiRepV27() {
       try {
         if (!isMainProfile()) return;
@@ -5947,7 +6111,7 @@
     }
 
     // ---- per-workout config for same-named exercises ----
-    const SLOT_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "equip", "rir", "notes"];
+    const SLOT_FIELDS = ["type", "repMin", "repMax", "increment", "setCount", "drops", "warmups", "backoffs", "heavySets", "lengthenedPartials", "equip", "rir", "notes"];
     function sameNameSlots(prog, name) {
       const out = [];
       prog.workouts.concat(prog.accessories).forEach(g => g.exercises.forEach(x => { if (x.name === name) out.push(x); }));
@@ -6419,6 +6583,7 @@
     migrateKneeHiRepV27();
     migrateFriendFbAbsCalvesV28();
     migrateFriendNoSupersetV29();
+    migrateCalfVolumeV30();
     try { localStorage.removeItem(K("abTempoStage_v1")); } catch (e) {} // v16/v17 tempo stages retired in v18
     requestPersistentStorage();
     applySavedBackground();
