@@ -2097,10 +2097,19 @@
       const last = getLastPerformance(name);
       const done = sessionCompleted.has(name) || loggedToday(name);
       let meta = "עדיין אין נתונים";
-      if (!last && isMainProfile() && name === LEG_EXT_NEW) {
-        const two = twoLegExtLogs();
+      if (!last && isMainProfile() && (name === LEG_EXT_HI || name === LEG_EXT_NEW)) {
+        const two = twoLegExtLogs().filter(e => !e.deload && !e.light);
         const tw = two.length ? getWorkingSet(two[two.length - 1]) : null;
-        if (tw && tw.weight != null) meta = `פעם קודמת (שתי רגליים יחד): ${wt(tw.weight, getEffectiveDef(name))} → התחלה כ-45% לכל רגל`;
+        const sl = singleLegExtLogs();
+        const slw = sl.length ? getWorkingSet(sl[sl.length - 1]) : null;
+        if (name === LEG_EXT_HI && tw && tw.weight != null) {
+          const conv = (tw.reps != null) ? e1rmToTargetReps(tw.weight, tw.reps, 25) : null;
+          meta = `פעם קודמת בשתי רגליים (טווח כבד): ${wt(tw.weight, getEffectiveDef(name))} × ${tw.reps != null ? tw.reps : "—"}` +
+            (conv ? ` → התחלה כ-${wt(conv.weight, getEffectiveDef(name))} × 25` : "");
+          if (slw && slw.weight != null) meta += ` · ברגל אחת: ${wt(slw.weight, getEffectiveDef(name))} (לא להמלצה)`;
+        } else if (name === LEG_EXT_NEW && tw && tw.weight != null) {
+          meta = `פעם קודמת (שתי רגליים יחד): ${wt(tw.weight, getEffectiveDef(name))} → התחלה כ-45% לכל רגל`;
+        }
       }
       if (last) {
         if (isMeasureType(last.type)) {
@@ -2698,7 +2707,13 @@
         if (beforeLast) {
           html += `<div style="margin-top:8px;font-size:0.85rem;">לעומת הפעם שלפניה (${formatDate(beforeLast.date)}): ${formatCmp(lastVal, beforeVal) || "—"}</div>`;
         }
+        if (isMainProfile() && isHiRepExtName(exerciseName)) {
+          const prior = priorExtHistoryHtml(def);
+          if (prior) html += `<div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--border);">${prior}</div>`;
+        }
         prevDiv.innerHTML = html;
+      } else if (isMainProfile() && isHiRepExtName(exerciseName) && (twoLegExtLogs().length || singleLegExtLogs().length)) {
+        prevDiv.innerHTML = priorExtHistoryHtml(def) || "אין נתונים קודמים לתרגיל זה";
       } else if (isMainProfile() && exerciseName === LEG_EXT_NEW && twoLegExtLogs().length) {
         const two = twoLegExtLogs();
         const lastTwo = two[two.length - 1];
@@ -3706,6 +3721,10 @@
     const LEG_PRESS_NAME = "לחיצת רגליים";
     const LEG_EXT_OLD = "פשיטת ברך במכונה";
     const LEG_EXT_NEW = "פשיטת ברך ברגל אחת";
+    const LEG_EXT_HI = "פשיטת ברך – חזרות גבוהות";
+    const LEG_EXT_NOTES_V31 = "שתי הרגליים יחד, משקל קל, 20-30 חזרות. הורדה 2-3 שנ׳, סחיטה 1 שנ׳ למעלה. כאב בברך עד 3/10 בסדר; אם הכאב חד – עוצרים. אפשר לקצר את הטווח לטווח ללא כאב. בלי דרופים כבדים.";
+    const BAYESIAN_CURL_NAME = "כפיפה בכבל מאחורי הגוף (באייזיאן)";
+    const BAYESIAN_CURL_NOTES = "יד אחת בכל פעם. גב לכבל, היד מאחורי הגוף – מתיחה בראש הארוך. מתיחה מלאה למטה. בלי סופרסט. טווח 10-15, RIR 0-1.";
     const LEG_PRESS_NOTES_V27 = "הורדה של 3 שניות, רגליים גבוה על המשטח ורחב. לא לרדת עד שהאגן מתרומם מהמשענת. עוצרים 1-2 חזרות לפני כשל. כאב בברך עד 3/10 בסדר; אם הכאב חד או מחמיר – מורידים משקל. טווח 12-20: המשקל מותאם לפי 1RM משוער מהטווח הכבד הישן, לא ממשיכים מאותו משקל.";
     const LEG_EXT_NOTES_V27 = "לכל רגל, 15-20 חזרות. מתחילים ברגל החלשה. קצב מבוקר, בלי נעילה קשה למעלה. אם כואב – אפשר לקצר את תחתית הטווח. משקל התחלה: כ-45% מהסט הכבד האחרון בשתי הרגליים, מעוגל ל-5 ק״ג (Technogym).";
     function isLegPressDef(def) {
@@ -3717,9 +3736,44 @@
     function twoLegExtLogs() {
       return (getData().logs[LEG_EXT_OLD] || []).filter(e => getWorkingSet(e));
     }
+    function singleLegExtLogs() {
+      return (getData().logs[LEG_EXT_NEW] || []).filter(e => getWorkingSet(e));
+    }
+    function isHiRepExtDef(def) {
+      return isMainProfile() && !!def && (def.name === LEG_EXT_HI || def.origName === LEG_EXT_HI);
+    }
+    function isHiRepExtName(name) {
+      return name === LEG_EXT_HI;
+    }
+    function e1rmToTargetReps(weight, reps, targetReps) {
+      const r = reps <= 15 ? reps : (reps <= 20 ? 15 + (reps - 15) * 0.2 : 16);
+      const e1rm = (weight * (1 + r / 30) + weight * 36 / (37 - r)) / 2;
+      const t = targetReps;
+      const factor = ((1 + t / 30) + 36 / (37 - t)) / 2;
+      const x = e1rm / factor * 0.95;
+      return { weight: roundTo5(x), e1rm: Math.round(e1rm * 10) / 10, raw: x };
+    }
     function roundTo5(x) {
       const w = Math.round(x / 5) * 5;
       return w > 0 ? w : 5;
+    }
+    function priorExtHistoryHtml(def) {
+      const bits = [];
+      const sl = singleLegExtLogs();
+      if (sl.length) {
+        const last = sl[sl.length - 1], ws = getWorkingSet(last);
+        bits.push(`<strong>פעם קודמת ברגל אחת (${formatDate(last.date)})</strong><br/>` +
+          (ws && ws.weight != null ? `סט כבד: ${wt(ws.weight, def)} × ${ws.reps != null ? ws.reps : "—"} (לכל רגל)<br/>` : "") +
+          `<div style="margin-top:4px;font-size:0.85rem;">הלוגים של הפשיטה ברגל אחת נשמרו ולא נכנסים להמלצת המשקל החדשה.</div>`);
+      }
+      const two = twoLegExtLogs().filter(e => !e.deload && !e.light);
+      if (two.length) {
+        const last = two[two.length - 1], ws = getWorkingSet(last);
+        bits.push(`<strong>פעם קודמת בשתי רגליים, טווח כבד (${formatDate(last.date)})</strong><br/>` +
+          (ws && ws.weight != null ? `סט כבד: ${wt(ws.weight, def)} × ${ws.reps != null ? ws.reps : "—"}<br/>` : "") +
+          `<div style="margin-top:4px;font-size:0.85rem;">ההמלצה הראשונה מחושבת מפה (1RM משוער ליעד ~25 חזרות), לא מהפשיטה ברגל אחת.</div>`);
+      }
+      return bits.join(`<div style="margin-top:10px;"></div>`);
     }
     // First suggestion after the v27 change: e1RM retarget (leg press) or 45% of two-leg (extension).
     // Later sessions in the new scheme use normal progression. Deload is applied on top of the converted weight.
@@ -3751,6 +3805,21 @@
         return wrap({ weight: big.weight, reps: lo, kind: "retarget",
           rule: "טווח חדש 12-20: המשקל מחושב מכוח משוער (1RM), לא מהמשקל הכבד הישן. קפיצות של 5 ק״ג.",
           explain: `בפעם הקודמת (טווח כבד): ${wt(last.weight, def)} × ${last.reps} (1RM משוער כ-${wt(big.e1rm, def)}) ← היום בטווח 12-20: ${wt(big.weight, def)} × ${lo}` });
+      }
+      if (isHiRepExtDef(def)) {
+        const cutoff = getData().hiRepExtV31At;
+        const own = (logs || []).filter(e => getWorkingSet(e) && !e.deload && !e.light);
+        const post = cutoff ? own.filter(e => e.date >= cutoff) : [];
+        if (post.length) return null; // later sessions use normal progression
+        const two = twoLegExtLogs().filter(e => !e.deload && !e.light);
+        if (!two.length) return null;
+        const last = getWorkingSet(two[two.length - 1]);
+        if (!last || last.weight == null || last.reps == null) return null;
+        const conv = e1rmToTargetReps(last.weight, last.reps, 25);
+        const lo = 25;
+        return wrap({ weight: conv.weight, reps: lo, kind: "retarget25",
+          rule: "פשיטה בחזרות גבוהות: המשקל הראשון מחושב מכוח משוער (1RM) של הסט הכבד האחרון בשתי הרגליים (לפני המעבר לרגל-רגל), ליעד של כ-25 חזרות, מעוגל ל-5 ק״ג. לוגים של רגל אחת לא נכנסים לחישוב.",
+          explain: `שתי רגליים (טווח כבד) בפעם האחרונה: ${wt(last.weight, def)} × ${last.reps} (1RM משוער כ-${wt(conv.e1rm, def)}) ← היום 20-30 חזרות: ${wt(conv.weight, def)} × ${lo}` });
       }
       if (isLegExtSingleDef(def)) {
         const own = (logs || []).filter(e => getWorkingSet(e) && !e.deload && !e.light);
@@ -4748,7 +4817,7 @@
       version: 1,
       workouts: [
         { id: "A", name: "אימון A – רגליים",
-          desc: "לחיצת רגליים (טופ 12-20) • בולגרי • דדליפט רומני • כפיפת ברך בישיבה • פשיטת ברך ברגל אחת • הרחקה לצדדים במכונה",
+          desc: "לחיצת רגליים (טופ 12-20) • בולגרי • דדליפט רומני • כפיפת ברך בישיבה • פשיטת ברך – חזרות גבוהות • הרחקה לצדדים במכונה",
           exercises: [
             { name: "לחיצת רגליים", equip: "machine", type: "topback", warmups: 2, backoffs: 2, repMin: 12, repMax: 20, increment: 5, origName: "לחיצת רגליים",
               notes: "הורדה של 3 שניות, רגליים גבוה על המשטח ורחב. לא לרדת עד שהאגן מתרומם מהמשענת. עוצרים 1-2 חזרות לפני כשל. כאב בברך עד 3/10 בסדר; אם הכאב חד או מחמיר – מורידים משקל. טווח 12-20: המשקל מותאם לפי 1RM משוער מהטווח הכבד הישן, לא ממשיכים מאותו משקל." },
@@ -4758,8 +4827,8 @@
               notes: "מחליף את הדדליפט הרגיל. יורדים עד מתיחה חזקה בירך האחורית, גב ניטרלי. בלי כשל – תמיד לפחות חזרה אחת ברזרבה." },
             { name: "כפיפת ברך במכונה", equip: "machine", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 5, origName: "כפיפת ברך במכונה",
               notes: "עדיף בישיבה (מתיחה גדולה יותר בירך האחורית). בדרופ האחרון: 3-6 חזרות חלקיות בטווח המתיחה." },
-            { name: "פשיטת ברך ברגל אחת", equip: "machine", type: "normal", warmups: 0, drops: 1, repMin: 15, repMax: 20, increment: 5, origName: "פשיטת ברך ברגל אחת",
-              notes: "לכל רגל, 15-20 חזרות. מתחילים ברגל החלשה. קצב מבוקר, בלי נעילה קשה למעלה. אם כואב – אפשר לקצר את תחתית הטווח. משקל התחלה: כ-45% מהסט הכבד האחרון בשתי הרגליים, מעוגל ל-5 ק״ג (Technogym)." },
+            { name: "פשיטת ברך – חזרות גבוהות", equip: "machine", type: "normal", warmups: 1, drops: 0, heavySets: 2, repMin: 20, repMax: 30, increment: 5, origName: "פשיטת ברך – חזרות גבוהות", rir: "1-2",
+              notes: "שתי הרגליים יחד, משקל קל, 20-30 חזרות. הורדה 2-3 שנ׳, סחיטה 1 שנ׳ למעלה. כאב בברך עד 3/10 בסדר; אם הכאב חד – עוצרים. אפשר לקצר את הטווח לטווח ללא כאב. בלי דרופים כבדים." },
             { name: "הרחקה לצדדים במכונה", equip: "machine", type: "normal", warmups: 1, drops: 2, repMin: 12, repMax: 20, increment: 5,
               notes: "כתף אמצעית – גם באימון הרגליים, כדי להגיע לנפח שבועי מספיק. תנועה נקייה בלי תנופה." }
           ] },
@@ -4780,7 +4849,7 @@
               notes: "מרפקים צמודים לגוף, יישור מלא בכל חזרה." }
           ] },
         { id: "C", name: "אימון C – משיכה (גב, כתף אחורית, יד קדמית)",
-          desc: "משיכה רחבה • חתירה רחבה בכבל (טופ+בק-אוף) • חתירה ביד אחת בכבל • הרחקה אופקית • הרחקה לצדדים בכבל • פריצ'ר • פטישים",
+          desc: "משיכה רחבה • חתירה רחבה בכבל (טופ+בק-אוף) • חתירה ביד אחת בכבל • הרחקה אופקית • הרחקה לצדדים בכבל • פריצ'ר • באייזיאן • פטישים",
           exercises: [
             { name: "משיכה בפולי רחב", equip: "machine", type: "normal", warmups: 2, drops: 2, repMin: 6, repMax: 10, increment: 5, origName: "משיכה בפולי רחב",
               notes: "מכונה – לכן דרופים. מתיחה מלאה למעלה, מושכים לחזה העליון." },
@@ -4794,6 +4863,8 @@
               notes: "הכבל עובר מאחורי הגוף – עבודה במתיחה. בדרופ האחרון: חזרות חלקיות." },
             { name: "כפיפה בפריצ'ר", equip: "machine_lb", unit: "lb", type: "normal", warmups: 1, drops: 2, repMin: 8, repMax: 12, increment: 15, stackStart: 15, stackPlates: 16, origName: "כפיפה בפריצ'ר",
               notes: "מכונת Paramount בליברות: סטק 15–255 (קפיצות של 15). יורדים כמעט עד יישור מלא, לאט." },
+            { name: "כפיפה בכבל מאחורי הגוף (באייזיאן)", equip: "cable", type: "simple", warmups: 0, setCount: 2, repMin: 10, repMax: 15, increment: 2.5, rir: "0-1", origName: "כפיפה בכבל מאחורי הגוף (באייזיאן)",
+              notes: "יד אחת בכל פעם. גב לכבל, היד מאחורי הגוף – מתיחה בראש הארוך. מתיחה מלאה למטה. בלי סופרסט. טווח 10-15, RIR 0-1." },
             { name: "פטישים", equip: "db", type: "normal", warmups: 0, drops: 2, repMin: 8, repMax: 12, increment: 2, origName: "פטישים",
               notes: "אחיזה ניטרלית, בלי נדנוד של הגוף." }
           ] }
@@ -5453,8 +5524,8 @@
 
       h += `<div class="section-title">מבנה השבוע</div><div class="card">` + guideTable(["יום", "אימון", "תוספת", "זמן"], [
         ["ראשון", "<b>A – רגליים</b>", "תאומים", "70-75 דק׳"], ["שני", "<b>B – דחיפה</b>", "בטן", "60-65 דק׳"],
-        ["שלישי", "<b>C – משיכה</b>", "תאומים", "70-75 דק׳"], ["רביעי", "<b>A – רגליים</b>", "בטן", "70 דק׳"],
-        ["חמישי", "<b>B – דחיפה</b>", "תאומים", "65-70 דק׳"], ["שישי", "<b>C – משיכה</b>", "בטן", "65-70 דק׳"], ["שבת", "מנוחה", "–", "–"]
+        ["שלישי", "<b>C – משיכה</b>", "תאומים", "75-85 דק׳"], ["רביעי", "<b>A – רגליים</b>", "בטן", "70 דק׳"],
+        ["חמישי", "<b>B – דחיפה</b>", "תאומים", "65-70 דק׳"], ["שישי", "<b>C – משיכה</b>", "בטן", "70-80 דק׳"], ["שבת", "מנוחה", "–", "–"]
       ], new Date().getDay()) + `<p class="g-muted">B = חזה, כתפיים, יד אחורית. C = גב, כתף אחורית, יד קדמית. התוספת (תאומים/בטן) נקבעת אוטומטית לפי היום.</p></div>`;
 
       h += `<div class="section-title">שיטות הביצוע</div><div class="card g-text">
@@ -5528,7 +5599,7 @@
         ["גב", "פולי 2, חתירה רחבה בכבל 3, חתירה ביד אחת 2", "14", "12-16"], ["ירך אחורית", "דדליפט רומני 3, כפיפת ברך 2", "10", "~10"],
         ["כתף אמצעית", "הרחקה ב-A 2, ב-B 2, ב-C 2", "12", "10-12+"], ["כתף אחורית", "הרחקה אופקית 2 + עקיף מחתירות", "9", "8-12"],
         ["כתף קדמית", "עקיף: באנץ', מקבילים", "5", "מספיק"], ["תלת-ראשי", "2 פשיטות × 2 + עקיף", "13", "10-16"],
-        ["דו-ראשי", "פריצ'ר 2, פטישים 2 + עקיף", "15", "10-16"], ["ישבן", "עקיף: לחיצה, בולגרי, דדליפט רומני", "8-10", "~8-12"],
+        ["דו-ראשי", "פריצ'ר 2, באייזיאן 2, פטישים 2 + עקיף", "19", "10-16"], ["ישבן", "עקיף: לחיצה, בולגרי, דדליפט רומני", "8-10", "~8-12"],
         ["זוקפי גב", "דדליפט רומני 3", "6", "מספיק"], ["תאומים", "עמידה 4 (2 כבד + 2 דרופים + סט חצאי חזרות) · ישיבה 2, 3 פעמים בשבוע", "18 (12/6)", "10-15"], ["בטן", "כפיפה + הרמות, 3 פעמים בשבוע", "10.5", "8-12"]
       ]) + `<p class="g-muted">ספירה: טופ/בק-אוף/סט כבד = 1, דרופ = 0.5, חימום = 0, עקיף = חצי. עד 7 סטים לשריר באימון (מתחת לסף של כ-11). בערך 15-18 סטים קשים לאימון + 4-6 בתוספת.</p>
         <p class="g-muted">לעומת התוכנית הקודמת: כתף אמצעית 4 ← 12, גב 8 ← 14, ירך אחורית 7 ← 10, כתף אחורית 6 ← 9.</p></div>`;
@@ -5536,7 +5607,7 @@
       h += `<div class="section-title">הערות</div><div class="card g-text"><ul>
         <li>עדיף לשמור על הסדר: A בראשון ורביעי, B בשני וחמישי, C בשלישי ושישי – כך התאומים והבטן יוצאים 3 פעמים בשבוע כל אחד.</li>
         <li>אין זמן? מוותרים על התרגיל האחרון (פטישים / פשיטה בפולי / הרחקה במכונה) או עושים דרופ אחד במקום שניים. <b>לא</b> מוותרים על הרחקות לצדדים ועל ירך אחורית.</li>
-        <li>לחיצת רגליים: טופ 12-20, הורדה של 3 שניות, רגליים גבוה על המשטח ורחב, בלי לרדת עד שהאגן מתרומם. עוצרים 1-2 חזרות לפני כשל. כאב עד 3/10 בסדר; כאב חד או מחמיר – מורידים משקל. פשיטת ברך ברגל אחת (15-20 לכל רגל), מתחילים בחלשה.</li>
+        <li>לחיצת רגליים: טופ 12-20, הורדה של 3 שניות, רגליים גבוה על המשטח ורחב, בלי לרדת עד שהאגן מתרומם. עוצרים 1-2 חזרות לפני כשל. כאב עד 3/10 בסדר; כאב חד או מחמיר – מורידים משקל. פשיטת ברך – חזרות גבוהות (שתי רגליים, 20-30, משקל קל). הורדה 2-3 שנ׳, סחיטה 1 שנ׳ למעלה. כאב עד 3/10 בסדר; כאב חד – עוצרים. אפשר לקצר לטווח ללא כאב.</li>
         <li>השמות הקיימים נשמרו כדי שההיסטוריה וההמלצות יימשכו. "כפיפת ברך במכונה" – מומלץ בישיבה.</li></ul></div>`;
       box.innerHTML = h;
     }
@@ -5850,6 +5921,76 @@
         data.friendNoSupersetV29 = true;
         saveData(data);
       } catch (e) { console.warn("friend no-superset v29 migration failed", e); }
+    }
+
+    function bayesianCurlDef() {
+      return { name: BAYESIAN_CURL_NAME, equip: "cable", type: "simple", warmups: 0, setCount: 2, repMin: 10, repMax: 15, increment: 2.5, rir: "0-1", origName: BAYESIAN_CURL_NAME, notes: BAYESIAN_CURL_NOTES };
+    }
+    function hiRepExtDefFrom(x) {
+      return Object.assign({}, x, {
+        name: LEG_EXT_HI, origName: LEG_EXT_HI,
+        type: "normal", warmups: 1, drops: 0, heavySets: 2,
+        repMin: 20, repMax: 30, increment: 5, equip: x.equip || "machine", rir: "1-2",
+        notes: LEG_EXT_NOTES_V31
+      });
+    }
+    function insertAfterName(exercises, afterName, ex) {
+      if (!Array.isArray(exercises)) return false;
+      if (exercises.some(e => e && (e.name === ex.name || e.origName === ex.name))) return false;
+      const i = exercises.findIndex(e => e && (e.name === afterName || e.origName === afterName));
+      if (i >= 0) exercises.splice(i + 1, 0, ex);
+      else {
+        const ham = exercises.findIndex(e => e && (e.name === "פטישים" || e.origName === "פטישים"));
+        if (ham >= 0) exercises.splice(ham, 0, ex);
+        else exercises.push(ex);
+      }
+      return true;
+    }
+    function migrateMainHiRepExtBayesV31() {
+      try {
+        if (!isMainProfile()) return;
+        const data = getData();
+        if (data.hiRepExtBayesV31 || data.programSource !== RESEARCH_PROGRAM_ID) return;
+        if (data.program && Array.isArray(data.program.workouts)) {
+          const prog = normalizeProgram(data.program) || data.program;
+          if (prog) {
+            (prog.workouts.concat(Array.isArray(prog.accessories) ? prog.accessories : [])).forEach(g => {
+              (g.exercises || []).forEach((x, i) => {
+                const n = x.name || "", o = x.origName || "";
+                if (n === LEG_EXT_OLD || o === LEG_EXT_OLD || n === LEG_EXT_NEW || o === LEG_EXT_NEW || n === LEG_EXT_HI || o === LEG_EXT_HI) {
+                  g.exercises[i] = hiRepExtDefFrom(x);
+                }
+              });
+              if (g.desc) {
+                g.desc = g.desc.replace(/פשיטת ברך ברגל אחת/g, LEG_EXT_HI);
+                g.desc = g.desc.replace(/פשיטת ברך במכונה/g, LEG_EXT_HI);
+                if (g.id === "C" || (g.name && g.name.indexOf("משיכה") >= 0)) {
+                  if (g.desc.indexOf("באייזיאן") < 0 && g.desc.indexOf("פריצ") >= 0) {
+                    g.desc = g.desc.replace(/פריצ['׳]ר • פטישים/g, "פריצ'ר • באייזיאן • פטישים");
+                  }
+                }
+              }
+            });
+            const c = (prog.workouts || []).find(w => w.id === "C") || (prog.workouts || []).find(w => w.name && w.name.indexOf("משיכה") >= 0);
+            if (c) insertAfterName(c.exercises, "כפיפה בפריצ'ר", bayesianCurlDef());
+            data.program = prog;
+            try {
+              const orders = readSessionOrders();
+              Object.keys(orders).forEach(k => {
+                if (Array.isArray(orders[k])) orders[k] = orders[k].map(n => (n === LEG_EXT_OLD || n === LEG_EXT_NEW) ? LEG_EXT_HI : n);
+              });
+              writeSessionOrders(orders);
+              const ov = readSessionOverrides();
+              if (ov[LEG_EXT_OLD]) { ov[LEG_EXT_HI] = ov[LEG_EXT_OLD]; delete ov[LEG_EXT_OLD]; }
+              if (ov[LEG_EXT_NEW]) { ov[LEG_EXT_HI] = Object.assign({}, ov[LEG_EXT_HI] || {}, ov[LEG_EXT_NEW]); delete ov[LEG_EXT_NEW]; }
+              writeSessionOverrides(ov);
+            } catch (e) {}
+          }
+        }
+        data.hiRepExtBayesV31 = true;
+        if (!data.hiRepExtV31At) data.hiRepExtV31At = new Date().toISOString();
+        saveData(data);
+      } catch (e) { console.warn("main hi-rep ext + bayesian v31 migration failed", e); }
     }
 
     function migrateCalfVolumeV30() {
@@ -6486,7 +6627,7 @@
 
       h += `<div class="section-title">בטיחות – ברך שמאל</div><div class="card g-text">${ul([
         "❌ לא: לאנג'ים עם תנועה גדולה של הברך קדימה, סקוואט עמוק וכבד, האק סקוואט, קפיצות וריצה.",
-        "❌ פשיטת ברך במכונה לא בתוכנית (עומס על ה-ACL בטווח 10-30°; וארבע-ראשי לא צריך עוד נפח).",
+        "✅ פשיטת ברך – חזרות גבוהות: משקל קל, 20-30 חזרות, הורדה איטית, טווח ללא כאב. כאב עד 3/10 בסדר; כאב חד – עוצרים. בלי משקל כבד בטווח הנמוך.",
         "✅ עלייה לספסל ולחיצת רגליים: ברך מעל כף הרגל ולא קורסת פנימה, שוק כמעט אנכית, לא מתחת לכ-90°, רגליים גבוה על הפלטה.",
         "תחושת חוסר יציבות או \"בריחה\" בברך – עוצרים מיד והולכים לבדיקה."])}</div>`;
 
@@ -6584,6 +6725,7 @@
     migrateFriendFbAbsCalvesV28();
     migrateFriendNoSupersetV29();
     migrateCalfVolumeV30();
+    migrateMainHiRepExtBayesV31();
     try { localStorage.removeItem(K("abTempoStage_v1")); } catch (e) {} // v16/v17 tempo stages retired in v18
     requestPersistentStorage();
     applySavedBackground();
